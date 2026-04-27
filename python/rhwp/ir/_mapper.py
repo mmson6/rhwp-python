@@ -17,6 +17,9 @@ from rhwp.ir._raw_types import (
     RawCell,
     RawCharRun,
     RawDocument,
+    RawEndnote,
+    RawFootnote,
+    RawFormula,
     RawImageRef,
     RawParagraph,
     RawPicture,
@@ -25,6 +28,9 @@ from rhwp.ir._raw_types import (
 from rhwp.ir.nodes import (
     Block,
     DocumentSource,
+    EndnoteBlock,
+    FootnoteBlock,
+    FormulaBlock,
     Furniture,
     HwpDocument,
     ImageRef,
@@ -75,6 +81,8 @@ def build_hwp_document(raw: RawDocument) -> HwpDocument:
     page_footers: list[Block] = []
     for raw_ftr in raw["footers"]:
         page_footers.extend(_flatten_paragraph(raw_ftr))
+    footnotes = [_build_footnote_block(fn) for fn in raw["footnotes"]]
+    endnotes = [_build_endnote_block(en) for en in raw["endnotes"]]
 
     return HwpDocument(
         source=source,
@@ -83,6 +91,8 @@ def build_hwp_document(raw: RawDocument) -> HwpDocument:
         furniture=Furniture(
             page_headers=page_headers,
             page_footers=page_footers,
+            footnotes=footnotes,
+            endnotes=endnotes,
         ),
     )
 
@@ -103,6 +113,8 @@ def _flatten_paragraph(raw_para: RawParagraph) -> list[Block]:
         blocks.append(_build_table_block(raw_para, raw_table))
     for raw_pic in raw_para["pictures"]:
         blocks.append(_build_picture_block(raw_pic))
+    for raw_eq in raw_para["formulas"]:
+        blocks.append(_build_formula_block(raw_eq))
     return blocks
 
 
@@ -234,6 +246,65 @@ def _build_picture_block(raw_pic: RawPicture) -> PictureBlock:
             char_start=None,
             char_end=None,
         ),
+    )
+
+
+def _build_formula_block(raw_eq: RawFormula) -> FormulaBlock:
+    """RawFormula → FormulaBlock. v0.3.0 시점 ``script_kind`` 는 항상 ``"hwp_eq"``.
+
+    ``inline`` 은 v0.3.0 미식별 (모든 수식을 별도 디스플레이로 처리). 본문 inline
+    여부는 상류 ``Equation.common.inline_object`` 등에서 추론할 수 있지만 현 시점
+    1차 사용처 (RAG) 에서 차이 의미 없음 — 모두 False 출고.
+    """
+    return FormulaBlock(
+        script=raw_eq["script"],
+        text_alt=raw_eq["text_alt"],
+        prov=Provenance(
+            section_idx=raw_eq["section_idx"],
+            para_idx=raw_eq["para_idx"],
+            char_start=None,
+            char_end=None,
+        ),
+    )
+
+
+def _build_footnote_block(raw_fn: RawFootnote) -> FootnoteBlock:
+    """RawFootnote → FootnoteBlock. blocks 는 각주 본문 paragraph 들을 평탄화."""
+    inner_blocks: list[Block] = []
+    for inner in raw_fn["blocks"]:
+        inner_blocks.extend(_flatten_paragraph(inner))
+    # ^ char_start/char_end 는 None — 본문 마커 character 정확 위치는 상류 field_ranges
+    #   매핑 필요로 v0.4.0+ 검토. nodes.FootnoteBlock docstring §marker precision 참조.
+    marker = Provenance(
+        section_idx=raw_fn["marker_section_idx"],
+        para_idx=raw_fn["marker_para_idx"],
+        char_start=None,
+        char_end=None,
+    )
+    return FootnoteBlock(
+        number=raw_fn["number"],
+        blocks=inner_blocks,
+        marker_prov=marker,
+        prov=marker,
+    )
+
+
+def _build_endnote_block(raw_en: RawEndnote) -> EndnoteBlock:
+    """RawEndnote → EndnoteBlock — Footnote 와 동일 패턴 (marker precision 동일 deferral)."""
+    inner_blocks: list[Block] = []
+    for inner in raw_en["blocks"]:
+        inner_blocks.extend(_flatten_paragraph(inner))
+    marker = Provenance(
+        section_idx=raw_en["marker_section_idx"],
+        para_idx=raw_en["marker_para_idx"],
+        char_start=None,
+        char_end=None,
+    )
+    return EndnoteBlock(
+        number=raw_en["number"],
+        blocks=inner_blocks,
+        marker_prov=marker,
+        prov=marker,
     )
 
 

@@ -86,18 +86,30 @@ def test_iter_blocks_all_scope_body_first_then_furniture():
 
 
 def test_iter_blocks_furniture_order_is_headers_footers_footnotes():
-    """Furniture 내부는 항상 page_headers → page_footers → footnotes 순 (ir.md 계약)."""
+    """Furniture 내부는 항상 page_headers → page_footers → footnotes → endnotes 순 (S2 갱신)."""
+    from rhwp.ir.nodes import EndnoteBlock, FootnoteBlock
+
     header = ParagraphBlock(text="H", prov=Provenance(section_idx=0, para_idx=1))
     footer = ParagraphBlock(text="F", prov=Provenance(section_idx=0, para_idx=2))
-    footnote = ParagraphBlock(text="N", prov=Provenance(section_idx=0, para_idx=3))
+    footnote = FootnoteBlock(
+        number=1,
+        marker_prov=Provenance(section_idx=0, para_idx=3),
+        prov=Provenance(section_idx=0, para_idx=3),
+    )
+    endnote = EndnoteBlock(
+        number=1,
+        marker_prov=Provenance(section_idx=0, para_idx=4),
+        prov=Provenance(section_idx=0, para_idx=4),
+    )
     ir = HwpDocument(
         furniture=Furniture(
             page_headers=[header],
             page_footers=[footer],
             footnotes=[footnote],
+            endnotes=[endnote],
         ),
     )
-    assert list(ir.iter_blocks(scope="furniture")) == [header, footer, footnote]
+    assert list(ir.iter_blocks(scope="furniture")) == [header, footer, footnote, endnote]
 
 
 # * 재귀 순회 — 수동 구성 중첩 표로 계약 확정
@@ -181,7 +193,24 @@ def test_iter_blocks_recurse_yields_more_on_real_sample(parsed_hwpx: rhwp.Docume
 
 def test_iter_blocks_yields_only_known_block_types(parsed_hwpx: rhwp.Document):
     ir = parsed_hwpx.to_ir()
-    from rhwp.ir.nodes import PictureBlock, UnknownBlock
+    from rhwp.ir.nodes import (
+        EndnoteBlock,
+        FootnoteBlock,
+        FormulaBlock,
+        PictureBlock,
+        UnknownBlock,
+    )
 
     for block in ir.iter_blocks(scope="all", recurse=True):
-        assert isinstance(block, (ParagraphBlock, TableBlock, PictureBlock, UnknownBlock))
+        assert isinstance(
+            block,
+            (
+                ParagraphBlock,
+                TableBlock,
+                PictureBlock,
+                FormulaBlock,
+                FootnoteBlock,
+                EndnoteBlock,
+                UnknownBlock,
+            ),
+        )

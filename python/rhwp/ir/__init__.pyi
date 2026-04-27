@@ -13,6 +13,15 @@ from rhwp.ir.nodes import (
     DocumentSource as DocumentSource,
 )
 from rhwp.ir.nodes import (
+    EndnoteBlock as EndnoteBlock,
+)
+from rhwp.ir.nodes import (
+    FootnoteBlock as FootnoteBlock,
+)
+from rhwp.ir.nodes import (
+    FormulaBlock as FormulaBlock,
+)
+from rhwp.ir.nodes import (
     Furniture as Furniture,
 )
 from rhwp.ir.nodes import (
@@ -66,6 +75,9 @@ __all__ = [
     "Block",
     "DocumentMetadata",
     "DocumentSource",
+    "EndnoteBlock",
+    "FootnoteBlock",
+    "FormulaBlock",
     "Furniture",
     "HwpDocument",
     "ImageRef",

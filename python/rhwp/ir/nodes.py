@@ -1,15 +1,16 @@
 """rhwp.ir.nodes — Document IR Pydantic 모델 (schema_version "1.1").
 
-재귀 구조 (``TableCell.blocks`` → ``Block`` → ``TableBlock.cells`` → ``TableCell``)
-는 문자열 전방 참조 + 파일 하단 ``model_rebuild()`` 로 해소한다.
+재귀 구조 (``TableCell.blocks`` → ``Block`` → ``TableBlock.cells`` → ``TableCell``,
+``FootnoteBlock.blocks`` / ``EndnoteBlock.blocks`` → ``Block``) 는 문자열 전방 참조
++ 파일 하단 ``model_rebuild()`` 로 해소한다.
 
-스키마 버전 1.1 (v0.3.0) — v1.0 의 paragraph/table 위에 picture 가 추가됐고,
-furniture.page_headers/page_footers 가 실제 채워진다. 이후 stage 에서 formula /
-footnote / endnote / list_item / caption / toc / field 가 차례로 추가된다.
+스키마 버전 1.1 (v0.3.0) — v1.0 의 paragraph/table 위에 picture (S1), formula /
+footnote / endnote (S2) 가 차례로 추가된다. 이후 stage 에서 list_item / caption /
+toc / field 도 추가될 예정.
 """
 
 import warnings
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from typing import Annotated, Any, Final, Literal
 
 from pydantic import (
@@ -27,6 +28,9 @@ __all__ = [
     "Block",
     "DocumentMetadata",
     "DocumentSource",
+    "EndnoteBlock",
+    "FootnoteBlock",
+    "FormulaBlock",
     "Furniture",
     "HwpDocument",
     "ImageRef",
@@ -213,6 +217,76 @@ class PictureBlock(BaseModel):
     prov: Provenance
 
 
+class FormulaBlock(BaseModel):
+    """수식 블록 — HWP ``Control::Equation``.
+
+    HWP 수식은 자체 스크립트 (``script``) 로 저장된다 (예: ``"1 over 2 + sqrt{x^2}"``).
+    HWP equation script → LaTeX/MathML 자동 변환은 공개 도구 부재로 v0.3.0 미제공
+    (spec § 비목표). ``script_kind="hwp_eq"`` 로 raw 출고 → 사용자가 외부 변환 후
+    ``model_copy(update={"script": tex, "script_kind": "latex"})`` 로 재구성 가능.
+
+    ``text_alt`` 는 RAG 폴백 — 단순 정규화 (``over`` → ``/``, ``sqrt{...}`` → ``√(...)``)
+    까지만 적용. 실패 시 None.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["formula"] = "formula"
+    script: str
+    script_kind: Literal["hwp_eq", "latex", "mathml"] = "hwp_eq"
+    text_alt: str | None = Field(
+        default=None,
+        description=(
+            "평문 근사 — RAG fallback. ``script`` 의 사람이 읽을 수 있는 형태 "
+            "(``over`` → ``/`` 등) 를 단순 정규화. 실패 시 None."
+        ),
+    )
+    inline: bool = Field(
+        default=False,
+        description="True: 본문 인라인 수식, False: 별도 디스플레이 수식.",
+    )
+    prov: Provenance
+
+
+class FootnoteBlock(BaseModel):
+    """각주 블록 — HWP ``Control::Footnote``.
+
+    각주 본문은 ``furniture.footnotes`` 로 라우팅되어 RAG 의 body 검색을 오염시키지
+    않는다. ``marker_prov`` 는 본문 인용 마커 (``…기존 연구[3]…`` 의 ``[3]`` 위치) 의
+    parent paragraph (section_idx, para_idx) 를 가리킨다 — 정확한 char_offset 까지는
+    상류 ``field_ranges`` 매핑이 필요해 v0.4.0+ 검토. ``prov`` 는 각주 본문 자체의
+    위치 = 마커가 등장한 paragraph 와 동일 (각주는 그 paragraph 에서 파생).
+
+    ``blocks`` 가 재귀 ``Block`` 리스트라 각주 본문 안의 표·그림·수식도 자연 지원.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["footnote"] = "footnote"
+    number: int = Field(description="표시 번호 (1, 2, 3, ...).")
+    blocks: list["Block"] = Field(default_factory=list)
+    marker_prov: Provenance = Field(
+        description="본문 인용 마커 위치 — RAG 가 각주가 어디서 인용됐는지 역추적.",
+    )
+    prov: Provenance
+
+
+class EndnoteBlock(BaseModel):
+    """미주 블록 — HWP ``Control::Endnote``.
+
+    각주와 같은 구조지만 배치가 다르다 (각주: 페이지 하단, 미주: 문서/구역 끝).
+    HWP 가 별도 struct 로 분리하므로 IR 도 분리 — 통합 시 정보 손실.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["endnote"] = "endnote"
+    number: int
+    blocks: list["Block"] = Field(default_factory=list)
+    marker_prov: Provenance
+    prov: Provenance
+
+
 class UnknownBlock(BaseModel):
     """Forward-compatibility catch-all.
 
@@ -282,7 +356,7 @@ class TableBlock(BaseModel):
     prov: Provenance
 
 
-_KNOWN_KINDS: Final = frozenset({"paragraph", "table", "picture"})
+_KNOWN_KINDS: Final = frozenset({"paragraph", "table", "picture", "formula", "footnote", "endnote"})
 
 
 def _block_discriminator(v: Any) -> str:
@@ -299,6 +373,9 @@ Block = Annotated[
     Annotated[ParagraphBlock, Tag("paragraph")]
     | Annotated[TableBlock, Tag("table")]
     | Annotated[PictureBlock, Tag("picture")]
+    | Annotated[FormulaBlock, Tag("formula")]
+    | Annotated[FootnoteBlock, Tag("footnote")]
+    | Annotated[EndnoteBlock, Tag("endnote")]
     | Annotated[UnknownBlock, Tag("unknown")],
     Discriminator(_block_discriminator),
 ]
@@ -307,16 +384,20 @@ Block = Annotated[
 class Furniture(BaseModel):
     """장식 노드 컨테이너 — RAG 가 임베딩에서 필터링 가능.
 
-    v0.3.0 부터 ``page_headers`` / ``page_footers`` 가 실제 채워진다.
-    ``footnotes`` 는 v0.3.0 S2 (FootnoteBlock 도입) 에서 채움. ``endnotes`` 신규
-    필드 추가도 S2.
+    v0.3.0 S1 부터 ``page_headers`` / ``page_footers`` 가 실제 채워진다.
+    v0.3.0 S2 부터 ``footnotes`` / ``endnotes`` 도 실제 채워지며 타입이
+    ``list[FootnoteBlock]`` / ``list[EndnoteBlock]`` 으로 강화된다.
+
+    iter_blocks(scope="furniture") 순서: page_headers → page_footers →
+    footnotes → endnotes (spec § 8 furniture 순서 계약).
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     page_headers: list["Block"] = Field(default_factory=list)
     page_footers: list["Block"] = Field(default_factory=list)
-    footnotes: list["Block"] = Field(default_factory=list)
+    footnotes: list[FootnoteBlock] = Field(default_factory=list)
+    endnotes: list[EndnoteBlock] = Field(default_factory=list)
 
 
 class HwpDocument(BaseModel):
@@ -364,9 +445,10 @@ class HwpDocument(BaseModel):
             scope: 순회 대상.
 
                 - ``"body"`` (기본, RAG-safe): 본문 블록만
-                - ``"furniture"``: 머리글 → 꼬리말 → 각주 순
+                - ``"furniture"``: 머리글 → 꼬리말 → 각주 → 미주 순
                 - ``"all"``: 본문 먼저, 이어서 장식
-            recurse: True 면 ``TableCell.blocks`` 재귀 진입 (중첩 표 내부까지).
+            recurse: True 면 컨테이너 블록 (TableCell.blocks, FootnoteBlock.blocks,
+                EndnoteBlock.blocks) 재귀 진입.
 
         구조 기반 작업에는 ``doc.body`` / ``doc.furniture`` 속성 직접 접근이
         더 간결하다. 본 메서드는 scope + recurse 조합이 필요한 경우용
@@ -378,18 +460,30 @@ class HwpDocument(BaseModel):
             yield from _walk_blocks(self.furniture.page_headers, recurse)
             yield from _walk_blocks(self.furniture.page_footers, recurse)
             yield from _walk_blocks(self.furniture.footnotes, recurse)
+            yield from _walk_blocks(self.furniture.endnotes, recurse)
 
 
-def _walk_blocks(blocks: list["Block"], recurse: bool) -> Iterator["Block"]:
-    """블록 리스트 DFS 순회 — recurse=True 면 TableCell.blocks 내부까지 진입."""
+def _walk_blocks(blocks: Sequence["Block"], recurse: bool) -> Iterator["Block"]:
+    """블록 리스트 DFS 순회 — recurse=True 면 컨테이너 블록 내부까지 진입.
+
+    재귀 진입 컨테이너: TableCell.blocks, FootnoteBlock.blocks, EndnoteBlock.blocks.
+    Sequence 로 받아 furniture.footnotes (list[FootnoteBlock]) / endnotes
+    (list[EndnoteBlock]) 같은 협소 타입 list 도 invariant 충돌 없이 수용한다.
+    """
     for block in blocks:
         yield block
-        if recurse and isinstance(block, TableBlock):
+        if not recurse:
+            continue
+        if isinstance(block, TableBlock):
             for cell in block.cells:
                 yield from _walk_blocks(cell.blocks, recurse)
+        elif isinstance(block, (FootnoteBlock, EndnoteBlock)):
+            yield from _walk_blocks(block.blocks, recurse)
 
 
-# 재귀 유니온 (Block ↔ TableCell ↔ TableBlock) forward reference 해소
+# 재귀 유니온 (Block ↔ TableCell ↔ TableBlock ↔ FootnoteBlock/EndnoteBlock) forward reference 해소
 TableCell.model_rebuild()
+FootnoteBlock.model_rebuild()
+EndnoteBlock.model_rebuild()
 Furniture.model_rebuild()
 HwpDocument.model_rebuild()

@@ -30,6 +30,7 @@ def test_furniture_default_lists_are_empty():
     assert f.page_headers == []
     assert f.page_footers == []
     assert f.footnotes == []
+    assert f.endnotes == []
 
 
 def test_furniture_extra_forbidden():
@@ -37,7 +38,8 @@ def test_furniture_extra_forbidden():
     import pytest
 
     with pytest.raises(ValidationError):
-        Furniture.model_validate({"page_headers": [], "endnotes": []})  # ^ S2 에서 추가될 키
+        # ^ v0.4.0+ 에서 추가될 가능성 있는 새 필드 (예: side_notes)
+        Furniture.model_validate({"page_headers": [], "side_notes": []})
 
 
 def test_furniture_frozen_blocks_mutation():
@@ -59,17 +61,29 @@ def _empty_raw_para(section_idx: int = 0, para_idx: int = 0, text: str = "") -> 
         char_runs=[],
         tables=[],
         pictures=[],
+        formulas=[],
+    )
+
+
+def _empty_raw_doc(
+    *,
+    headers: list[RawParagraph] | None = None,
+    footers: list[RawParagraph] | None = None,
+    paragraphs: list[RawParagraph] | None = None,
+) -> RawDocument:
+    return RawDocument(
+        source_uri=None,
+        section_count=1,
+        paragraphs=paragraphs or [],
+        headers=headers or [],
+        footers=footers or [],
+        footnotes=[],
+        endnotes=[],
     )
 
 
 def test_build_hwp_document_routes_headers_to_furniture():
-    raw = RawDocument(
-        source_uri=None,
-        section_count=1,
-        paragraphs=[],
-        headers=[_empty_raw_para(text="페이지 머리글")],
-        footers=[],
-    )
+    raw = _empty_raw_doc(headers=[_empty_raw_para(text="페이지 머리글")])
     ir = build_hwp_document(raw)
     assert ir.body == []
     assert len(ir.furniture.page_headers) == 1
@@ -79,13 +93,7 @@ def test_build_hwp_document_routes_headers_to_furniture():
 
 
 def test_build_hwp_document_routes_footers_to_furniture():
-    raw = RawDocument(
-        source_uri=None,
-        section_count=1,
-        paragraphs=[],
-        headers=[],
-        footers=[_empty_raw_para(text="© 2026 회사명", para_idx=2)],
-    )
+    raw = _empty_raw_doc(footers=[_empty_raw_para(text="© 2026 회사명", para_idx=2)])
     ir = build_hwp_document(raw)
     assert len(ir.furniture.page_footers) == 1
     blk = ir.furniture.page_footers[0]
@@ -96,11 +104,8 @@ def test_build_hwp_document_routes_footers_to_furniture():
 
 
 def test_build_hwp_document_preserves_header_footer_order():
-    """furniture iter 순서: page_headers → page_footers → footnotes."""
-    raw = RawDocument(
-        source_uri=None,
-        section_count=1,
-        paragraphs=[],
+    """furniture iter 순서: page_headers → page_footers → footnotes → endnotes."""
+    raw = _empty_raw_doc(
         headers=[_empty_raw_para(text="H1"), _empty_raw_para(text="H2")],
         footers=[_empty_raw_para(text="F1")],
     )
@@ -110,22 +115,20 @@ def test_build_hwp_document_preserves_header_footer_order():
     assert texts == ["H1", "H2", "F1"]
 
 
-def test_build_hwp_document_footnotes_empty_in_s1():
-    """v0.3.0 S1 은 FootnoteBlock 미구현 — footnotes 는 항상 빈 리스트."""
-    raw = RawDocument(source_uri=None, section_count=0, paragraphs=[], headers=[], footers=[])
+def test_build_hwp_document_footnotes_empty_when_raw_empty():
+    """raw.footnotes 가 비어 있으면 furniture.footnotes 도 빈 리스트."""
+    raw = _empty_raw_doc()
     ir = build_hwp_document(raw)
     assert ir.furniture.footnotes == []
+    assert ir.furniture.endnotes == []
 
 
 def test_build_hwp_document_furniture_paragraphs_share_section_idx():
     """Header/Footer paragraphs Provenance 는 Rust 가 설정한 외부 위치 그대로 보존."""
-    raw = RawDocument(
-        source_uri=None,
-        section_count=2,
-        paragraphs=[],
+    raw = _empty_raw_doc(
         headers=[_empty_raw_para(section_idx=1, para_idx=5, text="섹션 2 머리글")],
-        footers=[],
     )
+    raw["section_count"] = 2
     ir = build_hwp_document(raw)
     blk = ir.furniture.page_headers[0]
     assert isinstance(blk, ParagraphBlock)
@@ -160,6 +163,7 @@ def test_build_hwp_document_header_with_table_flattens_to_furniture():
                                 "char_runs": [],
                                 "tables": [],
                                 "pictures": [],
+                                "formulas": [],
                             }
                         ],
                     }
@@ -167,14 +171,9 @@ def test_build_hwp_document_header_with_table_flattens_to_furniture():
             }
         ],
         pictures=[],
+        formulas=[],
     )
-    raw = RawDocument(
-        source_uri=None,
-        section_count=1,
-        paragraphs=[],
-        headers=[raw_para_with_table],
-        footers=[],
-    )
+    raw = _empty_raw_doc(headers=[raw_para_with_table])
     ir = build_hwp_document(raw)
     assert len(ir.furniture.page_headers) == 2
     assert isinstance(ir.furniture.page_headers[0], ParagraphBlock)
@@ -212,18 +211,18 @@ def test_real_sample_body_excludes_header_footer_text(parsed_hwp: rhwp.Document)
         assert id(f) not in body_ids
 
 
-# * 호환성 메모 — Furniture extra="forbid" 가 v0.2.0 schema 충돌 가짜 시뮬
+# * 호환성 메모 — v0.3.0 S2 에서 endnotes 정식 필드로 추가됨
 
 
-def test_furniture_rejects_v0_3_0_endnotes_field_in_s1():
-    """ir-expansion.md §호환성: v0.2.0 Furniture 는 endnotes 키를 거부.
+def test_furniture_accepts_endnotes_field_in_s2():
+    """v0.3.0 S2 부터 endnotes 는 정식 필드 — Furniture 가 빈 리스트로 수용.
 
-    v0.3.0 S1 의 Furniture 도 아직 endnotes 키 미도입 (S2 에서 추가) — 같은 동작 보장.
+    ir-expansion.md §호환성: v0.2.0 소비자가 v0.3.0 IR JSON 을 읽으면
+    `extra="forbid"` 에 걸려 ValidationError — schema_version 1.0 ≠ 1.1
+    분기 강제 (S2 에서 trigger 활성화).
     """
-    import pytest
-
-    with pytest.raises(ValidationError):
-        Furniture.model_validate({"endnotes": []})
+    f = Furniture.model_validate({"endnotes": []})
+    assert f.endnotes == []
 
 
 # * iter_blocks(scope=all) — body → furniture 순서 보존 (수동)

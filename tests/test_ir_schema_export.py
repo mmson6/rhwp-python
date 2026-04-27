@@ -42,10 +42,11 @@ def test_export_schema_root_additional_properties_false():
 
 
 def test_export_schema_defs_are_exactly_the_known_nodes():
-    """`$defs` 는 HwpDocument (root) 를 제외한 12개 노드 정확히 일치.
+    """`$defs` 는 HwpDocument (root) 를 제외한 15개 노드 정확히 일치.
 
-    v0.3.0 S1: ImageRef + PictureBlock 추가 (10 → 12). 이후 stage (Formula /
-    Footnote / Endnote / ListItem / Caption / Toc / Field) 추가 시 갱신.
+    v0.3.0 S1: ImageRef + PictureBlock (10 → 12).
+    v0.3.0 S2: FormulaBlock + FootnoteBlock + EndnoteBlock (12 → 15).
+    이후 stage (ListItem / Caption / Toc / Field) 추가 시 갱신.
     """
     schema = export_schema()
     defs = schema.get("$defs", {})
@@ -62,6 +63,9 @@ def test_export_schema_defs_are_exactly_the_known_nodes():
         "Furniture",
         "ImageRef",
         "PictureBlock",
+        "FormulaBlock",
+        "FootnoteBlock",
+        "EndnoteBlock",
     }
     assert set(defs.keys()) == expected_nodes
 

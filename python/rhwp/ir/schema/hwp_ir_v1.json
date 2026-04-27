@@ -74,9 +74,181 @@
       "title": "DocumentSource",
       "type": "object"
     },
+    "EndnoteBlock": {
+      "additionalProperties": false,
+      "description": "미주 블록 — HWP ``Control::Endnote``.\n\n각주와 같은 구조지만 배치가 다르다 (각주: 페이지 하단, 미주: 문서/구역 끝).\nHWP 가 별도 struct 로 분리하므로 IR 도 분리 — 통합 시 정보 손실.",
+      "properties": {
+        "kind": {
+          "const": "endnote",
+          "default": "endnote",
+          "title": "Kind",
+          "type": "string"
+        },
+        "number": {
+          "title": "Number",
+          "type": "integer"
+        },
+        "blocks": {
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ParagraphBlock"
+              },
+              {
+                "$ref": "#/$defs/TableBlock"
+              },
+              {
+                "$ref": "#/$defs/PictureBlock"
+              },
+              {
+                "$ref": "#/$defs/FormulaBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnoteBlock"
+              },
+              {
+                "$ref": "#/$defs/EndnoteBlock"
+              },
+              {
+                "$ref": "#/$defs/UnknownBlock"
+              }
+            ]
+          },
+          "title": "Blocks",
+          "type": "array"
+        },
+        "marker_prov": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "prov": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "number",
+        "marker_prov",
+        "prov"
+      ],
+      "title": "EndnoteBlock",
+      "type": "object"
+    },
+    "FootnoteBlock": {
+      "additionalProperties": false,
+      "description": "각주 블록 — HWP ``Control::Footnote``.\n\n각주 본문은 ``furniture.footnotes`` 로 라우팅되어 RAG 의 body 검색을 오염시키지\n않는다. ``marker_prov`` 는 본문 인용 마커 (``…기존 연구[3]…`` 의 ``[3]`` 위치) 의\nparent paragraph (section_idx, para_idx) 를 가리킨다 — 정확한 char_offset 까지는\n상류 ``field_ranges`` 매핑이 필요해 v0.4.0+ 검토. ``prov`` 는 각주 본문 자체의\n위치 = 마커가 등장한 paragraph 와 동일 (각주는 그 paragraph 에서 파생).\n\n``blocks`` 가 재귀 ``Block`` 리스트라 각주 본문 안의 표·그림·수식도 자연 지원.",
+      "properties": {
+        "kind": {
+          "const": "footnote",
+          "default": "footnote",
+          "title": "Kind",
+          "type": "string"
+        },
+        "number": {
+          "description": "표시 번호 (1, 2, 3, ...).",
+          "title": "Number",
+          "type": "integer"
+        },
+        "blocks": {
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ParagraphBlock"
+              },
+              {
+                "$ref": "#/$defs/TableBlock"
+              },
+              {
+                "$ref": "#/$defs/PictureBlock"
+              },
+              {
+                "$ref": "#/$defs/FormulaBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnoteBlock"
+              },
+              {
+                "$ref": "#/$defs/EndnoteBlock"
+              },
+              {
+                "$ref": "#/$defs/UnknownBlock"
+              }
+            ]
+          },
+          "title": "Blocks",
+          "type": "array"
+        },
+        "marker_prov": {
+          "$ref": "#/$defs/Provenance",
+          "description": "본문 인용 마커 위치 — RAG 가 각주가 어디서 인용됐는지 역추적."
+        },
+        "prov": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "number",
+        "marker_prov",
+        "prov"
+      ],
+      "title": "FootnoteBlock",
+      "type": "object"
+    },
+    "FormulaBlock": {
+      "additionalProperties": false,
+      "description": "수식 블록 — HWP ``Control::Equation``.\n\nHWP 수식은 자체 스크립트 (``script``) 로 저장된다 (예: ``\"1 over 2 + sqrt{x^2}\"``).\nHWP equation script → LaTeX/MathML 자동 변환은 공개 도구 부재로 v0.3.0 미제공\n(spec § 비목표). ``script_kind=\"hwp_eq\"`` 로 raw 출고 → 사용자가 외부 변환 후\n``model_copy(update={\"script\": tex, \"script_kind\": \"latex\"})`` 로 재구성 가능.\n\n``text_alt`` 는 RAG 폴백 — 단순 정규화 (``over`` → ``/``, ``sqrt{...}`` → ``√(...)``)\n까지만 적용. 실패 시 None.",
+      "properties": {
+        "kind": {
+          "const": "formula",
+          "default": "formula",
+          "title": "Kind",
+          "type": "string"
+        },
+        "script": {
+          "title": "Script",
+          "type": "string"
+        },
+        "script_kind": {
+          "default": "hwp_eq",
+          "enum": [
+            "hwp_eq",
+            "latex",
+            "mathml"
+          ],
+          "title": "Script Kind",
+          "type": "string"
+        },
+        "text_alt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "평문 근사 — RAG fallback. ``script`` 의 사람이 읽을 수 있는 형태 (``over`` → ``/`` 등) 를 단순 정규화. 실패 시 None.",
+          "title": "Text Alt"
+        },
+        "inline": {
+          "default": false,
+          "description": "True: 본문 인라인 수식, False: 별도 디스플레이 수식.",
+          "title": "Inline",
+          "type": "boolean"
+        },
+        "prov": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "script",
+        "prov"
+      ],
+      "title": "FormulaBlock",
+      "type": "object"
+    },
     "Furniture": {
       "additionalProperties": false,
-      "description": "장식 노드 컨테이너 — RAG 가 임베딩에서 필터링 가능.\n\nv0.3.0 부터 ``page_headers`` / ``page_footers`` 가 실제 채워진다.\n``footnotes`` 는 v0.3.0 S2 (FootnoteBlock 도입) 에서 채움. ``endnotes`` 신규\n필드 추가도 S2.",
+      "description": "장식 노드 컨테이너 — RAG 가 임베딩에서 필터링 가능.\n\nv0.3.0 S1 부터 ``page_headers`` / ``page_footers`` 가 실제 채워진다.\nv0.3.0 S2 부터 ``footnotes`` / ``endnotes`` 도 실제 채워지며 타입이\n``list[FootnoteBlock]`` / ``list[EndnoteBlock]`` 으로 강화된다.\n\niter_blocks(scope=\"furniture\") 순서: page_headers → page_footers →\nfootnotes → endnotes (spec § 8 furniture 순서 계약).",
       "properties": {
         "page_headers": {
           "items": {
@@ -89,6 +261,15 @@
               },
               {
                 "$ref": "#/$defs/PictureBlock"
+              },
+              {
+                "$ref": "#/$defs/FormulaBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnoteBlock"
+              },
+              {
+                "$ref": "#/$defs/EndnoteBlock"
               },
               {
                 "$ref": "#/$defs/UnknownBlock"
@@ -111,6 +292,15 @@
                 "$ref": "#/$defs/PictureBlock"
               },
               {
+                "$ref": "#/$defs/FormulaBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnoteBlock"
+              },
+              {
+                "$ref": "#/$defs/EndnoteBlock"
+              },
+              {
                 "$ref": "#/$defs/UnknownBlock"
               }
             ]
@@ -120,22 +310,16 @@
         },
         "footnotes": {
           "items": {
-            "oneOf": [
-              {
-                "$ref": "#/$defs/ParagraphBlock"
-              },
-              {
-                "$ref": "#/$defs/TableBlock"
-              },
-              {
-                "$ref": "#/$defs/PictureBlock"
-              },
-              {
-                "$ref": "#/$defs/UnknownBlock"
-              }
-            ]
+            "$ref": "#/$defs/FootnoteBlock"
           },
           "title": "Footnotes",
+          "type": "array"
+        },
+        "endnotes": {
+          "items": {
+            "$ref": "#/$defs/EndnoteBlock"
+          },
+          "title": "Endnotes",
           "type": "array"
         }
       },
@@ -541,6 +725,15 @@
                 "$ref": "#/$defs/PictureBlock"
               },
               {
+                "$ref": "#/$defs/FormulaBlock"
+              },
+              {
+                "$ref": "#/$defs/FootnoteBlock"
+              },
+              {
+                "$ref": "#/$defs/EndnoteBlock"
+              },
+              {
                 "$ref": "#/$defs/UnknownBlock"
               }
             ]
@@ -566,6 +759,9 @@
           "type": "string",
           "not": {
             "enum": [
+              "endnote",
+              "footnote",
+              "formula",
               "paragraph",
               "picture",
               "table"
@@ -631,6 +827,15 @@
           },
           {
             "$ref": "#/$defs/PictureBlock"
+          },
+          {
+            "$ref": "#/$defs/FormulaBlock"
+          },
+          {
+            "$ref": "#/$defs/FootnoteBlock"
+          },
+          {
+            "$ref": "#/$defs/EndnoteBlock"
           },
           {
             "$ref": "#/$defs/UnknownBlock"

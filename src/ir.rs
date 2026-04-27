@@ -12,8 +12,9 @@
 
 use pyo3::prelude::*;
 
-use rhwp::model::control::Control;
+use rhwp::model::control::{Control, Equation};
 use rhwp::model::document::{DocInfo, Document};
+use rhwp::model::footnote::{Endnote, Footnote};
 use rhwp::model::image::Picture;
 use rhwp::model::paragraph::Paragraph;
 use rhwp::model::style::UnderlineType;
@@ -74,6 +75,37 @@ pub(crate) struct RawPicture {
 }
 
 #[derive(IntoPyObject)]
+pub(crate) struct RawFormula {
+    pub section_idx: usize,
+    pub para_idx: usize,
+    pub script: String,
+    // ^ HWP equation script 는 항상 "hwp_eq" — LaTeX/MathML 변환은 Python 사용자
+    //   책임 (spec § 비목표). text_alt 는 raw script 의 단순 정규화 결과.
+    pub text_alt: Option<String>,
+}
+
+#[derive(IntoPyObject)]
+pub(crate) struct RawFootnote {
+    // ^ 본문 인용 마커 위치 (parent paragraph 의 section_idx, para_idx).
+    //   각주 본문은 같은 paragraph 에서 파생되므로 prov 도 동일 위치를 공유한다.
+    //   정확한 char_offset 은 상류 field_ranges 매핑 필요 — v0.4.0+ 검토.
+    pub marker_section_idx: usize,
+    pub marker_para_idx: usize,
+    pub number: u16,
+    pub blocks: Vec<RawParagraph>,
+    // ^ 각주 본문의 내부 paragraph — Python mapper 가 _flatten_paragraph 로
+    //   처리해 표/그림/수식 등 nested 컨텐츠도 자연 지원
+}
+
+#[derive(IntoPyObject)]
+pub(crate) struct RawEndnote {
+    pub marker_section_idx: usize,
+    pub marker_para_idx: usize,
+    pub number: u16,
+    pub blocks: Vec<RawParagraph>,
+}
+
+#[derive(IntoPyObject)]
 pub(crate) struct RawParagraph {
     pub section_idx: usize,
     pub para_idx: usize,
@@ -81,6 +113,7 @@ pub(crate) struct RawParagraph {
     pub char_runs: Vec<RawCharRun>,
     pub tables: Vec<RawTable>,
     pub pictures: Vec<RawPicture>,
+    pub formulas: Vec<RawFormula>,
 }
 
 #[derive(IntoPyObject)]
@@ -88,10 +121,12 @@ pub(crate) struct RawDocument {
     pub source_uri: Option<String>,
     pub section_count: usize,
     pub paragraphs: Vec<RawParagraph>,
-    // ^ furniture.page_headers / page_footers 로 매핑. S1 시점은 Header/Footer
-    //   컨트롤만 (각주/미주 본문은 S2 에서 추가).
+    // ^ furniture.page_headers / page_footers 로 매핑.
     pub headers: Vec<RawParagraph>,
     pub footers: Vec<RawParagraph>,
+    // ^ furniture.footnotes / endnotes 로 매핑. v0.3.0 S2 신규.
+    pub footnotes: Vec<RawFootnote>,
+    pub endnotes: Vec<RawEndnote>,
 }
 
 /// 문서 전체를 raw 평탄 구조로 추출한다.
@@ -101,19 +136,11 @@ pub(crate) struct RawDocument {
 /// 한 번에 PyDict 트리로 변환한다.
 pub(crate) fn build_raw_document(doc: &Document, source_uri: Option<&str>) -> RawDocument {
     let mut paragraphs = Vec::new();
-    let mut headers = Vec::new();
-    let mut footers = Vec::new();
+    let mut acc = FurnitureAcc::default();
     for (section_idx, section) in doc.sections.iter().enumerate() {
         for (para_idx, para) in section.paragraphs.iter().enumerate() {
             paragraphs.push(build_raw_paragraph(section_idx, para_idx, para, doc));
-            collect_headers_footers_from_paragraph(
-                section_idx,
-                para_idx,
-                para,
-                doc,
-                &mut headers,
-                &mut footers,
-            );
+            collect_furniture_from_paragraph(section_idx, para_idx, para, doc, &mut acc);
         }
         // ^ 바탕쪽 안의 Header/Footer 컨트롤도 furniture 로 라우팅 (spec § 8 매퍼 정책).
         //   바탕쪽 paragraph 자체는 furniture 에 넣지 않는다 — 페이지 배경 템플릿이지
@@ -127,22 +154,17 @@ pub(crate) fn build_raw_document(doc: &Document, source_uri: Option<&str>) -> Ra
             .flat_map(|mp| mp.paragraphs.iter())
             .enumerate()
         {
-            collect_headers_footers_from_paragraph(
-                section_idx,
-                mp_flat_idx,
-                mp_para,
-                doc,
-                &mut headers,
-                &mut footers,
-            );
+            collect_furniture_from_paragraph(section_idx, mp_flat_idx, mp_para, doc, &mut acc);
         }
     }
     RawDocument {
         source_uri: source_uri.map(String::from),
         section_count: doc.sections.len(),
         paragraphs,
-        headers,
-        footers,
+        headers: acc.headers,
+        footers: acc.footers,
+        footnotes: acc.footnotes,
+        endnotes: acc.endnotes,
     }
 }
 
@@ -153,10 +175,12 @@ fn build_raw_paragraph(
     doc: &Document,
 ) -> RawParagraph {
     let char_runs = build_char_runs(para, &doc.doc_info);
-    // ^ 문단의 controls 중 Table / Picture 만 추출 — 내부 paragraph 들은 외부 (section, para)
-    //   를 공유한다 (Provenance 계약: 표·그림은 부모 문단 위치를 가리킨다)
+    // ^ 문단의 controls 중 Table / Picture / Equation 만 추출 — 내부 paragraph 들은
+    //   외부 (section, para) 를 공유한다 (Provenance 계약). Footnote / Endnote 는
+    //   본문이 아니라 furniture 로 라우팅되므로 여기서 처리하지 않음.
     let mut tables = Vec::new();
     let mut pictures = Vec::new();
+    let mut formulas = Vec::new();
     for ctrl in &para.controls {
         match ctrl {
             Control::Table(t) => {
@@ -164,6 +188,9 @@ fn build_raw_paragraph(
             }
             Control::Picture(p) => {
                 pictures.push(build_raw_picture(p, section_idx, para_idx, doc));
+            }
+            Control::Equation(e) => {
+                formulas.push(build_raw_formula(e, section_idx, para_idx));
             }
             _ => {}
         }
@@ -175,6 +202,7 @@ fn build_raw_paragraph(
         char_runs,
         tables,
         pictures,
+        formulas,
     }
 }
 
@@ -318,33 +346,160 @@ fn build_raw_picture(
     }
 }
 
-/// 본문 paragraph 안의 Header/Footer 컨트롤을 furniture 리스트에 누적한다.
+/// 본문 paragraph 에서 추출되는 furniture 누적 컨테이너.
+#[derive(Default)]
+struct FurnitureAcc {
+    headers: Vec<RawParagraph>,
+    footers: Vec<RawParagraph>,
+    footnotes: Vec<RawFootnote>,
+    endnotes: Vec<RawEndnote>,
+}
+
+/// 본문 paragraph 안의 furniture 컨트롤 (Header/Footer/Footnote/Endnote) 을 누적한다.
 ///
-/// Header / Footer 가 가지는 자체 paragraphs 들을 외부 (section_idx, para_idx) 와
-/// 공유한 RawParagraph 로 변환한다. 본 paragraphs 는 furniture 자체가 어디서
+/// 각 furniture 컨트롤이 가지는 자체 paragraphs 들을 외부 (section_idx, para_idx) 와
+/// 공유한 RawParagraph 로 변환한다. 본 paragraphs 는 furniture 가 어디서
 /// "선언" 됐는지 (Provenance) 만 보존하면 충분 — 페이지별 반복 출현은 렌더 단계.
-fn collect_headers_footers_from_paragraph(
+fn collect_furniture_from_paragraph(
     section_idx: usize,
     para_idx: usize,
     para: &Paragraph,
     doc: &Document,
-    headers: &mut Vec<RawParagraph>,
-    footers: &mut Vec<RawParagraph>,
+    acc: &mut FurnitureAcc,
 ) {
     for ctrl in &para.controls {
         match ctrl {
             Control::Header(h) => {
                 for hp in &h.paragraphs {
-                    headers.push(build_raw_paragraph(section_idx, para_idx, hp, doc));
+                    acc.headers
+                        .push(build_raw_paragraph(section_idx, para_idx, hp, doc));
                 }
             }
             Control::Footer(f) => {
                 for fp in &f.paragraphs {
-                    footers.push(build_raw_paragraph(section_idx, para_idx, fp, doc));
+                    acc.footers
+                        .push(build_raw_paragraph(section_idx, para_idx, fp, doc));
                 }
+            }
+            Control::Footnote(fn_) => {
+                acc.footnotes
+                    .push(build_raw_footnote(fn_, section_idx, para_idx, doc));
+            }
+            Control::Endnote(en) => {
+                acc.endnotes
+                    .push(build_raw_endnote(en, section_idx, para_idx, doc));
             }
             _ => {}
         }
+    }
+}
+
+/// Equation 컨트롤 → RawFormula. text_alt 는 raw script 의 단순 정규화 결과 —
+/// 정상 변환 대신 RAG 폴백용으로만 충분. 실패하면 None (mapper 가 그대로 보존).
+fn build_raw_formula(eq: &Equation, section_idx: usize, para_idx: usize) -> RawFormula {
+    let script = eq.script.clone();
+    let text_alt = simple_eq_text_alt(&script);
+    RawFormula {
+        section_idx,
+        para_idx,
+        script,
+        text_alt,
+    }
+}
+
+/// HWP equation script 의 단순 정규화 → 평문 근사. 완전한 변환이 아니라
+/// RAG 검색용 폴백 — 정확한 LaTeX 가 필요하면 사용자가 외부 변환기 사용.
+///
+/// 적용 규칙 (모두 토큰 경계 인식 — `[A-Za-z0-9_]` 의 연속을 한 식별자로 본다):
+/// - 식별자 토큰 `over` → `/` (분수). 예: `1 over 2` → `1 / 2`. `discover` 는 그대로.
+/// - 식별자 토큰 `sqrt` → `√` (제곱근). 예: `sqrt{x}` → `√(x)`. `sqrtish` 는 그대로.
+/// - 그룹 괄호 `{` → `(`, `}` → `)`. spec § 2 의 정규화 규약.
+///
+/// 빈 스크립트는 None 반환. UTF-8 multi-byte char (한글 등) 는 그대로 통과.
+fn simple_eq_text_alt(script: &str) -> Option<String> {
+    let trimmed = script.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    let mut out = String::with_capacity(trimmed.len());
+    let mut chars = trimmed.chars().peekable();
+    while let Some(c) = chars.next() {
+        if is_ident_start(c) {
+            // ^ 식별자 토큰 시작 — 끝까지 읽고 키워드 비교
+            let mut token = String::new();
+            token.push(c);
+            while let Some(&next) = chars.peek() {
+                if is_ident_continue(next) {
+                    token.push(next);
+                    chars.next();
+                } else {
+                    break;
+                }
+            }
+            match token.as_str() {
+                "over" => out.push('/'),
+                "sqrt" => out.push('√'),
+                _ => out.push_str(&token),
+            }
+        } else {
+            // ^ 비-식별자 char (공백, 괄호, 연산자, 한글 등)
+            match c {
+                '{' => out.push('('),
+                '}' => out.push(')'),
+                _ => out.push(c),
+            }
+        }
+    }
+    Some(out)
+}
+
+#[inline]
+fn is_ident_start(c: char) -> bool {
+    c.is_ascii_alphabetic() || c == '_'
+}
+
+#[inline]
+fn is_ident_continue(c: char) -> bool {
+    c.is_ascii_alphanumeric() || c == '_'
+}
+
+/// Footnote → RawFootnote. 본문 인용 마커 위치 (parent paragraph) 를 보존하고
+/// 각주 본문의 paragraph 들을 평탄화한다.
+fn build_raw_footnote(
+    fn_: &Footnote,
+    marker_section_idx: usize,
+    marker_para_idx: usize,
+    doc: &Document,
+) -> RawFootnote {
+    let blocks = fn_
+        .paragraphs
+        .iter()
+        .map(|p| build_raw_paragraph(marker_section_idx, marker_para_idx, p, doc))
+        .collect();
+    RawFootnote {
+        marker_section_idx,
+        marker_para_idx,
+        number: fn_.number,
+        blocks,
+    }
+}
+
+fn build_raw_endnote(
+    en: &Endnote,
+    marker_section_idx: usize,
+    marker_para_idx: usize,
+    doc: &Document,
+) -> RawEndnote {
+    let blocks = en
+        .paragraphs
+        .iter()
+        .map(|p| build_raw_paragraph(marker_section_idx, marker_para_idx, p, doc))
+        .collect();
+    RawEndnote {
+        marker_section_idx,
+        marker_para_idx,
+        number: en.number,
+        blocks,
     }
 }
 
@@ -407,5 +562,58 @@ mod tests {
     fn lookup_bin_data_zero_id_returns_none() {
         let doc = Document::default();
         assert!(lookup_bin_data_bytes(&doc, 0).is_none());
+    }
+
+    // * simple_eq_text_alt — 토큰 경계 인식 검증
+
+    #[test]
+    fn simple_eq_text_alt_empty_returns_none() {
+        assert_eq!(simple_eq_text_alt(""), None);
+        assert_eq!(simple_eq_text_alt("   "), None);
+    }
+
+    #[test]
+    fn simple_eq_text_alt_over_keyword_replaced() {
+        assert_eq!(simple_eq_text_alt("1 over 2").as_deref(), Some("1 / 2"));
+        assert_eq!(simple_eq_text_alt("over").as_deref(), Some("/"));
+    }
+
+    #[test]
+    fn simple_eq_text_alt_sqrt_keyword_replaced() {
+        assert_eq!(simple_eq_text_alt("sqrt{x}").as_deref(), Some("√(x)"));
+        assert_eq!(
+            simple_eq_text_alt("sqrt{x^2 + 1}").as_deref(),
+            Some("√(x^2 + 1)")
+        );
+    }
+
+    #[test]
+    fn simple_eq_text_alt_braces_become_parens() {
+        assert_eq!(simple_eq_text_alt("{a + b}").as_deref(), Some("(a + b)"));
+    }
+
+    #[test]
+    fn simple_eq_text_alt_keywords_inside_identifier_not_replaced() {
+        // ^ "sqrt" 가 식별자 일부면 변환되면 안 됨
+        assert_eq!(simple_eq_text_alt("sqrtish").as_deref(), Some("sqrtish"));
+        // ^ "over" 가 다른 식별자 일부일 때도
+        assert_eq!(simple_eq_text_alt("discover").as_deref(), Some("discover"));
+        assert_eq!(simple_eq_text_alt("overflow").as_deref(), Some("overflow"));
+        // ^ underscore 식별자
+        assert_eq!(simple_eq_text_alt("_over_").as_deref(), Some("_over_"));
+    }
+
+    #[test]
+    fn simple_eq_text_alt_combined_expression() {
+        assert_eq!(
+            simple_eq_text_alt("1 over 2 + sqrt{x^2 + 1}").as_deref(),
+            Some("1 / 2 + √(x^2 + 1)")
+        );
+    }
+
+    #[test]
+    fn simple_eq_text_alt_unicode_passes_through() {
+        // ^ 한글이 들어와도 변환 안 함 (HWP equation script 는 보통 ASCII 만)
+        assert_eq!(simple_eq_text_alt("α + β").as_deref(), Some("α + β"));
     }
 }

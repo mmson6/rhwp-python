@@ -115,18 +115,18 @@ def test_layout_role_on_merged_empty_cells(parsed_hwpx: rhwp.Document):
 
 
 def test_table_cells_blocks_are_paragraph_or_table(parsed_hwpx: rhwp.Document):
-    """TableCell.blocks 는 ParagraphBlock / TableBlock (중첩 표) / PictureBlock (셀 안 그림) 만.
+    """TableCell.blocks 는 ParagraphBlock / TableBlock / PictureBlock / FormulaBlock 만.
 
-    v0.3.0 S1 부터 PictureBlock 도 셀 내부에 출현 가능 — 셀 paragraph 의 controls
-    안에 Control::Picture 가 있을 때 _flatten_paragraph 가 PictureBlock 도 emit 한다.
+    셀 paragraph 의 controls 안에 Control::Table/Picture/Equation 이 있을 때
+    _flatten_paragraph 가 해당 블록을 emit 한다.
     """
-    from rhwp.ir.nodes import PictureBlock
+    from rhwp.ir.nodes import FormulaBlock, PictureBlock
 
     ir = parsed_hwpx.to_ir()
     for t in (b for b in ir.body if isinstance(b, TableBlock)):
         for cell in t.cells:
             for blk in cell.blocks:
-                assert isinstance(blk, (ParagraphBlock, TableBlock, PictureBlock))
+                assert isinstance(blk, (ParagraphBlock, TableBlock, PictureBlock, FormulaBlock))
 
 
 # * Provenance — ParagraphBlock 과 같은 para_idx 를 공유

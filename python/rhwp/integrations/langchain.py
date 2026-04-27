@@ -26,7 +26,16 @@ from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
 
 import rhwp
-from rhwp.ir.nodes import Block, ParagraphBlock, PictureBlock, TableBlock, UnknownBlock
+from rhwp.ir.nodes import (
+    Block,
+    EndnoteBlock,
+    FootnoteBlock,
+    FormulaBlock,
+    ParagraphBlock,
+    PictureBlock,
+    TableBlock,
+    UnknownBlock,
+)
 
 LoadMode = Literal["single", "paragraph", "ir-blocks"]
 
@@ -166,6 +175,29 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
             meta["image_uri"] = block.image.uri
             meta["image_mime"] = block.image.mime_type
         return content, meta
+    if isinstance(block, FormulaBlock):
+        # ^ text_alt (raw script 의 평문 근사) 우선, 없으면 raw script 자체.
+        #   사용자가 LaTeX/MathML 변환을 외부에서 적용한 경우 script_kind 가 갱신됨
+        return block.text_alt or block.script, {
+            "kind": "formula",
+            "section_idx": block.prov.section_idx,
+            "para_idx": block.prov.para_idx,
+            "script_kind": block.script_kind,
+            "inline": block.inline,
+        }
+    if isinstance(block, (FootnoteBlock, EndnoteBlock)):
+        # ^ 각주/미주 본문 paragraphs 의 평문을 합쳐 content 로. marker_prov 는 본문 인용
+        #   위치를 별도 메타로 노출 — RAG 가 "이 각주는 어디 paragraph 에서 인용됐나" 역추적
+        text_parts = [b.text for b in block.blocks if isinstance(b, ParagraphBlock) and b.text]
+        kind_label = "footnote" if isinstance(block, FootnoteBlock) else "endnote"
+        return "\n".join(text_parts), {
+            "kind": kind_label,
+            "section_idx": block.prov.section_idx,
+            "para_idx": block.prov.para_idx,
+            "number": block.number,
+            "marker_section_idx": block.marker_prov.section_idx,
+            "marker_para_idx": block.marker_prov.para_idx,
+        }
     # 새 Block variant 가 추가되면 그 variant 의 elif 를 이 assert 보다 위에 먼저
     # 추가해야 한다. 그러지 않으면 AssertionError 로 fail-fast (silent fallback 방지)
     assert isinstance(block, UnknownBlock)

@@ -61,16 +61,16 @@ def test_paragraph_block_count_matches(parsed_hwp: rhwp.Document):
 
 
 def test_body_contains_only_known_block_kinds(parsed_hwp: rhwp.Document):
-    """v0.3.0 S1 까지는 ParagraphBlock / TableBlock / PictureBlock 만 노출. UnknownBlock 출현 금지.
+    """v0.3.0 S2 까지는 body 에 ParagraphBlock / TableBlock / PictureBlock / FormulaBlock 노출.
 
-    이후 stage 에서 Formula/Footnote/Endnote/ListItem/Caption/Toc/Field 가 추가될 때
-    이 set 도 갱신한다.
+    Footnote/Endnote 는 body 가 아니라 furniture 로 라우팅되므로 body 에는 안 나옴.
+    이후 stage 에서 ListItem/Caption/Toc/Field 가 추가될 때 이 set 도 갱신한다.
     """
-    from rhwp.ir.nodes import PictureBlock
+    from rhwp.ir.nodes import FormulaBlock, PictureBlock
 
     ir = parsed_hwp.to_ir()
     for b in ir.body:
-        assert isinstance(b, (ParagraphBlock, TableBlock, PictureBlock)), (
+        assert isinstance(b, (ParagraphBlock, TableBlock, PictureBlock, FormulaBlock)), (
             f"unexpected block kind: {type(b).__name__}"
         )
 
@@ -202,22 +202,39 @@ def test_ir_is_frozen(parsed_hwp: rhwp.Document):
 
 
 def test_furniture_lists_have_correct_types(parsed_hwp: rhwp.Document):
-    """v0.3.0 S1 부터 page_headers / page_footers 는 채워질 수 있다 (샘플에 머리글/꼬리말 있을 시).
+    """v0.3.0 S2 furniture 4 종 (page_headers / page_footers / footnotes / endnotes) 모두 채워질 수 있다.
 
-    footnotes 는 v0.3.0 S2 의 FootnoteBlock 도입 전까지 빈 리스트. 본 테스트는
-    리스트 타입 + footnotes 비어있음만 검증 — 채움 여부는 test_ir_furniture.py 에서
-    샘플별 구체 검증.
+    채움 여부는 샘플 의존 (test_ir_furniture.py 에서 구체 검증). 본 테스트는 리스트
+    타입 일관성만 — page_headers/page_footers 의 entry 가 known Block 유니온 멤버,
+    footnotes/endnotes 는 각각 FootnoteBlock/EndnoteBlock 인스턴스.
     """
-    from rhwp.ir.nodes import PictureBlock, UnknownBlock
+    from rhwp.ir.nodes import (
+        EndnoteBlock,
+        FootnoteBlock,
+        FormulaBlock,
+        PictureBlock,
+        UnknownBlock,
+    )
 
     ir = parsed_hwp.to_ir()
     assert isinstance(ir.furniture.page_headers, list)
     assert isinstance(ir.furniture.page_footers, list)
-    # ^ S1 시점 footnotes 는 mapper 가 채우지 않음 (S2 에서 채움)
-    assert ir.furniture.footnotes == []
-    # ^ 채워진 entry 는 모두 known Block 유니온 멤버여야 함
+    assert isinstance(ir.furniture.footnotes, list)
+    assert isinstance(ir.furniture.endnotes, list)
+    # ^ 채워진 page_headers/footers entry 는 모두 known Block 유니온 멤버
+    body_block_types = (
+        ParagraphBlock,
+        TableBlock,
+        PictureBlock,
+        FormulaBlock,
+        UnknownBlock,
+    )
     for entry in ir.furniture.page_headers + ir.furniture.page_footers:
-        assert isinstance(entry, (ParagraphBlock, TableBlock, PictureBlock, UnknownBlock))
+        assert isinstance(entry, body_block_types)
+    for fn in ir.furniture.footnotes:
+        assert isinstance(fn, FootnoteBlock)
+    for en in ir.furniture.endnotes:
+        assert isinstance(en, EndnoteBlock)
 
 
 def test_metadata_fields_are_none(parsed_hwp: rhwp.Document):
