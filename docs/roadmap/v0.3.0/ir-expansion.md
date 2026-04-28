@@ -4,7 +4,7 @@
 
 v0.2.0 의 Document IR 위에 HWP 문서 고유 의미 요소를 더해 RAG/LLM 파이프라인이 표·단락 외에도 그림·수식·각주·목록·캡션·목차·필드를 구조화 형태로 직접 소비할 수 있게 한다. **`UnknownBlock` catch-all 안전장치 위에서 후방 호환을 유지하는 MINOR 증분** — v0.2.0 소비자는 새 `Block.kind` 를 만나도 `UnknownBlock` 으로 graceful skip 한다.
 
-v0.3.0 의 다른 축 (`rhwp-py` CLI) 과의 연동은 [phase-2.md § v0.3.0 두 축의 연동](../phase-2.md) 에 SSOT — 본 spec 은 IR 확장 자체에 집중. 두 축은 같은 릴리스에 함께 GA 한다.
+v0.3.0 의 다른 축 (`rhwp-py` CLI) 은 같은 릴리스에 함께 GA 한다 — 본 spec 은 IR 확장 자체에 집중. 활성 spec 인덱스는 [roadmap/README.md](../README.md). (Phase 2 문서는 v0.3.0 GA 완료로 정리됨)
 
 ## 배경 — v0.2.0 에서 남긴 빈 자리
 
@@ -41,7 +41,7 @@ v0.2.0 ir.md 의 § 스키마 버저닝 표에 따라:
 3. SchemaVersion `1.1` GA — JSON Schema in-place 갱신 + content-addressed alias 발행
 4. `Document.iter_blocks` 가 신규 kind 를 yield, `kind` 필터로 선택 가능
 5. `HwpLoader(mode="ir-blocks")` 가 신규 블록을 LangChain `Document` 로 매핑 (예: `PictureBlock` → caption + alt + URI 메타)
-6. `rhwp-py blocks --kind picture|formula|...` CLI 노출 — CLI 축과의 연동은 본 spec 도입부의 phase-2 reference 참조
+6. `rhwp-py blocks --kind picture|formula|...` CLI 노출 — CLI 축과의 연동은 본 spec 도입부 참조
 7. v0.2.0 모든 공개 API 보존 — `Document.to_ir()` 시그니처 동일, 기존 필드 동일
 
 ### v0.3.0 비목표 (v0.4.0 이후)
@@ -347,7 +347,7 @@ for blk in doc.iter_blocks(scope="body"):
             ...
 ```
 
-CLI `rhwp-py blocks --kind <kinds>` 가 본 메서드 위에서 필터링 (CLI 사양·연동 위치는 [phase-2.md § v0.3.0 두 축의 연동](../phase-2.md)).
+CLI `rhwp-py blocks --kind <kinds>` 가 본 메서드 위에서 필터링.
 
 ### `recurse=True` 의 새 재귀 경로
 
@@ -493,7 +493,7 @@ class Document:
 - `python/rhwp/ir/schema/hwp_ir_v1.json` — v1.1 갱신, content-addressed alias 신규 hash 추가 (구현 stage S4)
 - `examples/` — Picture/Footnote 사용 예제 추가
 
-문서 cross-link (README 인덱스 / phase-2 연동) 는 CONVENTIONS.md § Cross-link 방향성 규칙 에 따라 본 spec 본문에서 다루지 않음.
+문서 cross-link (README 인덱스) 는 CONVENTIONS.md § Cross-link 방향성 규칙 에 따라 본 spec 본문에서 다루지 않음.
 
 ## 참조
 

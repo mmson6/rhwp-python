@@ -116,6 +116,17 @@ Living  ───→  Active  ───→  Draft  ───→  Frozen
 4. `CHANGELOG.md` 의 해당 버전 섹션 마무리
 5. 구현 로그 작성 — `docs/implementation/v<X.Y.Z>/...` (작성 즉시 Frozen)
 
+### Phase 완료 후
+
+`phase-N.md` 의 모든 대상 vX.Y.Z 가 GA 되면 해당 phase 문서를 삭제한다.
+
+1. cross-link 정리 — Frozen spec 본문의 `phase-N.md` 참조: link 만 제거 (인용된 결정 텍스트는 본문에 흡수). 진행 중 spec / Active 문서의 참조: README 인덱스로 redirect 또는 단순 제거
+2. `docs/roadmap/README.md` § Phase 인덱스 표에서 해당 행 제거
+3. `docs/roadmap/phase-N.md` 파일 삭제
+4. CHANGELOG 에 phase 정리 기록
+
+근거: phase 문서는 진행 중 phase 의 의도/스코프 SSOT — 모두 GA 되면 historical record 는 `v<X.Y.Z>/*.md` spec 들이 보유. phase 문서를 보존하면 활성 인덱스가 비대해지고 "phase 가 살아있는 것처럼" 오해 유발.
+
 ### Frozen 후 결정 변경이 필요한 경우
 
 1. **새 spec 작성** — 기존 파일 수정 금지. 새 파일 (예: `docs/roadmap/v0.4.0/ir-correction.md`)

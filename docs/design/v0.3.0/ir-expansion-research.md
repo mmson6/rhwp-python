@@ -562,7 +562,6 @@ CI workflow `.github/workflows/publish-schema.yml` 은 `keep_files: true` 정책
 ## 참조
 
 - 본 리서치의 결정 요약: [roadmap/v0.3.0/ir-expansion.md](../../roadmap/v0.3.0/ir-expansion.md)
-- 병행 문서 (CLI 축): [phase-2.md § v0.3.0 두 축의 연동](../../roadmap/phase-2.md) 경유
 - v0.2.0 IR 본문: [roadmap/v0.2.0/ir.md](../../roadmap/v0.2.0/ir.md)
 - v0.2.0 결정 증거 (리서치 문서 형식 선례): [design/v0.2.0/ir-design-research.md](../v0.2.0/ir-design-research.md)
-- Phase 2 로드맵 위치: [roadmap/phase-2.md](../../roadmap/phase-2.md)
+- 활성 spec 인덱스: [roadmap/README.md](../../roadmap/README.md)

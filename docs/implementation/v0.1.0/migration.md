@@ -119,7 +119,7 @@ rhwp-python 자체 컨벤션 정립: `roadmap / design / implementation / verifi
 docs/
 ├── roadmap/
 │   ├── README.md                        버전 매핑 인덱스 + 연표
-│   ├── phase-2.md / phase-3.md / phase-4.md
+│   ├── phase-3.md / phase-4.md
 │   ├── v0.1.0/rhwp-python.md            현재 릴리스 런칭 계획
 │   └── v0.2.0/cli.md
 ├── design/

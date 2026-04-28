@@ -5,11 +5,11 @@
 **작업일**: 2026-04-28
 **계획 문서**: [roadmap/v0.3.0/ir-expansion.md](../../../roadmap/v0.3.0/ir-expansion.md) §구현 스테이지 분할 + [roadmap/v0.3.0/cli.md](../../../roadmap/v0.3.0/cli.md)
 **선행 stage**: [stage-3.md](stage-3.md) (ListItem + Caption + Toc + Field)
-**Phase 위치**: [roadmap/phase-2.md](../../../roadmap/phase-2.md) § v0.3.0 두 축의 연동 — IR 확장과 CLI 두 spec 을 한 릴리스에 동시 GA.
+**두 축 동시 GA**: IR 확장과 CLI 두 spec 을 한 릴리스에 동시 GA.
 
 ## 스코프
 
-ir-expansion.md §S4 row + cli.md §S1~S4 row 를 한 stage 에 통합 — phase-2.md § 두 축의 연동 정책에 따라 IR 확장 GA 와 CLI 재도입을 같은 시점에 발행한다.
+ir-expansion.md §S4 row + cli.md §S1~S4 row 를 한 stage 에 통합 — 두 축 동시 GA 정책에 따라 IR 확장 GA 와 CLI 재도입을 같은 시점에 발행한다.
 
 **ir-expansion.md §S4 row 매핑**:
 
@@ -51,7 +51,7 @@ ir-expansion.md §S4 row + cli.md §S1~S4 row 를 한 stage 에 통합 — phase
 
 | 결정 | 선택 | 근거 |
 |---|---|---|
-| **두 spec (ir-expansion + cli) 동시 GA** | 한 stage 에 통합 | phase-2.md § 두 축의 연동 — "IR 확장 매퍼/Pydantic 모델이 먼저 GA 가능 상태에 도달해야 CLI enum 도 의미 있게 노출 — 따라서 구현 순서는 IR 확장 stage S1~S3 → IR 확장 S4 (스키마 1.1) + CLI S2 (`blocks` enum 확장) 동시 진행이 자연" |
+| **두 spec (ir-expansion + cli) 동시 GA** | 한 stage 에 통합 | 두 축 동시 GA 정책 — "IR 확장 매퍼/Pydantic 모델이 먼저 GA 가능 상태에 도달해야 CLI enum 도 의미 있게 노출 — 따라서 구현 순서는 IR 확장 stage S1~S3 → IR 확장 S4 (스키마 1.1) + CLI S2 (`blocks` enum 확장) 동시 진행이 자연" |
 | **`[langchain]` extras 에 langchain-text-splitters 포함 (M3 fix)** | 포함 | cli.md spec 의 `[cli,langchain]` 조합 약속 위반 회피. RAG 사용처에서 text-splitters 거의 항상 동반 — v0.2.0 사용자 업그레이드 시 자동 설치 비용 ≪ spec 충실성. 단일 source of truth |
 | **`rhwp.cli.app` import chain 의 모든 ImportError 를 친절 처리 (M2 fix)** | `rhwp.*` 자체 모듈만 raise, 그 외는 모두 typer 설치 결함 메시지 + exit 2 | `e.name in ("typer", "click")` 화이트리스트는 transitive (rich/shellingham/annotated-doc) 누락 시 raw traceback 노출 — 사용자에게 cli.md spec § typer 미설치 시 동작 약속 위반 |
 | **`blocks --format ndjson|json` 도 빈 블록 skip (m1 fix)** | LangChain loader 와 일관 — `_filter_blocks` 에서 모든 포맷 공통 skip | RAG 1차 사용처 일관성 — `rhwp-py blocks --format ndjson` 결과를 vector DB 에 흘리는 사용자가 LangChain loader 의 결과와 동일 청크 수를 기대. 원시 IR 모두 보려면 `rhwp-py ir` 사용 |
@@ -136,7 +136,6 @@ S4 가 GA 의 마지막 stage. release 진입 전 다음 명시:
 ## 참조
 
 - 상위 설계: [roadmap/v0.3.0/ir-expansion.md](../../../roadmap/v0.3.0/ir-expansion.md), [roadmap/v0.3.0/cli.md](../../../roadmap/v0.3.0/cli.md)
-- Phase 위치: [roadmap/phase-2.md](../../../roadmap/phase-2.md) § v0.3.0 두 축의 연동
 - 결정 사항 증거: [design/v0.3.0/ir-expansion-research.md](../../../design/v0.3.0/ir-expansion-research.md), [design/v0.3.0/cli-design-research.md](../../../design/v0.3.0/cli-design-research.md)
 - 선행 stage: [stage-1.md](stage-1.md), [stage-2.md](stage-2.md), [stage-3.md](stage-3.md)
 - 상류 제안 이슈 (S2 시점 정리): [docs/upstream/issue-find-control-text-positions.md](../../../upstream/issue-find-control-text-positions.md)

@@ -562,7 +562,6 @@ def load_schema() -> dict:
 ## 다른 로드맵 문서에의 파급
 
 - `docs/roadmap/README.md` — 버전 계획 표에서 v0.2.0 = CLI → v0.2.0 = Document IR 로 교체. Phase 2 범위 축소 반영
-- `docs/roadmap/phase-2.md` — 대상 버전을 `v0.3.0 ~ v0.4.0` → `v0.3.0` 단일로 축소 (IR 확장만). "선행 조건" 에 v0.2.0 IR GA 명시
 - `docs/roadmap/phase-3.md` — v0.4.0 view 렌더러 / v0.5.0 LlamaIndex / v0.6.0 Haystack 으로 버전 한 번 씩 당김
 - `docs/roadmap/phase-4.md` — 대상 버전 그대로 (`v1.0.0`) — writeback 은 rhwp Rust 쓰기 API 성숙도에 의존하므로 앞당김 없음
 - `docs/roadmap/v0.2.0/cli.md` — 삭제 (git 히스토리 보존)

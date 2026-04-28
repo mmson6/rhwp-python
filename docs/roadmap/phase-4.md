@@ -1,9 +1,9 @@
 # Phase 4 — JSON IR → HWP 역생성
 
-**Status**: Active · **Target**: v0.7.0 ~ v1.0.0 · **Last updated**: 2026-04-26
+**Status**: Active · **Target**: v0.8.0 ~ v1.0.0 · **Last updated**: 2026-04-28
 
-**대상 버전**: v0.7.0 ~ v1.0.0 (안정화 + writeback 지원)
-**선행 조건**: Phase 3 (v0.6.0 까지) GA + rhwp Rust 코어의 HWP writer API 안정
+**대상 버전**: v0.8.0 ~ v1.0.0 (안정화 + writeback 지원)
+**선행 조건**: Phase 3 (v0.6.0 까지) GA + v0.7.0 MCP server 단발 통합 GA + rhwp Rust 코어의 HWP writer API 안정
 
 ## 목표
 
@@ -27,10 +27,12 @@ Phase 4 는 rhwp **Rust 코어의 쓰기 API 성숙도** 에 좌우됨. 업스�
 
 | 버전 | 범위 |
 |---|---|
-| v0.7.0 | HWPX writeback baseline (단순 문서 왕복) |
-| v0.8.0 | HWPX writeback 확장 (표·이미지·수식) |
-| v0.9.0 | HWP5 writeback baseline |
+| v0.8.0 | HWPX writeback baseline (단순 문서 왕복) |
+| v0.9.0 | HWPX writeback 확장 (표·이미지·수식) |
+| v0.10.0 | HWP5 writeback baseline |
 | v1.0.0 | HWP5 writeback 확장 + API 안정 선언 |
+
+SemVer 0.x.y 단계에서 minor 는 단조 증가 — v0.9 다음은 v0.10 (v1.0 으로 점프하지 않음). v1.0.0 은 API 안정 선언과 함께 별도 도달.
 
 ## 1.0 안정화 기준
 

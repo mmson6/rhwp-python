@@ -21,6 +21,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 | v0.2.0 | Frozen | [v0.2.0/ir.md](v0.2.0/ir.md) | [design/v0.2.0/ir-design-research.md](../design/v0.2.0/ir-design-research.md) |
 | v0.3.0 (IR 확장) | Frozen | [v0.3.0/ir-expansion.md](v0.3.0/ir-expansion.md) | [design/v0.3.0/ir-expansion-research.md](../design/v0.3.0/ir-expansion-research.md) |
 | v0.3.0 (CLI) | Frozen | [v0.3.0/cli.md](v0.3.0/cli.md) | [design/v0.3.0/cli-design-research.md](../design/v0.3.0/cli-design-research.md) |
+| v0.7.0 (MCP server) | Draft | [v0.7.0/mcp.md](v0.7.0/mcp.md) | [design/v0.7.0/mcp-research.md](../design/v0.7.0/mcp-research.md) |
 
 ## Phase 인덱스
 
@@ -28,11 +29,10 @@ Phase 는 여러 MINOR 릴리스에 걸친 기능 묶음. **구체 결정은 vX.
 
 | Phase | Status | 대상 버전 | 문서 |
 |---|---|---|---|
-| Phase 2 | Active | v0.3.0 | [phase-2.md](phase-2.md) — IR 확장 + CLI 두 축의 연동 SSOT |
 | Phase 3 | Active | v0.4.0 ~ v0.6.0 | [phase-3.md](phase-3.md) — view 렌더러 + RAG 프레임워크 통합 |
-| Phase 4 | Active | v0.7.0 ~ v1.0.0 | [phase-4.md](phase-4.md) — JSON IR → HWP 역생성 |
+| Phase 4 | Active | v0.8.0 ~ v1.0.0 | [phase-4.md](phase-4.md) — JSON IR → HWP 역생성 |
 
-Phase 1 (v0.1.x) 은 GA 완료로 별도 phase 문서 없음.
+Phase 1 (v0.1.x) 은 GA 완료로 별도 phase 문서 없음. Phase 2 (v0.3.0 GA 완료) 는 [CONVENTIONS.md § Phase 완료 후](../CONVENTIONS.md) 정책에 따라 phase 문서 삭제됨 — historical 결정은 [v0.2.0/ir.md](v0.2.0/ir.md) / [v0.3.0/ir-expansion.md](v0.3.0/ir-expansion.md) / [v0.3.0/cli.md](v0.3.0/cli.md) 가 보유.
 
 ## 구현 / 검증 로그 (Frozen)
 
