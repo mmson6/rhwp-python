@@ -125,6 +125,17 @@ Living  ───→  Active  ───→  Draft  ───→  Frozen
 
 오타·깨진 링크·외부 URL 변경 같은 비-의미 변경은 in-place 가능 (Last updated 갱신).
 
+## Archive 정책 (v1.0+)
+
+Major release GA 시점에 직전 major 의 frozen spec 들을 archive 디렉토리로 이동한다 — README 인덱스 비대화 / 검색 노이즈 완화. 파일 이동만, 본문 변경 없음.
+
+- v1.0 GA → 모든 v0.X.Y frozen spec 을 `docs/archive/v0/` 로 이동 (동일 구조 유지: `archive/v0/roadmap/v0.3.0/...`)
+- 이후 v2.0 GA → `docs/archive/v1/`, ... 로 누적
+- `roadmap/README.md` 인덱스는 active major 만 노출, archive 는 별도 페이지 (`docs/archive/README.md`) 에 한 줄 link
+- git size 자체는 무관 (markdown delta compression 효율적) — 본 정책은 인덱스/검색 가독성 목적
+
+v1.0 GA 전까지 아무것도 안 함 — 본 정책은 v1.0 GA 직전 작업으로 잡아둠.
+
 ## 명명 규칙
 
 - 파일명: kebab-case (`ir-expansion.md`, not `ir_expansion.md`)
