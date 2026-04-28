@@ -7,7 +7,7 @@
 | 분류 | 의미 | 갱신 정책 | 예시 |
 |---|---|---|---|
 | **Living** | 항상 최신 — 다른 문서의 위치 포인터 + 시간선 + 규칙 | 자유 갱신, 매 변경 시 손봐도 무방 | `docs/CONVENTIONS.md` (자체), `docs/roadmap/README.md`, `CHANGELOG.md`, `CLAUDE.md`, `README.md` |
-| **Active** | 현재 진행 중 — 의도/스코프 수준의 진화하는 문서 | 큰 변경만, in-place 갱신 OK | `docs/roadmap/phase-N.md`, `docs/design/pyo3-bindings.md` (cross-version reference) |
+| **Active** | 현재 진행 중 — 의도/스코프 수준의 진화하는 문서 | 큰 변경만, in-place 갱신 OK | `docs/roadmap/phase-N.md` |
 | **Draft** | 작성 중인 spec — 해당 버전 GA 전까지 활발 갱신 | 버전 GA 전까지 자유 갱신, GA 후 Frozen 으로 전환 | `docs/roadmap/v0.3.0/*.md` (현재 v0.3.0 GA 전) |
 | **Frozen** | GA 완료된 spec / 완료된 stage / 완료된 검증 | **변경 금지** — 오타·링크 수정만 in-place 허용. 큰 변경은 새 spec + supersede | `docs/roadmap/v0.2.0/ir.md` (v0.2.0 GA 완료), `docs/implementation/v0.2.0/stages/*.md` |
 
@@ -26,7 +26,7 @@
 ```
 
 - **Status**: 현재 분류
-- **GA** (Frozen 일 때): 어느 버전에서 GA 됐는지. **Target** (Draft 일 때): 어느 버전을 향한 작업인지. Active 면 둘 다 생략 가능
+- **GA** (Frozen, 부모 버전 이미 GA): 어느 버전에서 GA 됐는지. **Target** (Draft, 또는 implementation stage 가 부모 GA 전에 Frozen 처리된 경우): 어느 버전을 향한 작업인지. Active 면 둘 다 생략 가능
 - **Last updated**: 본문에 의미 있는 변경이 있었던 날짜 (오타·링크 수정 제외)
 - 모든 spec 변경 시 `Last updated` 만큼은 갱신
 
@@ -42,10 +42,11 @@ docs/
 │   ├── phase-{2,3,4}.md              Active  — Phase 의도/스코프 (구체 결정 미포함)
 │   └── v<X.Y.Z>/<topic>.md           Draft → Frozen on GA — per-version spec
 ├── design/
-│   ├── pyo3-bindings.md              Active  — 버전 무관 cross-version reference
 │   └── v<X.Y.Z>/<topic>-research.md  Draft → Frozen on GA — ADR-style 결정 증거
 ├── implementation/
 │   └── v<X.Y.Z>/...                  Frozen  — 완료된 stage 작업 로그
+├── upstream/
+│   └── <topic>.md                    Active  — 외부 (rhwp Rust 코어) 이슈 초안. 업스트림 머지 시 archive
 └── verification/
     └── v<X.Y.Z>/...                  Frozen  — 완료된 검증 리포트
 ```
@@ -58,13 +59,18 @@ docs/
 
 ### design/
 
-- `pyo3-bindings.md` (Active) — 버전 무관 reference. PyO3 / abi3 / unsendable 같은 cross-version 제약을 모은 참조 문서
 - `vX.Y.Z/<topic>-research.md` (Draft → Frozen) — ADR-style 결정 증거. 결정 매트릭스 + 항목별 (팩트/검증자 반박/최종 결정/출처). 짝이 되는 roadmap spec 과 1:1 페어
 
 ### implementation/
 
 - `vX.Y.Z/migration.md` 또는 `vX.Y.Z/stages/stage-N.md` (Frozen) — 작업 로그. 완료 즉시 Frozen. 산출물 / 검증 결과 / 이월 사항 기록
 - 작은 작업 (단일 세션·수일 규모) 은 단일 `migration.md`. 큰 작업 (여러 주, 의존성 추적 필요) 은 `stages/stage-N.md` 분할
+- **stage 작성 시점이 부모 버전 GA 전이면** Status 는 `Frozen + Target: vX.Y.Z` 로 표기 (작성 즉시 immutable, GA 라벨은 미부여). 부모 버전 GA 시 `Target` → `GA` 로 일괄 전환
+
+### upstream/
+
+- `<topic>.md` (Active) — 업스트림 (`edwardkim/rhwp` 등) 에 제출 검토 중인 이슈/제안 초안. 머지·해결 시 archive 또는 삭제. per-version 매핑 없음
+- 본 디렉토리는 외부 시스템 (GitHub Issues) 으로 흘러가기 전 단계의 staging — 정식 spec 의 일부가 아님
 
 ### verification/
 
@@ -118,6 +124,28 @@ Living  ───→  Active  ───→  Draft  ───→  Frozen
 4. CHANGELOG 에 변경 사유 기록
 
 오타·깨진 링크·외부 URL 변경 같은 비-의미 변경은 in-place 가능 (Last updated 갱신).
+
+## Implementation log 구조
+
+`docs/implementation/vX.Y.Z/` 안의 두 종류 분류:
+
+- `stages/stage-N.md` — 해당 release 의 spec § 구현 스테이지 분할 에 명시된 작업 (대규모, 다단계). spec 의 stage 표와 1:1 mapping
+- `<topic>.md` (직속 평면) — spec 없는 작은 작업 (refactor / chore / perf / dep bump 등). 결정 비교 (a/b/c 옵션) 가치 있어 CHANGELOG 한 줄로 부족할 때만 작성. branch prefix `<type>/<topic>` 와 1:1 mapping (예: branch `refactor/aparse-stdlib` → log `aparse-cleanup.md`)
+
+CHANGELOG 한 줄로 충분한 변경 (typo 정리, 단순 dep bump, 작은 docstring 갱신 등) 은 파일 작성 안 함 — git log + CHANGELOG 가 SSOT.
+
+미래 ad-hoc note 가 5개 이상 모이면 그때 `chores/` 디렉토리화 검토 (YAGNI). 본 패턴 = spec-driven AI coding 진영의 "결정 보존 — 미래 세션 reconstruct 회피" trend (MADR / Cline `decisions.md` / OpenSpec) 와 정합.
+
+## Archive 정책 (v1.0+)
+
+Major release GA 시점에 직전 major 의 frozen spec 들을 archive 디렉토리로 이동한다 — README 인덱스 비대화 / 검색 노이즈 완화. 파일 이동만, 본문 변경 없음.
+
+- v1.0 GA → 모든 v0.X.Y frozen spec 을 `docs/archive/v0/` 로 이동 (동일 구조 유지: `archive/v0/roadmap/v0.3.0/...`)
+- 이후 v2.0 GA → `docs/archive/v1/`, ... 로 누적
+- `roadmap/README.md` 인덱스는 active major 만 노출, archive 는 별도 페이지 (`docs/archive/README.md`) 에 한 줄 link
+- git size 자체는 무관 (markdown delta compression 효율적) — 본 정책은 인덱스/검색 가독성 목적
+
+v1.0 GA 전까지 아무것도 안 함 — 본 정책은 v1.0 GA 직전 작업으로 잡아둠.
 
 ## 명명 규칙
 

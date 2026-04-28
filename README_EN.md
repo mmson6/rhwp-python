@@ -108,16 +108,12 @@ Workload: 9 files (`aift.hwp` 5.5 MB + `table-vpos-01.hwpx` 359 KB + `tac-img-02
 CPU/allocator-bound inside `usvg` + `pdf-writer`, so parallelization yields only
 약 1.1× on 2–3 workers — see `benches/bench_gil.py` for reproducible measurement.
 
-## Known limitations (Phase 1)
+## Known limitations / operational notes
 
-- `Document` objects are `#[pyclass(unsendable)]` — single-threaded access only.
-  Cross-thread access raises `RuntimeError`. Use the pattern in `benches/bench_gil.py`:
-  run `parse + consume` inside the worker, return primitives (`int`, `str`, `bytes`).
-- No font embedding / debug overlay / page metadata APIs (Phase 2+).
-- No HWP/HWPX **serialization** (save) — read/render only.
-- No structured access to tables, images, formulas — text extraction only.
-- PDF render path outputs Rust-side `[DEBUG_TAB_POS]` / `LAYOUT_OVERFLOW` log lines
-  from the rhwp core. Filter with `grep -v -E "(DEBUG_TAB_POS|LAYOUT_OVERFLOW)"` for now.
+Operational constraints (`Document` single-threaded model, async entry point,
+PDF stdout noise) and unimplemented areas are summarized in
+[KNOWN_ISSUES.md](KNOWN_ISSUES.md) (Korean). In-progress / planned items live
+in the active spec index at [docs/roadmap/](docs/roadmap/README.md).
 
 ## Development
 

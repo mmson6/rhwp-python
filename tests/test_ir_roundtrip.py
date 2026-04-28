@@ -28,7 +28,8 @@ def test_to_ir_returns_hwp_document(parsed_hwp: rhwp.Document):
     ir = parsed_hwp.to_ir()
     assert isinstance(ir, HwpDocument)
     assert ir.schema_name == "HwpDocument"
-    assert ir.schema_version == "1.0"
+    # ^ v0.3.0 S1 부터 1.1 — picture / header / footer 블록 추가 (ir-expansion.md §스키마 버저닝)
+    assert ir.schema_version == "1.1"
 
 
 def test_to_ir_caches_same_object(parsed_hwp: rhwp.Document):
@@ -50,31 +51,62 @@ def test_ir_section_count_matches_document(parsed_hwp: rhwp.Document):
 
 
 def test_paragraph_block_count_matches(parsed_hwp: rhwp.Document):
-    """S3 계약: body 내 ParagraphBlock 개수 = Rust paragraph_count.
+    """v0.3.0 S3 계약: body 내 ParagraphBlock + ListItemBlock 개수 = Rust paragraph_count.
 
-    body 에는 TableBlock 도 섞여 있을 수 있으므로 ParagraphBlock 만 필터한다.
+    각 paragraph 는 list_info 유무에 따라 ParagraphBlock 또는 ListItemBlock 중
+    하나로 emit 되므로 둘 다 카운트해야 정확.
     """
+    from rhwp.ir.nodes import ListItemBlock
+
     ir = parsed_hwp.to_ir()
-    para_blocks = [b for b in ir.body if isinstance(b, ParagraphBlock)]
-    assert len(para_blocks) == parsed_hwp.paragraph_count
+    para_or_list_blocks = [b for b in ir.body if isinstance(b, (ParagraphBlock, ListItemBlock))]
+    assert len(para_or_list_blocks) == parsed_hwp.paragraph_count
 
 
 def test_body_contains_only_known_block_kinds(parsed_hwp: rhwp.Document):
-    """v0.2.0 (S3) 는 ParagraphBlock / TableBlock 둘만 노출. UnknownBlock 출현 금지."""
+    """v0.3.0 S3 까지: body 에 ParagraphBlock / TableBlock / PictureBlock / FormulaBlock /
+    ListItemBlock / TocBlock / FieldBlock 노출 가능.
+
+    Footnote/Endnote 는 body 가 아니라 furniture 로 라우팅되므로 body 에는 안 나옴.
+    CaptionBlock 은 PictureBlock.caption / TableBlock.caption_block 안에 부착되므로
+    일반 파싱 경로에서는 body 단독 등장하지 않음 (사용자 직접 구성 시에만).
+    """
+    from rhwp.ir.nodes import (
+        FieldBlock,
+        FormulaBlock,
+        ListItemBlock,
+        PictureBlock,
+        TocBlock,
+    )
+
     ir = parsed_hwp.to_ir()
     for b in ir.body:
-        assert isinstance(b, (ParagraphBlock, TableBlock)), (
-            f"unexpected block kind: {type(b).__name__}"
-        )
+        assert isinstance(
+            b,
+            (
+                ParagraphBlock,
+                TableBlock,
+                PictureBlock,
+                FormulaBlock,
+                ListItemBlock,
+                TocBlock,
+                FieldBlock,
+            ),
+        ), f"unexpected block kind: {type(b).__name__}"
 
 
 def test_ir_body_text_joined_matches_extract_text(parsed_hwp: rhwp.Document):
-    """ParagraphBlock 텍스트만 개행으로 연결하면 ``extract_text()`` 와 일치.
+    """ParagraphBlock + ListItemBlock 텍스트를 개행으로 연결하면 ``extract_text()`` 와 일치.
 
-    TableBlock 은 extract_text() 에 포함되지 않으므로 필터.
+    TableBlock 은 extract_text() 에 포함되지 않으므로 필터. v0.3.0 S3 부터
+    ListItemBlock 도 paragraph-like 로 텍스트 흐름에 포함됨.
     """
+    from rhwp.ir.nodes import ListItemBlock
+
     ir = parsed_hwp.to_ir()
-    non_empty_texts = [b.text for b in ir.body if isinstance(b, ParagraphBlock) and b.text]
+    non_empty_texts = [
+        b.text for b in ir.body if isinstance(b, (ParagraphBlock, ListItemBlock)) and b.text
+    ]
     assert "\n".join(non_empty_texts) == parsed_hwp.extract_text()
 
 
@@ -82,15 +114,18 @@ def test_ir_body_text_joined_matches_extract_text(parsed_hwp: rhwp.Document):
 
 
 def test_provenance_monotonic(parsed_hwp: rhwp.Document):
-    """ParagraphBlock 만으로 (section_idx, para_idx) 가 순차 증가하는지 검증.
+    """ParagraphBlock + ListItemBlock 으로 (section_idx, para_idx) 가 순차 증가하는지 검증.
 
-    TableBlock 은 같은 Paragraph 에서 파생되어 동일 para_idx 를 공유하므로
-    본 테스트에서는 제외한다.
+    TableBlock 등은 같은 Paragraph 에서 파생되어 동일 para_idx 를 공유하므로
+    본 테스트에서는 제외한다. ListItemBlock 도 paragraph 자체를 대체하는 변형이므로
+    포함.
     """
+    from rhwp.ir.nodes import ListItemBlock
+
     ir = parsed_hwp.to_ir()
     prev = None
     for block in ir.body:
-        if not isinstance(block, ParagraphBlock):
+        if not isinstance(block, (ParagraphBlock, ListItemBlock)):
             continue
         prov = block.prov
         if prev is None:
@@ -106,13 +141,15 @@ def test_provenance_monotonic(parsed_hwp: rhwp.Document):
 
 
 def test_provenance_char_end_matches_text_length(parsed_hwp: rhwp.Document):
-    """ParagraphBlock 의 prov.char_end 는 ``len(block.text)`` 와 일치.
+    """ParagraphBlock + ListItemBlock 의 prov.char_end 는 ``len(block.text)`` 와 일치.
 
-    TableBlock 은 char_start/char_end 가 None 이므로 별도 테스트에서 검증.
+    TableBlock 등 파생 블록은 char_start/char_end 가 None.
     """
+    from rhwp.ir.nodes import ListItemBlock
+
     ir = parsed_hwp.to_ir()
     for block in ir.body:
-        if not isinstance(block, ParagraphBlock):
+        if not isinstance(block, (ParagraphBlock, ListItemBlock)):
             continue
         assert block.prov.char_start == 0
         # ^ codepoint 기준 길이 (ir.md §3) — Python len(str) 과 동일
@@ -124,14 +161,16 @@ def test_provenance_char_end_matches_text_length(parsed_hwp: rhwp.Document):
 
 
 def test_inline_run_text_concatenates_to_paragraph_text(parsed_hwp: rhwp.Document):
-    """InlineRun.text 를 이어붙이면 ParagraphBlock.text 와 같아야 한다.
+    """InlineRun.text 를 이어붙이면 ParagraphBlock/ListItemBlock.text 와 같아야 한다.
 
     런 분할은 char_shapes 순회 기반이라 텍스트 전체를 커버해야 한다.
     예외: 빈 문단은 inlines 도 빈 리스트.
     """
+    from rhwp.ir.nodes import ListItemBlock
+
     ir = parsed_hwp.to_ir()
     for block in ir.body:
-        if not isinstance(block, ParagraphBlock):
+        if not isinstance(block, (ParagraphBlock, ListItemBlock)):
             continue
         joined = "".join(r.text for r in block.inlines)
         if not block.text:
@@ -142,10 +181,12 @@ def test_inline_run_text_concatenates_to_paragraph_text(parsed_hwp: rhwp.Documen
 
 def test_inline_run_has_styled_runs(parsed_hwp: rhwp.Document):
     """실제 샘플에서 최소 하나의 InlineRun 이 raw_style_id 를 가져야 한다."""
+    from rhwp.ir.nodes import ListItemBlock
+
     ir = parsed_hwp.to_ir()
     has_styled = False
     for block in ir.body:
-        if not isinstance(block, ParagraphBlock):
+        if not isinstance(block, (ParagraphBlock, ListItemBlock)):
             continue
         if any(run.raw_style_id is not None for run in block.inlines):
             has_styled = True
@@ -157,11 +198,13 @@ def test_inline_run_has_styled_runs(parsed_hwp: rhwp.Document):
 
 
 def test_to_ir_on_hwpx_sample(parsed_hwpx: rhwp.Document):
+    from rhwp.ir.nodes import ListItemBlock
+
     ir = parsed_hwpx.to_ir()
     assert isinstance(ir, HwpDocument)
     assert len(ir.sections) == parsed_hwpx.section_count
-    para_blocks = [b for b in ir.body if isinstance(b, ParagraphBlock)]
-    assert len(para_blocks) == parsed_hwpx.paragraph_count
+    para_or_list_blocks = [b for b in ir.body if isinstance(b, (ParagraphBlock, ListItemBlock))]
+    assert len(para_or_list_blocks) == parsed_hwpx.paragraph_count
 
 
 # * to_ir_json 왕복
@@ -191,14 +234,52 @@ def test_ir_is_frozen(parsed_hwp: rhwp.Document):
         ir.body = []  # type: ignore[misc]
 
 
-# * Furniture / metadata — v0.2.0 은 전부 비어있거나 None
+# * Furniture / metadata
 
 
-def test_furniture_is_empty(parsed_hwp: rhwp.Document):
+def test_furniture_lists_have_correct_types(parsed_hwp: rhwp.Document):
+    """v0.3.0 S2 furniture 4 종 (page_headers / page_footers / footnotes / endnotes) 모두 채워질 수 있다.
+
+    채움 여부는 샘플 의존 (test_ir_furniture.py 에서 구체 검증). 본 테스트는 리스트
+    타입 일관성만 — page_headers/page_footers 의 entry 가 known Block 유니온 멤버,
+    footnotes/endnotes 는 각각 FootnoteBlock/EndnoteBlock 인스턴스.
+    """
+    from rhwp.ir.nodes import (
+        CaptionBlock,
+        EndnoteBlock,
+        FieldBlock,
+        FootnoteBlock,
+        FormulaBlock,
+        ListItemBlock,
+        PictureBlock,
+        TocBlock,
+        UnknownBlock,
+    )
+
     ir = parsed_hwp.to_ir()
-    assert ir.furniture.page_headers == []
-    assert ir.furniture.page_footers == []
-    assert ir.furniture.footnotes == []
+    assert isinstance(ir.furniture.page_headers, list)
+    assert isinstance(ir.furniture.page_footers, list)
+    assert isinstance(ir.furniture.footnotes, list)
+    assert isinstance(ir.furniture.endnotes, list)
+    # ^ 채워진 page_headers/footers entry 는 모두 known Block 유니온 멤버
+    body_block_types = (
+        ParagraphBlock,
+        TableBlock,
+        PictureBlock,
+        FormulaBlock,
+        # ^ v0.3.0 S3 추가
+        ListItemBlock,
+        CaptionBlock,
+        TocBlock,
+        FieldBlock,
+        UnknownBlock,
+    )
+    for entry in ir.furniture.page_headers + ir.furniture.page_footers:
+        assert isinstance(entry, body_block_types)
+    for fn in ir.furniture.footnotes:
+        assert isinstance(fn, FootnoteBlock)
+    for en in ir.furniture.endnotes:
+        assert isinstance(en, EndnoteBlock)
 
 
 def test_metadata_fields_are_none(parsed_hwp: rhwp.Document):
@@ -239,7 +320,8 @@ def test_hwp_document_direct_construction_allows_null_source():
     ir = HwpDocument()
     assert ir.source is None
     assert ir.schema_name == "HwpDocument"
-    assert ir.schema_version == "1.0"
+    # ^ v0.3.0 S1 부터 1.1
+    assert ir.schema_version == "1.1"
 
 
 def test_hwp_document_json_null_source_roundtrip():

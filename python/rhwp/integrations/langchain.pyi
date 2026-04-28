@@ -11,7 +11,14 @@ LoadMode = Literal["single", "paragraph", "ir-blocks"]
 class HwpLoader(BaseLoader):
     path: str
     mode: LoadMode
+    include_furniture: bool
 
-    def __init__(self, path: str, *, mode: LoadMode = "single") -> None: ...
+    def __init__(
+        self,
+        path: str,
+        *,
+        mode: LoadMode = "single",
+        include_furniture: bool = False,
+    ) -> None: ...
     def load(self) -> list[Document]: ...
     def lazy_load(self) -> Iterator[Document]: ...

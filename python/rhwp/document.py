@@ -22,8 +22,9 @@
 - ``rhwp.Document`` 인스턴스는 생성한 스레드 에서만 사용
 
 async 환경에서 파일 I/O 를 non-blocking 으로 처리하려면 :func:`aparse` 사용 —
-``aiofiles`` 가 파일 읽기만 async 로 수행하고, 파싱 (``Document.from_bytes``) 은
-호출 스레드에서 동기 실행한다. 파싱 구간의 GIL 은 Rust ``py.detach`` 가 해제.
+stdlib ``asyncio.to_thread`` 가 파일 읽기만 thread pool 에 offload 하고, 파싱
+(``Document.from_bytes``) 은 호출 스레드에서 동기 실행한다. 파싱 구간의 GIL 은
+Rust ``py.detach`` 가 해제.
 
 ### IR 캐싱
 
@@ -36,7 +37,7 @@ from typing import TYPE_CHECKING
 from rhwp._rhwp import _Document
 
 if TYPE_CHECKING:
-    from rhwp.ir.nodes import HwpDocument
+    from rhwp.ir.nodes import HwpDocument, PictureBlock
 
 
 class Document:
@@ -146,6 +147,54 @@ class Document:
         """
         return self._inner.to_ir_json(indent=indent)
 
+    def bytes_for_image(self, picture: "PictureBlock") -> bytes:
+        """``PictureBlock`` 의 ``bin://`` URI 를 raw bytes 로 해석.
+
+        IR JSON 에 image binary 가 inline 되지 않으므로 (모델은 source 보존,
+        직렬화 시점 결정), raw bytes 가 필요할 때 본 헬퍼로 접근한다.
+
+        ``data:image/...`` (embedded) 또는 ``file://...`` (external) 모드의
+        ImageRef 는 v0.4.0+ opt-in 이며 v0.3.0 시점에는 ValueError. broken
+        reference (``picture.image is None``) 도 ValueError.
+
+        Args:
+            picture: ``Document.to_ir()`` 결과 트리에서 얻은 PictureBlock.
+                다른 Document 의 PictureBlock 을 넘기면 잘못된 binary 를 반환할
+                수 있다 — bin_data_id 는 같은 문서 안에서만 유효한 인덱스다.
+
+        Returns:
+            이미지 raw bytes (PNG/JPEG/BMP/... — ``picture.image.mime_type`` 참조).
+
+        Raises:
+            ValueError: image=None (broken reference), URI 가 bin:// 스킴이 아님,
+                bin_data_id 파싱 실패, 또는 lookup 실패 (Embedding 이 아니거나
+                bin_data_content 누락).
+        """
+        if picture.image is None:
+            raise ValueError("PictureBlock.image is None (broken reference) — no bytes available")
+        uri = picture.image.uri
+        # ^ v0.3.0 S1 은 bin:// 스킴만 출고한다. embedded/external 은 직렬화
+        #   시점 모드 (v0.4.0+) — 읽기 경로에서 마주치면 명시적 에러.
+        if not uri.startswith("bin://"):
+            raise ValueError(
+                f"bytes_for_image only supports 'bin://' URIs, got {uri!r}. "
+                "embedded (data:) and external (file:) modes are v0.4.0+ opt-in."
+            )
+        try:
+            bin_data_id = int(uri[len("bin://") :])
+        except ValueError as e:
+            raise ValueError(f"invalid bin:// URI {uri!r} — expected bin://<int>") from e
+        if not 0 <= bin_data_id <= 0xFFFF:
+            raise ValueError(f"bin_data_id {bin_data_id} out of u16 range — corrupt URI {uri!r}")
+        result = self._inner.bytes_for_image_id(bin_data_id)
+        if result is None:
+            raise ValueError(
+                f"bin_data_id {bin_data_id} not found in document. "
+                "BinData may be Link/Storage type (not Embedding) or content was "
+                "not loaded by the parser."
+            )
+        return result
+
     # * Rendering
 
     def render_svg(self, page: int) -> str:
@@ -231,12 +280,17 @@ async def aparse(path: str) -> Document:
 
     ``#[pyclass(unsendable)]`` 제약 상 Document 는 스레드 경계를 넘을 수 없다.
     따라서 ``asyncio.to_thread(parse, path)`` 패턴은 panic 을 일으킨다. 대신
-    ``aiofiles`` 로 **파일 I/O 만** async 로 수행하고, bytes 파싱은 호출 스레드
-    에서 동기 실행 (GIL 은 Rust ``py.detach`` 가 해제). 이 경로는 Document
-    인스턴스를 이벤트 루프 스레드에 유지하므로 panic 이 없다.
+    파일 read 만 stdlib ``asyncio.to_thread`` 로 thread pool 에 offload 하고,
+    bytes 파싱은 호출 스레드 (event loop) 에서 동기 실행 (GIL 은 Rust
+    ``py.detach`` 가 해제). 이 경로는 Document 인스턴스를 event loop 스레드에
+    유지하므로 panic 이 없다.
 
-    ``aiofiles`` 는 optional dependency — ``pip install rhwp-python[async]`` 또는
-    ``pip install aiofiles``. 미설치 시 ``ImportError``.
+    Python ``asyncio`` 가 native async file I/O 를 미지원하는 한 모든 async
+    file lib (aiofiles 등) 도 결국 thread pool wrapping — 본 구현이 stdlib 만
+    으로 동등 효과 달성. 외부 의존성 없음.
+
+    Cancellation: thread 위 blocking read 라 한 번 시작되면 cancel 어려움 —
+    aiofiles 도 동일 한계. 단발 read 이므로 실용 영향 없음.
 
     Args:
         path: HWP 또는 HWPX 파일 경로.
@@ -245,20 +299,18 @@ async def aparse(path: str) -> Document:
         파싱된 Document. 호출 스레드에 묶인다.
 
     Raises:
-        ImportError: ``aiofiles`` 미설치.
         FileNotFoundError: 파일이 존재하지 않을 때.
         PermissionError: 파일 접근 권한이 없을 때.
         OSError: 그 외 I/O 오류.
         ValueError: 파일 포맷이 유효하지 않을 때.
     """
-    try:
-        import aiofiles
-    except ImportError as e:
-        raise ImportError(
-            "rhwp.aparse requires aiofiles. "
-            "Install via `pip install rhwp-python[async]` or `pip install aiofiles`."
-        ) from e
+    import asyncio
 
-    async with aiofiles.open(path, "rb") as f:
-        data = await f.read()
+    data = await asyncio.to_thread(_read_bytes, path)
     return Document.from_bytes(data, source_uri=path)
+
+
+def _read_bytes(path: str) -> bytes:
+    """동기 파일 read 헬퍼 — ``aparse`` 가 ``asyncio.to_thread`` 로 offload 하는 단위."""
+    with open(path, "rb") as f:
+        return f.read()

@@ -13,7 +13,7 @@
 
 - **PyPI 패키지명**: `rhwp-python`
 - **Python import**: `import rhwp`
-- **Rust 코어**: [`external/rhwp`](external/) 에 git submodule 로 고정
+- **Rust 코어**: [`edwardkim/rhwp`](https://github.com/edwardkim/rhwp)
 
 ## 왜 rhwp-python 인가
 
@@ -89,10 +89,11 @@ chunks = RecursiveCharacterTextSplitter(chunk_size=500).split_documents(docs)
 모든 Document 메타데이터: `source`, `section_count`, `paragraph_count`,
 `page_count`, `rhwp_version`. `paragraph` 모드에서는 `paragraph_index` 추가.
 
-## Document IR (v0.2.0+)
+## Document IR
 
 RAG / LLM 파이프라인이 직접 소비하는 구조화 문서 모델. Pydantic V2 모델 + JSON
-Schema (Draft 2020-12) — HWP 의 구역 / 단락 / 표 / 서식 런을 손실 없이 노출한다.
+Schema (Draft 2020-12) — HWP 의 구역 / 단락 / 표 / 그림 / 수식 / 각주 / 목록 /
+캡션 / 목차 / 필드를 손실 없이 노출한다.
 
 ```python
 from rhwp.ir.nodes import ParagraphBlock, TableBlock
@@ -122,14 +123,23 @@ docs = HwpLoader("report.hwp", mode="ir-blocks").load()
 #   para_idx / (표의 경우) rows / cols / text / caption 포함
 ```
 
-**JSON Schema** — `rhwp.ir.schema.export_schema()` 로 Draft 2020-12 스키마 생성,
-`load_schema()` 로 in-package 동봉 JSON 로드 (네트워크 불필요). `$id` 공개 URL:
-`https://danmeon.github.io/rhwp-python/schema/hwp_ir/v1/schema.json` — 불변 경로
-정책 (v1 영구). 외부 도구는 이 URL 또는 `*.hwp_ir.json` 파일명 convention 사용 가능.
+**JSON Schema** — `rhwp.ir.schema.export_schema()` / `load_schema()`. 공개 `$id`:
+`https://danmeon.github.io/rhwp-python/schema/hwp_ir/v1/schema.json` (불변 경로).
 
-미구현 블록 타입 (Picture / Formula / Footnote / ListItem / Caption / TocEntry /
-Field) 은 `UnknownBlock` catch-all 로 forward-compat — v0.3.0 에서 추가되어도
-v0.2.0 소비자가 깨지지 않는다.
+## rhwp-py CLI
+
+```bash
+pip install "rhwp-python[cli]"          # parse / version / schema / ir / blocks
+pip install "rhwp-python[cli-chunks]"    # + chunks (langchain text splitter)
+
+rhwp-py parse report.hwp
+rhwp-py blocks report.hwp --kind table --format ndjson | jq '.rows'
+rhwp-py chunks report.hwp --size 1000 --format ndjson
+```
+
+`rhwp-py` 는 구조 추출 (IR / 블록 / 청크 / 스키마) 전담 — 시각 출력 (SVG/PDF) /
+메타데이터 덤프는 상류 `rhwp` Rust 바이너리. 자세한 사용은 `rhwp-py --help`
+또는 [cli.md](docs/roadmap/v0.3.0/cli.md) 참조.
 
 ## 성능
 
@@ -147,56 +157,21 @@ Apple M2 (8 코어) release 빌드. Parse = 파일 읽기 + 전체 파싱 + Docu
 코어 수에 비례해 스케일. PDF 렌더링 자체는 `usvg` + `pdf-writer` 내부에서 CPU/allocator
 바운드라 2 ~ 3 워커에서 약 1.1× 정도만 향상됨 — 재현은 `benches/bench_gil.py` 참고.
 
-## 알려진 제약 (Phase 1)
+## 알려진 제약 / 운영 노트
 
-- `Document` 객체는 `#[pyclass(unsendable)]` — 단일 스레드 접근만 허용.
-  교차 스레드 접근 시 `RuntimeError`. 멀티스레드에선 `benches/bench_gil.py` 패턴 사용 —
-  워커 내에서 `parse + consume` 까지 완결한 뒤 원시 타입(`int`, `str`, `bytes`) 만 반환.
-- 폰트 임베딩 / 디버그 오버레이 / 페이지 메타데이터 API 없음 (Phase 2+).
-- HWP/HWPX **저장(serialization)** 미지원 — 읽기/렌더링 전용.
-- 표 / 이미지 / 수식 구조화 접근 없음 — 텍스트 추출만 지원.
-- PDF 렌더 경로가 rhwp 코어의 `[DEBUG_TAB_POS]` / `LAYOUT_OVERFLOW` 로그를
-  stdout 으로 출력. 필요 시 `grep -v -E "(DEBUG_TAB_POS|LAYOUT_OVERFLOW)"` 로 필터링.
+운영상 제약 (`Document` 의 단일 스레드 모델, async 진입점, PDF stdout 노이즈)
+및 미구현 영역 요약은 [KNOWN_ISSUES.md](KNOWN_ISSUES.md). 작업 중 / 계획 항목은
+[docs/roadmap/](docs/roadmap/README.md) 의 활성 spec 인덱스.
 
 ## 개발
 
-이 리포는 rhwp Rust 코어를 `external/rhwp` git submodule 로 소비합니다.
-
-```bash
-git clone --recurse-submodules https://github.com/DanMeon/rhwp-python
-cd rhwp-python
-
-# dev + testing + linting 툴 일괄 설치
-uv sync --no-install-project --group all
-uv run maturin develop --release
-
-# 테스트 (core + LangChain, slow PDF 제외)
-uv run pytest tests/ -m "not slow"
-
-# PDF 렌더링 테스트
-uv run pytest tests/ -m slow
-
-# 타입 체크
-uv run pyright python/ tests/
-
-# GIL 해제 벤치마크
-uv run python benches/bench_gil.py 2>&1 | grep -v -E "(DEBUG_TAB_POS|LAYOUT_OVERFLOW)"
-```
-
-clone 시 `--recurse-submodules` 를 빠뜨렸다면:
-
-```bash
-git submodule update --init --recursive
-```
-
-테스트 fixture 는 submodule 내부 `external/rhwp/samples/` 에 있으며,
-`tests/conftest.py` 가 이 경로를 참조합니다.
+소스에서 빌드·테스트·기여하는 절차는 [CONTRIBUTING.md](CONTRIBUTING.md) 참조.
 
 ## 버전 관리
 
 이 Python 패키지와 `rhwp` Rust 코어는 **독립적으로** 버저닝됩니다.
 `rhwp.version()` 은 이 패키지 버전을, `rhwp.rhwp_core_version()` 은
-고정된 submodule 에 포함된 Rust 코어의 버전을 반환합니다.
+번들된 Rust 코어 버전을 반환합니다.
 
 ## 라이선스
 

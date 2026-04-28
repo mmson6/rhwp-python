@@ -47,7 +47,18 @@ def test_escape_html_preserves_non_ascii():
 
 
 def _paragraph(text: str) -> RawParagraph:
-    return RawParagraph(section_idx=0, para_idx=0, text=text, char_runs=[], tables=[])
+    return RawParagraph(
+        section_idx=0,
+        para_idx=0,
+        text=text,
+        char_runs=[],
+        tables=[],
+        pictures=[],
+        formulas=[],
+        tocs=[],
+        fields=[],
+        list_info=None,
+    )
 
 
 def _cell(
@@ -162,7 +173,7 @@ def test_build_inline_runs_preserves_prefix_when_rest_zero_width():
 
 
 def _table(cells: list[RawCell]) -> RawTable:
-    return RawTable(rows=1, cols=1, caption=None, cells=cells)
+    return RawTable(rows=1, cols=1, caption=None, caption_block=None, cells=cells)
 
 
 def test_table_to_html_rowspan_before_colspan():

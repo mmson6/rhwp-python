@@ -41,7 +41,7 @@ v0.2.0 ir.md 의 § 스키마 버저닝 표에 따라:
 3. SchemaVersion `1.1` GA — JSON Schema in-place 갱신 + content-addressed alias 발행
 4. `Document.iter_blocks` 가 신규 kind 를 yield, `kind` 필터로 선택 가능
 5. `HwpLoader(mode="ir-blocks")` 가 신규 블록을 LangChain `Document` 로 매핑 (예: `PictureBlock` → caption + alt + URI 메타)
-6. `rhwp-py blocks --kind picture|formula|...` CLI 노출 ([cli.md](cli.md) §S2 확장)
+6. `rhwp-py blocks --kind picture|formula|...` CLI 노출 — CLI 축과의 연동은 본 spec 도입부의 phase-2 reference 참조
 7. v0.2.0 모든 공개 API 보존 — `Document.to_ir()` 시그니처 동일, 기존 필드 동일
 
 ### v0.3.0 비목표 (v0.4.0 이후)

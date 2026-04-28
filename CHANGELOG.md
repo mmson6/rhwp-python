@@ -7,6 +7,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-04-28
+
+### Changed — async API 의존성 정리
+
+- `rhwp.aparse` 가 `aiofiles` 대신 stdlib `asyncio.to_thread` 사용 — 외부 의존성 제거. `[async]` extras 키는 빈 배열로 보존 (`pip install rhwp[async]` 명령 호환 유지, v0.4.0 에서 키 자체 제거 검토). 의미·성능 동등 — Python `asyncio` 가 native async file I/O 를 미지원하는 한 모든 async file lib (aiofiles 포함) 도 결국 thread pool wrapping 이라 둘은 같은 메커니즘. CI `test-without-extras` skip count 5 → 4 (`test_async.py` 가 더 이상 gated 아님).
+
+MINOR release — Phase 2 두 축 동시 GA. v0.2.0 의 Document IR v1.0 위에 HWP 고유 의미 요소 8 종을 추가하고 (SchemaVersion 1.1), 동시에 Python 고유 가치 (IR/LangChain 청크/스키마 export) 를 shell 에서 직접 소비할 수 있는 `rhwp-py` CLI 를 재도입한다. 모든 v0.2.0 공개 API 보존 — 추가만 있고 기존 코드는 그대로 동작.
+
+상류 `edwardkim/rhwp` 커밋 핀을 `bea635b` → `033617e` 로 bump (upstream v0.6.x → v0.7.7 흡수, 380 commits). IR 확장이 사용하는 first-class struct/enum (Picture, Equation, Footnote/Endnote, Caption, Field/FieldType, Header/Footer, ParaShape) 자체는 핀 변경 전부터 노출돼 있어 IR 매핑 작업은 상류 변경에 의존하지 않는다 — bump 의 효과는 직교 영역에 한정: 렌더 경로 정정 (TypesetEngine pagination drift, TAC 표/그림 좌표 통합 수정), export text/markdown 추가 (Task #237), v0.7.6/v0.7.7 릴리즈 흡수.
+
+### Added — Document IR v1.1 (8 신규 블록 + Furniture 채움)
+
+- `PictureBlock` (S1) — 이미지. `image: ImageRef | None` (URI 스킴 `bin://<bin_data_id>` 기본), `caption: CaptionBlock | None` (S3 부터), `description: str | None` (HWP alt-text). `Document.bytes_for_image(picture)` 헬퍼로 raw bytes 해석.
+- `FormulaBlock` (S2) — 수식. `script: str` (HWP equation script raw) + `script_kind: Literal["hwp_eq", "latex", "mathml"]` + `text_alt: str | None` (RAG 폴백 평문 근사). LaTeX/MathML 자동 변환은 v0.3.0 미제공 (공개 변환기 부재).
+- `FootnoteBlock` / `EndnoteBlock` (S2) — 각주 / 미주. `blocks: list[Block]` 재귀, `marker_prov` (본문 인용 위치) 와 `prov` (각주 본문 위치) 분리. 각주/미주 본문은 `furniture.footnotes` / `endnotes` 로 라우팅 — body 검색 오염 회피.
+- `ListItemBlock` (S3) — 목록 항목. `level + marker + enumerated` 평면 모델 (group container 미도입, HWP 상류가 list group 미지원). `marker` 는 v0.3.0 placeholder (`"•"` / `"1."` / `"-"`) — 정확 marker (`"가."`, `"(a)"`) 는 v0.4.0+.
+- `CaptionBlock` (S3) — 캡션. `blocks: list[Block]` 재귀 + `direction: Literal["top", "bottom", "left", "right"]`. 부모 컨테인먼트 — `PictureBlock.caption` / `TableBlock.caption_block` 으로 1:1 부착 (ref-id 미도입). v0.2.0 `TableBlock.caption: str` 보존 + `caption_block` 옵셔널 추가.
+- `TocBlock` + `TocEntryBlock` (S3) — 목차. `entries: list[TocEntryBlock]` (TocEntryBlock 은 leaf type, Block 유니온 멤버 아님). v0.3.0 entries 는 빈 placeholder — 항목 추출은 v0.4.0+ (heading hierarchy + bookmark resolver 필요).
+- `FieldBlock` + `FieldKind` (S3) — 필드. 닫힌 `Literal` 14 종 (`date`/`crossref`/`hyperlink`/...) + `"unknown"` 안전판 + `field_type_code: int | None` (forward-compat). `FieldType::Formula` 는 `"calc"` (Equation 의 `"formula"` 와 이름 충돌 회피).
+- `Furniture` 채움 (S1+S2) — `page_headers` / `page_footers` (master_pages + Control::Header/Footer 매핑) / `footnotes` / `endnotes` 모두 실제 본문 출고. `iter_blocks(scope="furniture")` 순서: page_headers → page_footers → footnotes → endnotes (v0.2.0 furniture 순서 계약 확장).
+
+### Added — `rhwp-py` CLI 재도입
+
+v0.2.0 에서 폐기됐던 CLI 를 별도 이름 (`rhwp-py`) 으로 재도입. 상류 Rust `rhwp` 바이너리와 PATH 충돌 회피 + Python 고유 가치 (IR / LangChain) 에 집중 — 기능 중복 0.
+
+- 신규 entry point: `rhwp-py = "rhwp.cli:app"` (typer 지연 로드, 미설치 시 친절 에러 + exit 2).
+- 서브커맨드: `parse` (요약 정보) / `version` / `schema` (in-package JSON Schema) / `ir` (전체 IR JSON) / `blocks` (블록 스트림 NDJSON / JSON / text) / `chunks` (LangChain RecursiveCharacterTextSplitter 결과).
+- `blocks` 의 `--kind` enum 11 종 (`paragraph` / `table` + 8 신규 + `all`) — IR 확장 GA 와 동기.
+- `chunks --include-furniture` — `HwpLoader(mode="ir-blocks", include_furniture=True)` 와 동일 정책.
+- 글로벌 옵션 `--quiet/-q` — stderr progress 메시지 가드.
+- 새 extras: `[cli]` (typer 만), `[cli-chunks]` (typer + langchain-text-splitters).
+- 업스트림 바이너리와의 역할 분담: 구조 추출은 `rhwp-py`, 시각 출력 (SVG/PDF) / 메타데이터 덤프 (`info`/`dump`) / 라운드트립 진단 (`diag`/`ir-diff`) 은 상류 `rhwp` — overlap 0.
+
+### Added — LangChain `HwpLoader.include_furniture`
+
+- `HwpLoader(mode="ir-blocks", include_furniture=True)` — body 다음에 furniture (page_headers / page_footers / footnotes / endnotes) 도 LangChain Document 로 yield. 각 furniture Document 는 `metadata.scope="furniture"` 로 표시되어 RAG 가 body / furniture 분리 색인 가능.
+- 기본 `include_furniture=False` — v0.2.0 시절 동작 (body 만) 보존.
+- `mode="single"` / `"paragraph"` 에서는 `include_furniture` 무시 — text 추출은 항상 body 만.
+
+### Added — Schema GA + content-addressed alias
+
+- SchemaVersion `"1.0"` → `"1.1"` (in-place v1 URL — major 안의 minor 추가).
+- `_KNOWN_KINDS` 11 known kinds (10 known + UnknownBlock) — `Block` Annotated Union 11 멤버. callable Discriminator 는 O(1) lookup.
+- JSON Schema in-place 갱신 — `python/rhwp/ir/schema/hwp_ir_v1.json` (1,261 lines, 20 `$defs`).
+- Content-addressed alias `hwp_ir_v1-sha256-<hash>.json` — `publish-schema.yml` 가 매 deploy 시 hash-tagged immutable copy 를 alongside 발행. 구 hash 는 영구 보존 (SchemaStore / 외부 도구 reproducibility).
+- `_harden_unknown_variant` 가 `_KNOWN_KINDS` SSOT 를 사용 — `TocEntryBlock.kind="toc_entry"` 같은 leaf-only kind 가 not.enum 에 포함되어 라운드트립 깨지는 케이스 회피.
+
+### Documentation
+
+- `docs/roadmap/v0.3.0/ir-expansion.md` — IR 확장 spec (8 결정 사항 + research 인용).
+- `docs/roadmap/v0.3.0/cli.md` — `rhwp-py` 재도입 spec (이름 선정 + overlap=0 + extras 정책).
+- `docs/design/v0.3.0/ir-expansion-research.md` / `cli-design-research.md` — 결정 증거.
+- `docs/implementation/v0.3.0/stages/stage-{1..4}.md` — 단계별 구현 로그 (S1: Picture+Furniture, S2: Formula+Footnote/Endnote, S3: ListItem+Caption+Toc+Field, S4: Schema GA + CLI + LangChain include_furniture + 문서).
+- `README.md` — v0.3.0 신규 블록 + `rhwp-py` CLI 섹션 추가, content-addressed alias 안내.
+
+### Tests
+
+- 5 신규 IR 테스트 파일 (S1 picture+furniture, S2 formula+footnote, S3 list+caption+toc+field) + 1 CLI 테스트 파일 → 405 (S3) → S4 추가.
+- `tests/test_cli.py` — typer.testing.CliRunner 기반 smoke + 통합 (parse/version/schema/ir/blocks/chunks 전 서브커맨드 + exit code 1/2 검증 + langchain-text-splitters 미설치 monkeypatch).
+- `tests/test_langchain_loader_ir.py` 확장 — `include_furniture` 옵션 4 테스트.
+- CI `test-without-extras` skip count 4 → 5 (typer 추가).
+
+### Deferred to v0.4.0+
+
+- `ListItemBlock` 정확 marker (`"가."`, `"(a)"`) — `Numbering.level_formats` lookup.
+- `TocBlock.entries` 채움 + `target_section_idx` resolver + `is_stale` 검출.
+- `FieldBlock.cached_value` 추출 (paragraph text inline `field_ranges` 매핑 필요).
+- `InlineRun.href` 자동 채움 (Hyperlink/Bookmark Field 와 cross-link).
+- `PictureBlock` `embedded` / `external_dir` 임베딩 모드 (`Document.to_ir(image_mode=...)` 옵션).
+- `RevisionMark` (변경 이력) — 상류 미지원 (영구 비목표 후보).
+
 ## [0.2.0] — 2026-04-25
 
 MINOR release — Phase 2 착수. RAG / LLM 파이프라인이 직접 소비하는 구조화 Document IR v1 (Pydantic V2 + JSON Schema Draft 2020-12) 을 도입. 기존 `Document` / `HwpLoader` API 는 변경 없음 (backward-compatible). 상류 `edwardkim/rhwp` 커밋 핀을 `bea635b` (main HEAD) 로 갱신 — v0.1.0 의 `1636213` 이후 upstream 변경은 docs (매뉴얼 현행화 / README 동기화 / 자기검열) 만으로 코드 동작 변화 없음. BMP→PNG 재인코딩 fix (#240) 는 여전히 upstream `origin/devel` 에만 있으며 본 release pin 에 미포함 — BMP 임베딩 HWP 의 SVG/PDF 렌더링 이슈는 upstream main 머지를 대기.
@@ -134,7 +205,8 @@ The `rhwp` Rust core is consumed via git submodule pinned to upstream commit `16
 - Local `maturin build --release` wheel (3.0 MB) verified end-to-end in a clean venv: install → import → `rhwp.parse` → `HwpLoader` load. (Note: the v0.1.0 sdist exceeded PyPI's 100 MB limit and did not upload; fixed in [0.1.1](#011--2026-04-23).)
 - GitHub Actions workflow (`publish.yml`) builds Linux (x86_64 + aarch64) / macOS (x86_64 + aarch64) / Windows wheels + sdist on release publish, then uploads via PyPI Trusted Publisher (OIDC).
 
-[Unreleased]: https://github.com/DanMeon/rhwp-python/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/DanMeon/rhwp-python/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.3.0
 [0.2.0]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.2.0
 [0.1.1]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.1.1
 [0.1.0]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.1.0

@@ -38,5 +38,8 @@ coverage.xml
 # * MCP
 .serena/
 
+# * Claude Code — settings.json 은 팀 공유 (hooks 등록), local override 만 ignore
+.claude/settings.local.json
+
 # * Examples 산출물
 render_output/

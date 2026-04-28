@@ -17,7 +17,7 @@ import json
 from importlib.resources import files
 from typing import Any, Final
 
-from rhwp.ir.nodes import HwpDocument
+from rhwp.ir.nodes import _KNOWN_KINDS, HwpDocument
 
 __all__ = [
     "SCHEMA_ID",
@@ -49,30 +49,28 @@ def export_schema() -> dict[str, Any]:
 
 
 def _harden_unknown_variant(schema: dict[str, Any]) -> None:
-    """UnknownBlock 스키마에 "kind 가 known 값이 아님" 제약을 주입한다.
+    """UnknownBlock 스키마에 "kind 가 known Block 유니온 값이 아님" 제약을 주입한다.
 
     Pydantic V2 callable Discriminator 는 JSON Schema ``discriminator`` 키워드로
     표현 불가 — 기본 출력은 단순 ``oneOf`` 이라 UnknownBlock (``extra="allow"``)
     이 ParagraphBlock/TableBlock 인스턴스에도 매치되어 oneOf 가 실패한다.
-    known variant 들의 ``kind.const`` 를 모아 UnknownBlock.kind 에 ``not.enum``
-    으로 주입하면 oneOf 가 정확히 하나로 수렴한다.
+    Block 유니온 멤버의 kind 값을 ``not.enum`` 으로 주입하면 oneOf 가 정확히
+    하나로 수렴한다.
+
+    ``_KNOWN_KINDS`` (Pydantic 디스크리미네이터 SSOT) 를 직접 사용한다 — schema 내
+    ``$defs`` 의 ``kind.const`` 를 walk 하면 Block 유니온 멤버가 아닌 leaf 타입
+    (예: ``TocEntryBlock.kind="toc_entry"``) 까지 포함되어 디스크리미네이터와 schema
+    가 어긋난다 (Pydantic 은 toc_entry 를 UnknownBlock 으로 라우팅하는데 schema 가
+    not.enum 에 toc_entry 포함 → round-trip 깨짐).
     """
     defs = schema.get("$defs", {})
     unknown = defs.get("UnknownBlock")
     if not unknown:
         return
-    known_kinds: list[str] = []
-    for name, body in defs.items():
-        if name == "UnknownBlock":
-            continue
-        kind_prop = body.get("properties", {}).get("kind", {})
-        const = kind_prop.get("const")
-        if isinstance(const, str):
-            known_kinds.append(const)
-    if not known_kinds:
+    if not _KNOWN_KINDS:
         return
     kind_schema = unknown.setdefault("properties", {}).setdefault("kind", {})
-    kind_schema["not"] = {"enum": sorted(known_kinds)}
+    kind_schema["not"] = {"enum": sorted(_KNOWN_KINDS)}
 
 
 def load_schema() -> dict[str, Any]:

@@ -46,16 +46,31 @@ Issues = "https://github.com/DanMeon/rhwp-python/issues"
 Upstream = "https://github.com/edwardkim/rhwp"
 
 [project.optional-dependencies]
-langchain = ["langchain-core>=0.2"]
-# ^ aparse() 가 aiofiles.open 으로 파일 I/O 를 async 처리하기 위해 필요.
-#   미설치 시 aparse 호출 시점에 ImportError — sync 경로 (parse) 는 무관
-async = ["aiofiles>=23"]
-# ^ examples 는 01~03 예제 스크립트 일괄 실행용 우산 extras — typer + langchain-core + text-splitters 합집합
+# ^ v0.3.0+: text-splitters 는 RAG 사용처에서 거의 항상 동반되므로 [langchain] 에
+#   포함하여 [cli,langchain] 조합으로도 chunks 서브커맨드가 작동한다.
+langchain = ["langchain-core>=0.2", "langchain-text-splitters>=0.2"]
+# ^ v0.3.0 부터 aparse() 가 stdlib asyncio.to_thread 사용 — aiofiles 의존성 제거.
+#   `pip install rhwp[async]` 명령 호환을 위해 빈 배열 유지 (v0.4.0 에서 키 자체 제거 검토).
+async = []
+# ^ rhwp-py CLI (v0.3.0+). chunks 서브커맨드는 별도 [cli-chunks] 또는 [cli,langchain] 조합 필요
+cli = ["typer>=0.12"]
+# ^ rhwp-py chunks 서브커맨드 — RecursiveCharacterTextSplitter 사용
+cli-chunks = [
+    "typer>=0.12",
+    "langchain-core>=0.2",
+    "langchain-text-splitters>=0.2",
+]
+# ^ examples 는 01~05 예제 스크립트 일괄 실행용 우산 extras — typer + langchain-core + text-splitters 합집합
 examples = [
     "typer>=0.12",
     "langchain-core>=0.2",
     "langchain-text-splitters>=0.2",
 ]
+
+[project.scripts]
+# ^ Entry point — typer 미설치 시 rhwp.cli.app() 가 친절 에러 + exit 2.
+#   이름은 cli.md § 이름 선정 ("rhwp-py" 채택, 상류 rhwp 와 PATH 충돌 회피)
+rhwp-py = "rhwp.cli:app"
 
 [dependency-groups]
 dev = ["maturin>=1.7"]
@@ -67,8 +82,8 @@ testing = [
     "langchain-text-splitters>=0.2",
     # ^ JSON Schema meta-validation (tests/test_ir_schema_export.py)
     "jsonschema>=4",
-    # ^ aparse() 경로 검증 — aiofiles.open + Document.from_bytes 조합
-    "aiofiles>=23",
+    # ^ rhwp-py CLI smoke / integration tests (tests/test_cli.py)
+    "typer>=0.12",
 ]
 linting = [
     {include-group = "dev"},
@@ -126,3 +141,9 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# ^ typer 의 권장 패턴: 함수 default 로 typer.Argument(...) / typer.Option(...) 호출.
+#   B008 (function call in default arg) 와 충돌하나 typer 가 의도한 사용처라 ignore.
+"python/rhwp/cli/*.py" = ["B008"]
+"examples/*.py" = ["B008"]

@@ -144,3 +144,36 @@ def test_ir_blocks_preserves_iter_blocks_order(hwpx_sample: Path) -> None:
 def test_invalid_mode_still_rejects_after_ir_addition(hwp_sample: Path) -> None:
     with pytest.raises(ValueError, match="mode"):
         HwpLoader(str(hwp_sample), mode="page")  # type: ignore[arg-type]
+
+
+# * include_furniture (v0.3.0 S4 신규)
+
+
+def test_include_furniture_default_false(hwp_sample: Path) -> None:
+    loader = HwpLoader(str(hwp_sample), mode="ir-blocks")
+    assert loader.include_furniture is False
+
+
+def test_include_furniture_yields_extra_documents(hwp_sample: Path) -> None:
+    """include_furniture=True 면 body 다음에 furniture Document 가 추가 yield 된다."""
+    body_only = HwpLoader(str(hwp_sample), mode="ir-blocks", include_furniture=False).load()
+    with_furn = HwpLoader(str(hwp_sample), mode="ir-blocks", include_furniture=True).load()
+    # ^ furniture 가 비어있는 샘플도 body_only ≤ with_furn 가 invariant
+    assert len(with_furn) >= len(body_only)
+
+
+def test_include_furniture_marks_scope_metadata(hwp_sample: Path) -> None:
+    """furniture Document 는 metadata.scope == 'furniture', body 는 키 없음."""
+    docs = HwpLoader(str(hwp_sample), mode="ir-blocks", include_furniture=True).load()
+    for d in docs:
+        scope = d.metadata.get("scope")
+        # ^ body 는 scope 키 부재 (None), furniture 만 'furniture'
+        assert scope in (None, "furniture")
+
+
+def test_include_furniture_ignored_in_paragraph_mode(hwp_sample: Path) -> None:
+    """paragraph 모드는 include_furniture 무관하게 동일 결과 (옵션은 ir-blocks 전용)."""
+    a = HwpLoader(str(hwp_sample), mode="paragraph", include_furniture=False).load()
+    b = HwpLoader(str(hwp_sample), mode="paragraph", include_furniture=True).load()
+    assert len(a) == len(b)
+    assert [d.page_content for d in a] == [d.page_content for d in b]

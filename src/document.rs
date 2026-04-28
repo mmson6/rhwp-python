@@ -182,6 +182,10 @@ impl PyDocument {
         }
         // ^ Rust 는 raw 평탄 구조만 출고. 도메인 변환 (HTML/role/Pydantic 합성)
         //   은 rhwp.ir._mapper 가 담당 — IR 진화 시 maturin rebuild 회피.
+        //   GIL 해제 불가: self.inner (DocumentCore) 가 RefCell 캐시로 !Sync —
+        //   closure 가 &self 를 캡처하면 py.detach 의 Ungil 바운드 불만족.
+        //   parse 단계 (from_bytes — owned bytes) 와 render_pdf/export_pdf
+        //   (owned svgs) 만 GIL 해제 가능.
         let raw = ir::build_raw_document(self.inner.document(), self.source_uri.as_deref());
         let mapper = py.import("rhwp.ir._mapper")?;
         let ir = mapper.call_method1("build_hwp_document", (raw,))?.unbind();
@@ -193,6 +197,21 @@ impl PyDocument {
             .get()
             .expect("ir_cache was just set")
             .clone_ref(py))
+    }
+
+    /// `bin_data_id` (1-based) 에 해당하는 이미지 raw bytes 를 반환.
+    ///
+    /// `Document.bytes_for_image(picture)` Python 헬퍼가 ``picture.image.uri`` 의
+    /// ``bin://`` 스킴을 파싱한 결과를 본 메서드에 위임한다. 상류 BinData 가
+    /// Embedding 타입이 아니거나 (Link/Storage) `bin_data_content` 에 누락된
+    /// 경우 None — Python wrapper 가 ValueError 로 변환.
+    fn bytes_for_image_id<'py>(
+        &self,
+        py: Python<'py>,
+        bin_data_id: u16,
+    ) -> PyResult<Option<Bound<'py, PyBytes>>> {
+        Ok(ir::lookup_bin_data_bytes(self.inner.document(), bin_data_id)
+            .map(|bytes| PyBytes::new(py, bytes)))
     }
 
     /// IR 을 JSON 문자열로 반환한다. `to_ir()` 캐시를 공유한다.
