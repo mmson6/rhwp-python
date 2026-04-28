@@ -125,6 +125,17 @@ Living  ───→  Active  ───→  Draft  ───→  Frozen
 
 오타·깨진 링크·외부 URL 변경 같은 비-의미 변경은 in-place 가능 (Last updated 갱신).
 
+## Implementation log 구조
+
+`docs/implementation/vX.Y.Z/` 안의 두 종류 분류:
+
+- `stages/stage-N.md` — 해당 release 의 spec § 구현 스테이지 분할 에 명시된 작업 (대규모, 다단계). spec 의 stage 표와 1:1 mapping
+- `<topic>.md` (직속 평면) — spec 없는 작은 작업 (refactor / chore / perf / dep bump 등). 결정 비교 (a/b/c 옵션) 가치 있어 CHANGELOG 한 줄로 부족할 때만 작성. branch prefix `<type>/<topic>` 와 1:1 mapping (예: branch `refactor/aparse-stdlib` → log `aparse-cleanup.md`)
+
+CHANGELOG 한 줄로 충분한 변경 (typo 정리, 단순 dep bump, 작은 docstring 갱신 등) 은 파일 작성 안 함 — git log + CHANGELOG 가 SSOT.
+
+미래 ad-hoc note 가 5개 이상 모이면 그때 `chores/` 디렉토리화 검토 (YAGNI). 본 패턴 = spec-driven AI coding 진영의 "결정 보존 — 미래 세션 reconstruct 회피" trend (MADR / Cline `decisions.md` / OpenSpec) 와 정합.
+
 ## Archive 정책 (v1.0+)
 
 Major release GA 시점에 직전 major 의 frozen spec 들을 archive 디렉토리로 이동한다 — README 인덱스 비대화 / 검색 노이즈 완화. 파일 이동만, 본문 변경 없음.
