@@ -83,7 +83,9 @@ if not any(rel_str.startswith(p) for p in HISTORICAL_FROZEN):
 
 
 # * 3. Same-version spec ↔ spec direct link (pair files exempted)
-m = re.match(r"docs/(roadmap|design)/(v[\d.]+(?:\.[\d.]+)*)/(.+)\.md$", rel_str)
+# ^ SemVer 정확 매칭 (vMAJOR.MINOR.PATCH) — 이전의 [\d.]+ 기반은 catastrophic
+#   backtracking 위험 (CodeQL py/redos). v0.3.0 / v0.3.1 등 모두 cover.
+m = re.match(r"docs/(roadmap|design)/(v\d+\.\d+\.\d+)/(.+)\.md$", rel_str)
 if m:
     base = m.group(3)
     pair_topic = base.removesuffix("-research")
