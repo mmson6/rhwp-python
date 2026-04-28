@@ -296,3 +296,27 @@ def test_chunks_missing_file_exit_1(tmp_path: Path) -> None:
     pytest.importorskip("langchain_text_splitters")
     result = _run("chunks", str(tmp_path / "missing.hwp"))
     assert result.exit_code == 1
+
+
+# * footnote/caption 평문화 회귀 — ListItemBlock 누락 방지 (--format text)
+#
+# ``rhwp.ir._plain_text.join_inline_blocks`` 도입 전에는 footnote/caption 안의
+# ListItemBlock 이 평문에 포함되지 않았다. CLI ``--format text`` 도 동일한 누락이
+# 있었으므로 같은 회귀를 가드한다.
+
+
+def test_block_to_text_includes_list_items_in_footnote() -> None:
+    from rhwp.cli.ir import _block_to_text
+    from rhwp.ir.nodes import FootnoteBlock, ListItemBlock, ParagraphBlock, Provenance
+
+    prov = Provenance(section_idx=0, para_idx=0)
+    footnote = FootnoteBlock(
+        number=1,
+        marker_prov=prov,
+        prov=prov,
+        blocks=[
+            ParagraphBlock(text="참고:", prov=prov),
+            ListItemBlock(text="첫째", marker="1.", enumerated=True, prov=prov),
+        ],
+    )
+    assert _block_to_text(footnote) == "참고:\n1. 첫째"

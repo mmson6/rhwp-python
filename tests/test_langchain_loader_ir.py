@@ -176,3 +176,63 @@ def test_include_furniture_ignored_in_paragraph_mode(hwp_sample: Path) -> None:
     b = HwpLoader(str(hwp_sample), mode="paragraph", include_furniture=True).load()
     assert len(a) == len(b)
     assert [d.page_content for d in a] == [d.page_content for d in b]
+
+
+# * footnote/endnote/caption 평문화 회귀 — ListItemBlock 누락 방지
+#
+# 이전 구현은 inner blocks 중 ParagraphBlock 만 평문에 포함 → 각주 안의 list 가 통째로
+# 누락. 헬퍼 (`rhwp.ir._plain_text.join_inline_blocks`) 로 통합되며 ListItemBlock /
+# FormulaBlock / FieldBlock 도 포함. 본 회귀 테스트는 sample 의 footnote 구조에 의존
+# 하지 않도록 private 헬퍼 `_block_to_content_and_meta` 를 직접 호출한다.
+
+
+def test_footnote_with_list_items_includes_them_in_content() -> None:
+    # ^ langchain.pyi stub 이 public class (HwpLoader) 만 노출 — module-level
+    #   private helper 는 stub 누락이지만 .py 에 존재. pyright 가 stub 우선이라
+    #   reportAttributeAccessIssue 발생, 본 회귀 테스트 한정으로 ignore.
+    from rhwp.integrations.langchain import (
+        _block_to_content_and_meta,  # pyright: ignore[reportAttributeAccessIssue]
+    )
+    from rhwp.ir.nodes import FootnoteBlock, ListItemBlock, ParagraphBlock, Provenance
+
+    prov = Provenance(section_idx=0, para_idx=0)
+    footnote = FootnoteBlock(
+        number=1,
+        marker_prov=prov,
+        prov=prov,
+        blocks=[
+            ParagraphBlock(text="참고 문헌:", prov=prov),
+            ListItemBlock(text="첫째 출처", marker="1.", enumerated=True, prov=prov),
+            ListItemBlock(text="둘째 출처", marker="2.", enumerated=True, prov=prov),
+        ],
+    )
+    content, meta = _block_to_content_and_meta(footnote)
+    assert content == "참고 문헌:\n1. 첫째 출처\n2. 둘째 출처"
+    assert meta["kind"] == "footnote"
+
+
+def test_caption_with_formula_and_field_includes_them() -> None:
+    from rhwp.integrations.langchain import (
+        _block_to_content_and_meta,  # pyright: ignore[reportAttributeAccessIssue]
+    )
+    from rhwp.ir.nodes import (
+        CaptionBlock,
+        FieldBlock,
+        FormulaBlock,
+        ParagraphBlock,
+        Provenance,
+    )
+
+    prov = Provenance(section_idx=0, para_idx=0)
+    caption = CaptionBlock(
+        blocks=[
+            ParagraphBlock(text="<그림 1>", prov=prov),
+            FormulaBlock(script="E=mc^2", text_alt=None, prov=prov),
+            FieldBlock(field_kind="date", cached_value="2026-04-28", prov=prov),
+        ],
+        direction="bottom",
+        prov=prov,
+    )
+    content, meta = _block_to_content_and_meta(caption)
+    assert content == "<그림 1>\nE=mc^2\n2026-04-28"
+    assert meta["kind"] == "caption"

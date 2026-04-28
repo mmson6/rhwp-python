@@ -26,6 +26,7 @@ from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
 
 import rhwp
+from rhwp.ir._plain_text import join_inline_blocks
 from rhwp.ir.nodes import (
     Block,
     CaptionBlock,
@@ -185,7 +186,9 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
         #   caption 은 v0.2.0 호환 평문 우선, 없으면 caption_block.blocks 평문 폴백
         #   (PictureBlock 분기와 대칭 — caption 정보 손실 회피).
         caption_text = block.caption or (
-            _caption_plain_text(block.caption_block) if block.caption_block is not None else None
+            join_inline_blocks(block.caption_block.blocks)
+            if block.caption_block is not None
+            else None
         )
         return block.html, {
             "kind": "table",
@@ -200,7 +203,7 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
         # ^ caption.blocks 평문 우선 (S3 구조화), 없으면 description (S1 호환).
         #   image meta 는 RAG 가 picture 를 별도 색인할 때 활용. 빈 content 는
         #   lazy_load 상위에서 strip 후 skip.
-        caption_text = _caption_plain_text(block.caption) if block.caption is not None else ""
+        caption_text = join_inline_blocks(block.caption.blocks) if block.caption is not None else ""
         content = caption_text or (block.description or "")
         meta: dict[str, Any] = {
             "kind": "picture",
@@ -222,11 +225,11 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
             "inline": block.inline,
         }
     if isinstance(block, (FootnoteBlock, EndnoteBlock)):
-        # ^ 각주/미주 본문 paragraphs 의 평문을 합쳐 content 로. marker_prov 는 본문 인용
-        #   위치를 별도 메타로 노출 — RAG 가 "이 각주는 어디 paragraph 에서 인용됐나" 역추적
-        text_parts = [b.text for b in block.blocks if isinstance(b, ParagraphBlock) and b.text]
+        # ^ 각주/미주 본문의 인라인-스러운 블록 (Paragraph/ListItem/Formula/Field) 평문을
+        #   결합. marker_prov 는 본문 인용 위치를 별도 메타로 노출 — RAG 가 "이 각주는
+        #   어디 paragraph 에서 인용됐나" 역추적.
         kind_label = "footnote" if isinstance(block, FootnoteBlock) else "endnote"
-        return "\n".join(text_parts), {
+        return join_inline_blocks(block.blocks), {
             "kind": kind_label,
             "section_idx": block.prov.section_idx,
             "para_idx": block.prov.para_idx,
@@ -248,7 +251,7 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
     if isinstance(block, CaptionBlock):
         # ^ 단독 CaptionBlock 은 거의 없음 (Picture/Table 자식). 명시적으로 body 에
         #   넣은 사용자 경로만 — direction 메타로 노출.
-        return _caption_plain_text(block), {
+        return join_inline_blocks(block.blocks), {
             "kind": "caption",
             "section_idx": block.prov.section_idx,
             "para_idx": block.prov.para_idx,
@@ -283,23 +286,3 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
         "section_idx": block.prov.section_idx,
         "para_idx": block.prov.para_idx,
     }
-
-
-def _caption_plain_text(caption: CaptionBlock) -> str:
-    """CaptionBlock.blocks 의 텍스트 표현을 개행 결합 (S3 신규 헬퍼).
-
-    포함 대상: ParagraphBlock.text + FormulaBlock.text_alt|script + FieldBlock.cached_value.
-    캡션 안의 수식·필드도 평문 흐름의 일부 (spec § 5 "캡션 안의 인라인 수식·필드도
-    자연스럽게 표현") — RAG 색인에 자연 포함. 표/그림 등 구조 블록은 별도 색인.
-    """
-    parts: list[str] = []
-    for b in caption.blocks:
-        if isinstance(b, ParagraphBlock) and b.text:
-            parts.append(b.text)
-        elif isinstance(b, FormulaBlock):
-            text = b.text_alt or b.script
-            if text:
-                parts.append(text)
-        elif isinstance(b, FieldBlock) and b.cached_value:
-            parts.append(b.cached_value)
-    return "\n".join(parts)

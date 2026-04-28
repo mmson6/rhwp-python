@@ -17,6 +17,7 @@ import typer
 
 import rhwp
 from rhwp.cli._state import is_quiet
+from rhwp.ir._plain_text import join_inline_blocks
 from rhwp.ir.nodes import (
     Block,
     CaptionBlock,
@@ -113,9 +114,7 @@ def register_ir_commands(app: typer.Typer) -> None:
             "--format",
             help="출력 포맷 (ndjson/json/text).",
         ),
-        limit: int | None = typer.Option(
-            None, "--limit", help="최대 출고 개수 (None = 전체)."
-        ),
+        limit: int | None = typer.Option(None, "--limit", help="최대 출고 개수 (None = 전체)."),
     ) -> None:
         if not path.exists():
             typer.echo(f"file not found: {path}", err=True)
@@ -188,18 +187,16 @@ def _block_to_text(block: Block) -> str:
         return block.text
     if isinstance(block, PictureBlock):
         if block.caption is not None:
-            cap = _caption_plain(block.caption)
+            cap = join_inline_blocks(block.caption.blocks)
             if cap:
                 return cap
         return block.description or ""
     if isinstance(block, FormulaBlock):
         return block.text_alt or block.script
-    if isinstance(block, (FootnoteBlock, EndnoteBlock)):
-        return "\n".join(b.text for b in block.blocks if isinstance(b, ParagraphBlock) and b.text)
+    if isinstance(block, (FootnoteBlock, EndnoteBlock, CaptionBlock)):
+        return join_inline_blocks(block.blocks)
     if isinstance(block, ListItemBlock):
         return f"{block.marker} {block.text}".strip()
-    if isinstance(block, CaptionBlock):
-        return _caption_plain(block)
     if isinstance(block, TocBlock):
         return "\n".join(e.text for e in block.entries if e.text)
     if isinstance(block, FieldBlock):
@@ -207,21 +204,3 @@ def _block_to_text(block: Block) -> str:
     # ^ 새 Block variant 추가 시 위 분기를 먼저 확장 — UnknownBlock 폴백은 빈 텍스트
     assert isinstance(block, UnknownBlock)
     return ""
-
-
-def _caption_plain(caption: CaptionBlock) -> str:
-    """CaptionBlock.blocks 평문 추출 — Paragraph + Formula(text_alt|script) 결합.
-
-    LangChain loader (_caption_plain_text) 와 의도적 동일 정책 — RAG 일관성 보존.
-    """
-    parts: list[str] = []
-    for b in caption.blocks:
-        if isinstance(b, ParagraphBlock) and b.text:
-            parts.append(b.text)
-        elif isinstance(b, FormulaBlock):
-            text = b.text_alt or b.script
-            if text:
-                parts.append(text)
-        elif isinstance(b, FieldBlock) and b.cached_value:
-            parts.append(b.cached_value)
-    return "\n".join(parts)
