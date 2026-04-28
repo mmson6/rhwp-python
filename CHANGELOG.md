@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 MINOR release — Phase 2 두 축 동시 GA. v0.2.0 의 Document IR v1.0 위에 HWP 고유 의미 요소 8 종을 추가하고 (SchemaVersion 1.1), 동시에 Python 고유 가치 (IR/LangChain 청크/스키마 export) 를 shell 에서 직접 소비할 수 있는 `rhwp-py` CLI 를 재도입한다. 모든 v0.2.0 공개 API 보존 — 추가만 있고 기존 코드는 그대로 동작.
 
-상류 `edwardkim/rhwp` 커밋 핀은 v0.2.0 그대로 (`bea635b`) — IR 확장은 상류가 이미 노출하는 first-class struct/enum (Picture, Equation, Footnote/Endnote, Caption, Field/FieldType, Header/Footer, ParaShape) 의 매핑을 채우는 작업이며 상류 변경 없이 가능했다.
+상류 `edwardkim/rhwp` 커밋 핀을 `bea635b` → `033617e` 로 bump (upstream v0.6.x → v0.7.7 흡수, 380 commits). IR 확장이 사용하는 first-class struct/enum (Picture, Equation, Footnote/Endnote, Caption, Field/FieldType, Header/Footer, ParaShape) 자체는 핀 변경 전부터 노출돼 있어 IR 매핑 작업은 상류 변경에 의존하지 않는다 — bump 의 효과는 직교 영역에 한정: 렌더 경로 정정 (TypesetEngine pagination drift, TAC 표/그림 좌표 통합 수정), export text/markdown 추가 (Task #237), v0.7.6/v0.7.7 릴리즈 흡수.
 
 ### Added — Document IR v1.1 (8 신규 블록 + Furniture 채움)
 

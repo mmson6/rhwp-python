@@ -182,6 +182,10 @@ impl PyDocument {
         }
         // ^ Rust 는 raw 평탄 구조만 출고. 도메인 변환 (HTML/role/Pydantic 합성)
         //   은 rhwp.ir._mapper 가 담당 — IR 진화 시 maturin rebuild 회피.
+        //   GIL 해제 불가: self.inner (DocumentCore) 가 RefCell 캐시로 !Sync —
+        //   closure 가 &self 를 캡처하면 py.detach 의 Ungil 바운드 불만족.
+        //   parse 단계 (from_bytes — owned bytes) 와 render_pdf/export_pdf
+        //   (owned svgs) 만 GIL 해제 가능.
         let raw = ir::build_raw_document(self.inner.document(), self.source_uri.as_deref());
         let mapper = py.import("rhwp.ir._mapper")?;
         let ir = mapper.call_method1("build_hwp_document", (raw,))?.unbind();

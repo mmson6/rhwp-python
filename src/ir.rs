@@ -209,7 +209,9 @@ pub(crate) struct RawDocument {
 /// `py.detach()` 로 GIL 을 해제할 수 있다. 결과 반환 시점에 PyO3 derive 가
 /// 한 번에 PyDict 트리로 변환한다.
 pub(crate) fn build_raw_document(doc: &Document, source_uri: Option<&str>) -> RawDocument {
-    let mut paragraphs = Vec::new();
+    // ^ 총 단락 수 사전 계산으로 push 중 realloc 을 회피 — 큰 문서에서 의미 있음.
+    let total_paras: usize = doc.sections.iter().map(|s| s.paragraphs.len()).sum();
+    let mut paragraphs = Vec::with_capacity(total_paras);
     let mut acc = FurnitureAcc::default();
     for (section_idx, section) in doc.sections.iter().enumerate() {
         for (para_idx, para) in section.paragraphs.iter().enumerate() {
