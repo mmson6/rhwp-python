@@ -10,27 +10,6 @@ Project-specific instructions. Inherits all rules from `~/.claude/CLAUDE.md` (gl
 - **License**: MIT — dual copyright (Edward Kim for rhwp core, DanMeon for bindings). Both LICENSE files are bundled in the wheel (`license-files = ["LICENSE", "external/rhwp/LICENSE"]`)
 - **Status**: unofficial community package. The `rhwp` name on PyPI is intentionally left for the upstream maintainer
 
-## Quick start
-
-```bash
-git clone --recurse-submodules https://github.com/DanMeon/rhwp-python
-cd rhwp-python
-uv sync --no-install-project --group all
-uv run maturin develop --release
-uv run pytest -m "not slow"
-```
-
-If the repo is already cloned without submodules: `git submodule update --init --recursive`.
-
-## Quality checks
-
-- `uv run ruff format python/ tests/ benches/` — format
-- `uv run ruff check python/ tests/ benches/` — lint
-- `uv run pyright python/ tests/` — type check
-- `cargo clippy --all-targets -- -D warnings` — Rust lint (run after any `src/*.rs` change)
-
-Autolint hook (`~/.claude/hooks/autolint.js`) runs ruff/pyright on edited files automatically; the commands above are for cross-file / cold checks.
-
 ## Global rules inherited
 
 All rules from `~/.claude/CLAUDE.md` apply. This file adds only project-specific details — do not restate global rules here.
@@ -38,9 +17,13 @@ All rules from `~/.claude/CLAUDE.md` apply. This file adds only project-specific
 ## Project-specific rules
 
 ### Rust + Python hybrid build
-- After any Rust change (`src/*.rs`): `uv run maturin develop --release` before `pytest`. Without it, tests run against the stale binary
+- After any Rust change (`src/*.rs`): `uv run maturin develop --release` before `pytest` (without it, tests run against the stale binary), and `cargo clippy --all-targets -- -D warnings` for lint
+- `external/rhwp/` is upstream-owned. Never edit it locally — file an issue / PR against [edwardkim/rhwp](https://github.com/edwardkim/rhwp) instead
 - PyO3 `#[pyclass(unsendable)]`: `_Document` is bound to its creation thread (upstream `DocumentCore` holds `RefCell` fields — `!Sync`). Same-thread worker pattern (`parse + consume + return primitives` inside one thread) works; `asyncio.to_thread(rhwp.parse, path)` does NOT — the Future resolves on the main thread and first attribute access panics with `_rhwp::document::PyDocument is unsendable, but sent to another thread`
-- GIL release via `py.detach` in `_Document::from_bytes` / `render_pdf()` / `export_pdf()` — keep this pattern when adding new CPU/IO-bound methods
+- GIL release via `py.detach` — apply selectively, not blanket:
+  - **Release** for ≥1 ms CPU/IO-bound work that touches only Rust-side data (parse, render, decode, compress, file read). Current sites: `_Document::from_bytes` / `render_pdf()` / `export_pdf()`. When adding new methods of this shape, follow the same pattern
+  - **Don't release** for trivial getters, short attribute access, or hot paths that frequently call back into Python — the `detach`/`attach` round-trip cost exceeds the gain, and may slow things down
+  - **When unsure**, measure with the `benches/bench_gil.py` pattern (with vs without `py.detach` wall-clock comparison) before committing
 - `abi3-py310` feature: **one wheel covers 3.10–3.13+**. Don't bind to Python version-specific C API
 
 ### Async direction
@@ -66,10 +49,11 @@ All rules from `~/.claude/CLAUDE.md` apply. This file adds only project-specific
 
 ### Versioning / release
 - Git tags `vX.Y.Z`, SemVer, MINOR-sized increments
+- **Cargo.toml is the version source of truth** via `dynamic = ["version"]` in pyproject.toml. Always bump Cargo.toml before tagging — `publish.yml`'s `verify-version` aborts on mismatch
 - **No breaking changes across Phase boundaries** (Phase 1 → 2 must keep existing APIs)
 - Release trigger: GitHub Release `published` event fires `publish.yml`. Draft releases don't trigger
-- `publish.yml` runs `verify-version` — Cargo.toml `version` must match the tag or publish aborts. Always bump Cargo.toml before tagging
 - Every release records the `external/rhwp` submodule commit hash in CHANGELOG
+- Integration-only runtime deps (LangChain, typer, jsonschema) belong in `[project.optional-dependencies]`, never `[project] dependencies` — keeps the core wheel dependency-free
 
 ### Documentation
 Authoritative policy is `docs/CONVENTIONS.md` — read it before any docs work. Active spec index SSOT is `docs/roadmap/README.md`.
@@ -86,27 +70,3 @@ Hard rules (auto-applied without further instruction):
 - `secrets.GITHUB_TOKEN` is injected automatically; don't try to "register" it
 - Workflow permissions stay minimal. `publish.yml` declares `id-token: write` at the job level only
 
-## Directory layout
-
-```
-.
-├── src/                    Rust bindings (lib.rs + document/errors/version.rs)
-├── python/rhwp/            Python package
-│   ├── __init__.py(.pyi)
-│   ├── py.typed
-│   └── integrations/langchain.py(.pyi)
-├── tests/                  pytest — conftest reads external/rhwp/samples
-├── benches/bench_gil.py    GIL-release benchmark
-├── examples/               typer-based usage samples (extras: [examples])
-├── external/rhwp/          git submodule — pinned upstream commit
-└── docs/                   4-axis documentation
-```
-
-## Common mistakes to avoid
-
-- Forgetting `--recurse-submodules` on clone → samples missing. Fix: `git submodule update --init --recursive`
-- Forgetting `maturin develop --release` after Rust changes → tests run against stale binary
-- Changing `tests/conftest.py` sample path without updating `benches/bench_gil.py`
-- Adding a runtime dependency to `[project] dependencies` when it belongs in `[project.optional-dependencies]` (LangChain, typer currently gated as extras)
-- Bumping the version only in `pyproject.toml` — **Cargo.toml is the source of truth** via `dynamic = ["version"]`
-- Modifying `external/rhwp/` directly — it's upstream-owned. Upstream PRs only
