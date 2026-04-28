@@ -194,10 +194,14 @@ def test_iter_blocks_recurse_yields_more_on_real_sample(parsed_hwpx: rhwp.Docume
 def test_iter_blocks_yields_only_known_block_types(parsed_hwpx: rhwp.Document):
     ir = parsed_hwpx.to_ir()
     from rhwp.ir.nodes import (
+        CaptionBlock,
         EndnoteBlock,
+        FieldBlock,
         FootnoteBlock,
         FormulaBlock,
+        ListItemBlock,
         PictureBlock,
+        TocBlock,
         UnknownBlock,
     )
 
@@ -211,6 +215,11 @@ def test_iter_blocks_yields_only_known_block_types(parsed_hwpx: rhwp.Document):
                 FormulaBlock,
                 FootnoteBlock,
                 EndnoteBlock,
+                # ^ v0.3.0 S3 추가
+                ListItemBlock,
+                CaptionBlock,
+                TocBlock,
+                FieldBlock,
                 UnknownBlock,
             ),
         )

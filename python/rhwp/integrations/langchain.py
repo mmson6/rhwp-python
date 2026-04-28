@@ -28,12 +28,16 @@ from langchain_core.documents import Document
 import rhwp
 from rhwp.ir.nodes import (
     Block,
+    CaptionBlock,
     EndnoteBlock,
+    FieldBlock,
     FootnoteBlock,
     FormulaBlock,
+    ListItemBlock,
     ParagraphBlock,
     PictureBlock,
     TableBlock,
+    TocBlock,
     UnknownBlock,
 )
 
@@ -152,7 +156,12 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
             "char_end": block.prov.char_end,
         }
     if isinstance(block, TableBlock):
-        # ^ HTML 을 page_content 로 — LLM 에 구조 정보 제공. 검색 색인용 평문은 메타로 노출
+        # ^ HTML 을 page_content 로 — LLM 에 구조 정보 제공. 검색 색인용 평문은 메타로 노출.
+        #   caption 은 v0.2.0 호환 평문 우선, 없으면 caption_block.blocks 평문 폴백
+        #   (PictureBlock 분기와 대칭 — caption 정보 손실 회피).
+        caption_text = block.caption or (
+            _caption_plain_text(block.caption_block) if block.caption_block is not None else None
+        )
         return block.html, {
             "kind": "table",
             "section_idx": block.prov.section_idx,
@@ -160,12 +169,14 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
             "rows": block.rows,
             "cols": block.cols,
             "text": block.text,
-            "caption": block.caption,
+            "caption": caption_text,
         }
     if isinstance(block, PictureBlock):
-        # ^ description (HWP alt-text) 을 page_content 로 — 빈 description 은 lazy_load
-        #   상위에서 strip 후 skip. image meta 는 RAG 가 picture 를 별도 색인할 때 활용
-        content = block.description or ""
+        # ^ caption.blocks 평문 우선 (S3 구조화), 없으면 description (S1 호환).
+        #   image meta 는 RAG 가 picture 를 별도 색인할 때 활용. 빈 content 는
+        #   lazy_load 상위에서 strip 후 skip.
+        caption_text = _caption_plain_text(block.caption) if block.caption is not None else ""
+        content = caption_text or (block.description or "")
         meta: dict[str, Any] = {
             "kind": "picture",
             "section_idx": block.prov.section_idx,
@@ -198,6 +209,47 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
             "marker_section_idx": block.marker_prov.section_idx,
             "marker_para_idx": block.marker_prov.para_idx,
         }
+    if isinstance(block, ListItemBlock):
+        # ^ marker + " " + text 로 합쳐 content — RAG 가 항목 단위로 색인 가능.
+        #   level/enumerated 는 청킹 시 hierarchy 보존 단서로 사용.
+        content = f"{block.marker} {block.text}".strip()
+        return content, {
+            "kind": "list_item",
+            "section_idx": block.prov.section_idx,
+            "para_idx": block.prov.para_idx,
+            "level": block.level,
+            "enumerated": block.enumerated,
+        }
+    if isinstance(block, CaptionBlock):
+        # ^ 단독 CaptionBlock 은 거의 없음 (Picture/Table 자식). 명시적으로 body 에
+        #   넣은 사용자 경로만 — direction 메타로 노출.
+        return _caption_plain_text(block), {
+            "kind": "caption",
+            "section_idx": block.prov.section_idx,
+            "para_idx": block.prov.para_idx,
+            "direction": block.direction,
+        }
+    if isinstance(block, TocBlock):
+        # ^ entries 의 text 들을 개행 결합. v0.3.0 entries 는 빈 리스트가 일반적
+        #   (TOC entry 추출은 v0.4.0+) — 빈 content 는 lazy_load 상위에서 skip.
+        toc_text = "\n".join(e.text for e in block.entries if e.text)
+        return toc_text, {
+            "kind": "toc",
+            "section_idx": block.prov.section_idx,
+            "para_idx": block.prov.para_idx,
+            "entry_count": len(block.entries),
+        }
+    if isinstance(block, FieldBlock):
+        # ^ cached_value 가 있으면 그것이 content (예: 자동 날짜). raw_instruction 은
+        #   round-trip 보존용으로 메타에. v0.3.0 은 cached_value 가 항상 None 이므로
+        #   대부분 빈 content — lazy_load 상위에서 skip 됨.
+        return block.cached_value or "", {
+            "kind": "field",
+            "section_idx": block.prov.section_idx,
+            "para_idx": block.prov.para_idx,
+            "field_kind": block.field_kind,
+            "raw_instruction": block.raw_instruction,
+        }
     # 새 Block variant 가 추가되면 그 variant 의 elif 를 이 assert 보다 위에 먼저
     # 추가해야 한다. 그러지 않으면 AssertionError 로 fail-fast (silent fallback 방지)
     assert isinstance(block, UnknownBlock)
@@ -206,3 +258,23 @@ def _block_to_content_and_meta(block: Block) -> tuple[str, dict[str, Any]]:
         "section_idx": block.prov.section_idx,
         "para_idx": block.prov.para_idx,
     }
+
+
+def _caption_plain_text(caption: CaptionBlock) -> str:
+    """CaptionBlock.blocks 의 텍스트 표현을 개행 결합 (S3 신규 헬퍼).
+
+    포함 대상: ParagraphBlock.text + FormulaBlock.text_alt|script + FieldBlock.cached_value.
+    캡션 안의 수식·필드도 평문 흐름의 일부 (spec § 5 "캡션 안의 인라인 수식·필드도
+    자연스럽게 표현") — RAG 색인에 자연 포함. 표/그림 등 구조 블록은 별도 색인.
+    """
+    parts: list[str] = []
+    for b in caption.blocks:
+        if isinstance(b, ParagraphBlock) and b.text:
+            parts.append(b.text)
+        elif isinstance(b, FormulaBlock):
+            text = b.text_alt or b.script
+            if text:
+                parts.append(text)
+        elif isinstance(b, FieldBlock) and b.cached_value:
+            parts.append(b.cached_value)
+    return "\n".join(parts)

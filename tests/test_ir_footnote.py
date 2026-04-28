@@ -39,6 +39,9 @@ def _empty_raw_para(*, section_idx: int = 0, para_idx: int = 0, text: str = "") 
         tables=[],
         pictures=[],
         formulas=[],
+        tocs=[],
+        fields=[],
+        list_info=None,
     )
 
 

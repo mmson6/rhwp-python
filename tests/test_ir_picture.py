@@ -154,6 +154,7 @@ def _raw_picture(
         para_idx=para_idx,
         image=img,
         description=description,
+        caption=None,
     )
 
 

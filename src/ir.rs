@@ -12,12 +12,13 @@
 
 use pyo3::prelude::*;
 
-use rhwp::model::control::{Control, Equation};
+use rhwp::model::control::{Control, Equation, Field, FieldType};
 use rhwp::model::document::{DocInfo, Document};
 use rhwp::model::footnote::{Endnote, Footnote};
 use rhwp::model::image::Picture;
 use rhwp::model::paragraph::Paragraph;
-use rhwp::model::style::UnderlineType;
+use rhwp::model::shape::{Caption, CaptionDirection};
+use rhwp::model::style::{HeadType, UnderlineType};
 use rhwp::model::table::{Cell, Table};
 
 #[derive(IntoPyObject)]
@@ -32,6 +33,19 @@ pub(crate) struct RawCharRun {
 }
 
 #[derive(IntoPyObject)]
+pub(crate) struct RawListInfo {
+    // ^ 상류 ParaShape.head_type 가 비-None 일 때 채워진다. mapper 가 이 dict 를 보면
+    //   ParagraphBlock 대신 ListItemBlock 을 emit. spec § 4 ListItemBlock 매핑.
+    //
+    //   head_type 은 lowercase string ("number"/"bullet"/"outline") — Python mapper 가
+    //   marker placeholder + enumerated 결정 (도메인 분기는 Python 책임, IR 진화 시
+    //   maturin rebuild 회피). 미래 v0.4.0+ 의 정확 marker 추출은 raw
+    //   numbering_id 추가 + Python 의 Numbering.level_formats lookup.
+    pub head_type: String,
+    pub level: u32,
+}
+
+#[derive(IntoPyObject)]
 pub(crate) struct RawCell {
     pub row: usize,
     pub col: usize,
@@ -42,11 +56,25 @@ pub(crate) struct RawCell {
 }
 
 #[derive(IntoPyObject)]
+pub(crate) struct RawCaption {
+    // ^ Picture/Table 양쪽의 캡션 paragraphs + direction 추출. Python mapper 가
+    //   _flatten_paragraph 로 평탄화 → CaptionBlock.blocks. v0.3.0 S3 신규.
+    //   direction 은 lowercase string ("top"/"bottom"/"left"/"right") — Python
+    //   Literal 어휘와 1:1.
+    pub direction: String,
+    pub section_idx: usize,
+    pub para_idx: usize,
+    pub paragraphs: Vec<RawParagraph>,
+}
+
+#[derive(IntoPyObject)]
 pub(crate) struct RawTable {
     pub rows: usize,
     pub cols: usize,
     pub cells: Vec<RawCell>,
     pub caption: Option<String>,
+    // ^ v0.3.0 S3 신규 — 구조화 캡션. caption (str) 은 v0.2.0 호환 평문 fallback.
+    pub caption_block: Option<RawCaption>,
 }
 
 #[derive(IntoPyObject)]
@@ -68,10 +96,12 @@ pub(crate) struct RawPicture {
     pub section_idx: usize,
     pub para_idx: usize,
     pub image: Option<RawImageRef>,
-    // ^ caption.paragraphs 첫 비-빈 텍스트 — S1 임시 alt-text. S3 에서
-    //   `CaptionBlock` 도입 시 이 단순 필드는 PictureBlock.description 으로
-    //   유지되고 caption_block 이 추가된다.
+    // ^ caption.paragraphs 첫 비-빈 텍스트 — S1 호환 평문 fallback (description).
+    //   v0.3.0 S3 부터 caption (RawCaption) 으로 구조화 노출되며 description 은
+    //   호환 보존만.
     pub description: Option<String>,
+    // ^ v0.3.0 S3 신규 — 구조화 캡션. Picture.caption 이 None 이면 None.
+    pub caption: Option<RawCaption>,
 }
 
 #[derive(IntoPyObject)]
@@ -106,6 +136,43 @@ pub(crate) struct RawEndnote {
 }
 
 #[derive(IntoPyObject)]
+pub(crate) struct RawTocEntry {
+    // ^ v0.3.0 placeholder — 실제 TOC entry 추출은 v0.4.0+ (bookmark resolver
+    //   필요). 본 struct 는 forward-compat 를 위해 미리 정의.
+    pub text: String,
+    pub level: u32,
+    pub target_bookmark_name: Option<String>,
+    pub cached_page: Option<u32>,
+}
+
+#[derive(IntoPyObject)]
+pub(crate) struct RawToc {
+    // ^ FieldType::TableOfContents 검출 시 emit. v0.3.0 entries 는 빈 Vec —
+    //   spec § 6 결정 사항 7.
+    pub section_idx: usize,
+    pub para_idx: usize,
+    pub entries: Vec<RawTocEntry>,
+}
+
+#[derive(IntoPyObject)]
+pub(crate) struct RawField {
+    pub section_idx: usize,
+    pub para_idx: usize,
+    // ^ FieldType lowercase 표현 — Python Literal 어휘와 1:1. 미지 variant 는
+    //   "unknown" + field_type_code 채움 (현재는 모두 알려져 있어 None).
+    pub field_kind: String,
+    // ^ HWP Field 는 cached_value 를 직접 노출하지 않는다 (paragraph text 안에
+    //   inline 으로 들어있음). v0.3.0 은 None 출고 — 정확 추출은 field_ranges
+    //   매핑 필요 (v0.4.0+ 검토).
+    pub cached_value: Option<String>,
+    // ^ HWP Field.command — Word <w:instrText> 대응. round-trip 보존용.
+    pub raw_instruction: Option<String>,
+    // ^ 미지의 raw 코드 — 상류 FieldType 추가 시 forward-compat. v0.3.0 은 모든
+    //   variant 가 알려져 있으므로 항상 None.
+    pub field_type_code: Option<u32>,
+}
+
+#[derive(IntoPyObject)]
 pub(crate) struct RawParagraph {
     pub section_idx: usize,
     pub para_idx: usize,
@@ -114,6 +181,13 @@ pub(crate) struct RawParagraph {
     pub tables: Vec<RawTable>,
     pub pictures: Vec<RawPicture>,
     pub formulas: Vec<RawFormula>,
+    // ^ v0.3.0 S3 신규 — TOC field 와 일반 field 분리 출고. mapper 가 각각
+    //   TocBlock / FieldBlock 으로 합성.
+    pub tocs: Vec<RawToc>,
+    pub fields: Vec<RawField>,
+    // ^ v0.3.0 S3 신규 — paragraph 가 list item 인지 표시. Some 이면 mapper 가
+    //   ParagraphBlock 대신 ListItemBlock 을 emit.
+    pub list_info: Option<RawListInfo>,
 }
 
 #[derive(IntoPyObject)]
@@ -175,12 +249,15 @@ fn build_raw_paragraph(
     doc: &Document,
 ) -> RawParagraph {
     let char_runs = build_char_runs(para, &doc.doc_info);
-    // ^ 문단의 controls 중 Table / Picture / Equation 만 추출 — 내부 paragraph 들은
-    //   외부 (section, para) 를 공유한다 (Provenance 계약). Footnote / Endnote 는
-    //   본문이 아니라 furniture 로 라우팅되므로 여기서 처리하지 않음.
+    // ^ 문단의 controls 중 Table / Picture / Equation / Field 만 추출 — 내부
+    //   paragraph 들은 외부 (section, para) 를 공유한다 (Provenance 계약).
+    //   Footnote / Endnote / Header / Footer 는 본문이 아니라 furniture 로
+    //   라우팅되므로 여기서 처리하지 않음.
     let mut tables = Vec::new();
     let mut pictures = Vec::new();
     let mut formulas = Vec::new();
+    let mut tocs = Vec::new();
+    let mut fields = Vec::new();
     for ctrl in &para.controls {
         match ctrl {
             Control::Table(t) => {
@@ -192,9 +269,17 @@ fn build_raw_paragraph(
             Control::Equation(e) => {
                 formulas.push(build_raw_formula(e, section_idx, para_idx));
             }
+            Control::Field(f) => {
+                if f.field_type == FieldType::TableOfContents {
+                    tocs.push(build_raw_toc(f, section_idx, para_idx));
+                } else {
+                    fields.push(build_raw_field(f, section_idx, para_idx));
+                }
+            }
             _ => {}
         }
     }
+    let list_info = build_raw_list_info(para, &doc.doc_info);
     RawParagraph {
         section_idx,
         para_idx,
@@ -203,6 +288,9 @@ fn build_raw_paragraph(
         tables,
         pictures,
         formulas,
+        tocs,
+        fields,
+        list_info,
     }
 }
 
@@ -281,11 +369,16 @@ fn build_raw_table(
         .map(|c| build_raw_cell(c, outer_section, outer_para, doc))
         .collect();
     let caption = table.caption.as_ref().and_then(extract_caption_text);
+    let caption_block = table
+        .caption
+        .as_ref()
+        .map(|c| build_raw_caption(c, outer_section, outer_para, doc));
     RawTable {
         rows: table.row_count as usize,
         cols: table.col_count as usize,
         cells,
         caption,
+        caption_block,
     }
 }
 
@@ -338,11 +431,16 @@ fn build_raw_picture(
         })
     };
     let description = pic.caption.as_ref().and_then(extract_caption_text);
+    let caption = pic
+        .caption
+        .as_ref()
+        .map(|c| build_raw_caption(c, section_idx, para_idx, doc));
     RawPicture {
         section_idx,
         para_idx,
         image,
         description,
+        caption,
     }
 }
 
@@ -503,8 +601,41 @@ fn build_raw_endnote(
     }
 }
 
-/// Caption 에서 텍스트만 추출한다 (복합 캡션 구조는 미지원 — S3 CaptionBlock 에서 도입).
-fn extract_caption_text(caption: &rhwp::model::shape::Caption) -> Option<String> {
+/// Caption → RawCaption (구조화 캡션, S3 신규).
+///
+/// shape::Caption 의 paragraphs 를 RawParagraph 로 평탄화. direction 은
+/// CaptionDirection enum → lowercase string 으로 변환 (Python Literal 매칭).
+/// section_idx / para_idx 는 부모 (Picture/Table) 의 위치 공유 — Provenance 계약.
+fn build_raw_caption(
+    cap: &Caption,
+    section_idx: usize,
+    para_idx: usize,
+    doc: &Document,
+) -> RawCaption {
+    let paragraphs = cap
+        .paragraphs
+        .iter()
+        .map(|p| build_raw_paragraph(section_idx, para_idx, p, doc))
+        .collect();
+    RawCaption {
+        direction: caption_direction_to_str(cap.direction).to_string(),
+        section_idx,
+        para_idx,
+        paragraphs,
+    }
+}
+
+fn caption_direction_to_str(d: CaptionDirection) -> &'static str {
+    match d {
+        CaptionDirection::Top => "top",
+        CaptionDirection::Bottom => "bottom",
+        CaptionDirection::Left => "left",
+        CaptionDirection::Right => "right",
+    }
+}
+
+/// Caption 에서 텍스트만 추출한다 (S1 호환 description fallback 경로).
+fn extract_caption_text(caption: &Caption) -> Option<String> {
     let text: Vec<String> = caption
         .paragraphs
         .iter()
@@ -515,6 +646,88 @@ fn extract_caption_text(caption: &rhwp::model::shape::Caption) -> Option<String>
         None
     } else {
         Some(text.join("\n"))
+    }
+}
+
+/// ParaShape.head_type → list_info (S3 신규).
+///
+/// ``HeadType::None`` 이면 None 반환 → mapper 가 ParagraphBlock 으로 emit.
+/// 그 외 (Number / Bullet / Outline) 면 lowercase string 출고 → Python mapper 가
+/// ListItemBlock 합성 (marker placeholder / enumerated 결정).
+///
+/// para_shape_id lookup 실패 시에도 None — 손상 파일 대비.
+fn build_raw_list_info(para: &Paragraph, doc_info: &DocInfo) -> Option<RawListInfo> {
+    let ps = doc_info.para_shapes.get(para.para_shape_id as usize)?;
+    let head_type = match ps.head_type {
+        HeadType::None => return None,
+        HeadType::Number => "number",
+        HeadType::Outline => "outline",
+        HeadType::Bullet => "bullet",
+    };
+    Some(RawListInfo {
+        head_type: head_type.to_string(),
+        level: ps.para_level as u32,
+    })
+}
+
+/// FieldType (TableOfContents 제외) → RawField. cached_value 는 v0.3.0 미추출.
+fn build_raw_field(field: &Field, section_idx: usize, para_idx: usize) -> RawField {
+    RawField {
+        section_idx,
+        para_idx,
+        field_kind: field_type_to_str(field.field_type).to_string(),
+        cached_value: None,
+        raw_instruction: if field.command.is_empty() {
+            None
+        } else {
+            Some(field.command.clone())
+        },
+        // ^ v0.3.0 은 모든 FieldType variant 가 알려져 있으므로 None — 상류가
+        //   새 variant 추가 시 mapper 가 raw u32 채워야 한다 (v0.4.0+).
+        field_type_code: None,
+    }
+}
+
+/// FieldType::TableOfContents → RawToc. v0.3.0 은 entries 빈 Vec —
+/// 실제 TOC 항목 추출은 v0.4.0+ (bookmark resolver 필요, spec § 6 결정).
+fn build_raw_toc(_field: &Field, section_idx: usize, para_idx: usize) -> RawToc {
+    RawToc {
+        section_idx,
+        para_idx,
+        entries: Vec::new(),
+    }
+}
+
+/// FieldType → Python FieldKind Literal value (lowercase string, 1:1 매핑).
+///
+/// 상류 ``Field::field_type_str`` 와 어휘가 다른 항목 (DocDate → "doc_date",
+/// PrivateInfoSecurity → "private_info", Formula → "calc") 은 Python 어휘에
+/// 맞추기 위해 자체 구현. ``"calc"`` 는 Equation ("formula" kind) 과의 이름
+/// 충돌 회피 — spec § 7 FieldKind 표.
+///
+/// **TableOfContents arm**: 현 라우팅은 ``build_raw_paragraph`` 가
+/// ``FieldType::TableOfContents`` 를 ``tocs`` 로 사전 분리하므로 본 arm 은
+/// dead code. 그러나 (1) Python ``FieldKind`` Literal 어휘 동기 (15 종 일치)
+/// (2) 미래 routing 정책 변경 시 (예: TocBlock 도 FieldBlock 통합) 활성화
+/// — 두 이유로 어휘 보존.
+fn field_type_to_str(ft: FieldType) -> &'static str {
+    match ft {
+        FieldType::Unknown => "unknown",
+        FieldType::Date => "date",
+        FieldType::DocDate => "doc_date",
+        FieldType::Path => "path",
+        FieldType::Bookmark => "bookmark",
+        FieldType::MailMerge => "mailmerge",
+        FieldType::CrossRef => "crossref",
+        FieldType::Formula => "calc",
+        FieldType::ClickHere => "clickhere",
+        FieldType::Summary => "summary",
+        FieldType::UserInfo => "userinfo",
+        FieldType::Hyperlink => "hyperlink",
+        FieldType::Memo => "memo",
+        FieldType::PrivateInfoSecurity => "private_info",
+        // ^ 현 라우팅에서는 도달 안 함 — 어휘 보존 + 미래 routing 변경 대비
+        FieldType::TableOfContents => "toc",
     }
 }
 
@@ -615,5 +828,42 @@ mod tests {
     fn simple_eq_text_alt_unicode_passes_through() {
         // ^ 한글이 들어와도 변환 안 함 (HWP equation script 는 보통 ASCII 만)
         assert_eq!(simple_eq_text_alt("α + β").as_deref(), Some("α + β"));
+    }
+
+    // * field_type_to_str — Python FieldKind Literal 어휘와 1:1 일치
+
+    #[test]
+    fn field_type_to_str_all_variants_lowercase() {
+        // ^ Python FieldKind Literal 의 14 + unknown 어휘. 추가/이름 변경 시 mapper.py
+        //   _VALID_FIELD_KINDS 와 양방향 동기화 필요.
+        assert_eq!(field_type_to_str(FieldType::Unknown), "unknown");
+        assert_eq!(field_type_to_str(FieldType::Date), "date");
+        assert_eq!(field_type_to_str(FieldType::DocDate), "doc_date");
+        assert_eq!(field_type_to_str(FieldType::Path), "path");
+        assert_eq!(field_type_to_str(FieldType::Bookmark), "bookmark");
+        assert_eq!(field_type_to_str(FieldType::MailMerge), "mailmerge");
+        assert_eq!(field_type_to_str(FieldType::CrossRef), "crossref");
+        // ^ Formula → "calc" — Equation ("formula" kind) 와의 이름 충돌 회피
+        assert_eq!(field_type_to_str(FieldType::Formula), "calc");
+        assert_eq!(field_type_to_str(FieldType::ClickHere), "clickhere");
+        assert_eq!(field_type_to_str(FieldType::Summary), "summary");
+        assert_eq!(field_type_to_str(FieldType::UserInfo), "userinfo");
+        assert_eq!(field_type_to_str(FieldType::Hyperlink), "hyperlink");
+        assert_eq!(field_type_to_str(FieldType::Memo), "memo");
+        assert_eq!(
+            field_type_to_str(FieldType::PrivateInfoSecurity),
+            "private_info"
+        );
+        assert_eq!(field_type_to_str(FieldType::TableOfContents), "toc");
+    }
+
+    // * caption_direction_to_str — Python CaptionBlock.direction Literal 과 1:1
+
+    #[test]
+    fn caption_direction_lowercase() {
+        assert_eq!(caption_direction_to_str(CaptionDirection::Top), "top");
+        assert_eq!(caption_direction_to_str(CaptionDirection::Bottom), "bottom");
+        assert_eq!(caption_direction_to_str(CaptionDirection::Left), "left");
+        assert_eq!(caption_direction_to_str(CaptionDirection::Right), "right");
     }
 }

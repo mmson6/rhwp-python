@@ -7,6 +7,9 @@ from rhwp.ir.nodes import (
     Block as Block,
 )
 from rhwp.ir.nodes import (
+    CaptionBlock as CaptionBlock,
+)
+from rhwp.ir.nodes import (
     DocumentMetadata as DocumentMetadata,
 )
 from rhwp.ir.nodes import (
@@ -14,6 +17,12 @@ from rhwp.ir.nodes import (
 )
 from rhwp.ir.nodes import (
     EndnoteBlock as EndnoteBlock,
+)
+from rhwp.ir.nodes import (
+    FieldBlock as FieldBlock,
+)
+from rhwp.ir.nodes import (
+    FieldKind as FieldKind,
 )
 from rhwp.ir.nodes import (
     FootnoteBlock as FootnoteBlock,
@@ -32,6 +41,9 @@ from rhwp.ir.nodes import (
 )
 from rhwp.ir.nodes import (
     InlineRun as InlineRun,
+)
+from rhwp.ir.nodes import (
+    ListItemBlock as ListItemBlock,
 )
 from rhwp.ir.nodes import (
     ParagraphBlock as ParagraphBlock,
@@ -55,6 +67,12 @@ from rhwp.ir.nodes import (
     TableCell as TableCell,
 )
 from rhwp.ir.nodes import (
+    TocBlock as TocBlock,
+)
+from rhwp.ir.nodes import (
+    TocEntryBlock as TocEntryBlock,
+)
+from rhwp.ir.nodes import (
     UnknownBlock as UnknownBlock,
 )
 from rhwp.ir.schema import (
@@ -73,15 +91,19 @@ from rhwp.ir.schema import (
 __all__ = [
     "CURRENT_SCHEMA_VERSION",
     "Block",
+    "CaptionBlock",
     "DocumentMetadata",
     "DocumentSource",
     "EndnoteBlock",
+    "FieldBlock",
+    "FieldKind",
     "FootnoteBlock",
     "FormulaBlock",
     "Furniture",
     "HwpDocument",
     "ImageRef",
     "InlineRun",
+    "ListItemBlock",
     "ParagraphBlock",
     "PictureBlock",
     "Provenance",
@@ -91,6 +113,8 @@ __all__ = [
     "Section",
     "TableBlock",
     "TableCell",
+    "TocBlock",
+    "TocEntryBlock",
     "UnknownBlock",
     "export_schema",
     "load_schema",

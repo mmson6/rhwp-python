@@ -154,10 +154,10 @@ def _find_formulas(ir: HwpDocument) -> list[FormulaBlock]:
 def test_formula_inside_table_cell_is_flattened():
     """Formula 가 셀 paragraph.controls 에 있으면 cell.blocks 에 FormulaBlock 출현."""
     from rhwp.ir._mapper import build_hwp_document
-    from rhwp.ir._raw_types import RawDocument
+    from rhwp.ir._raw_types import RawDocument, RawParagraph
     from rhwp.ir.nodes import TableBlock
 
-    raw_inner_para = {
+    raw_inner_para: RawParagraph = {
         "section_idx": 0,
         "para_idx": 0,
         "text": "셀 단락",
@@ -172,8 +172,11 @@ def test_formula_inside_table_cell_is_flattened():
                 "text_alt": None,
             }
         ],
+        "tocs": [],
+        "fields": [],
+        "list_info": None,
     }
-    raw_para_with_table = {
+    raw_para_with_table: RawParagraph = {
         "section_idx": 0,
         "para_idx": 0,
         "text": "",
@@ -183,6 +186,7 @@ def test_formula_inside_table_cell_is_flattened():
                 "rows": 1,
                 "cols": 1,
                 "caption": None,
+                "caption_block": None,
                 "cells": [
                     {
                         "row": 0,
@@ -197,6 +201,9 @@ def test_formula_inside_table_cell_is_flattened():
         ],
         "pictures": [],
         "formulas": [],
+        "tocs": [],
+        "fields": [],
+        "list_info": None,
     }
     raw = RawDocument(
         source_uri=None,
@@ -218,9 +225,9 @@ def test_formula_inside_table_cell_is_flattened():
 def test_formula_inside_footnote_body_is_flattened():
     """Formula 가 각주 본문 paragraph.controls 에 있으면 footnote.blocks 에 출현."""
     from rhwp.ir._mapper import build_hwp_document
-    from rhwp.ir._raw_types import RawDocument
+    from rhwp.ir._raw_types import RawDocument, RawFootnote, RawParagraph
 
-    raw_inner_para = {
+    raw_inner_para: RawParagraph = {
         "section_idx": 0,
         "para_idx": 0,
         "text": "각주 본문",
@@ -235,6 +242,9 @@ def test_formula_inside_footnote_body_is_flattened():
                 "text_alt": "1 / 2",
             }
         ],
+        "tocs": [],
+        "fields": [],
+        "list_info": None,
     }
     raw = RawDocument(
         source_uri=None,
@@ -243,12 +253,12 @@ def test_formula_inside_footnote_body_is_flattened():
         headers=[],
         footers=[],
         footnotes=[
-            {
-                "marker_section_idx": 0,
-                "marker_para_idx": 5,
-                "number": 1,
-                "blocks": [raw_inner_para],
-            }
+            RawFootnote(
+                marker_section_idx=0,
+                marker_para_idx=5,
+                number=1,
+                blocks=[raw_inner_para],
+            )
         ],
         endnotes=[],
     )

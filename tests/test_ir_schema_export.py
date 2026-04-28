@@ -42,11 +42,11 @@ def test_export_schema_root_additional_properties_false():
 
 
 def test_export_schema_defs_are_exactly_the_known_nodes():
-    """`$defs` 는 HwpDocument (root) 를 제외한 15개 노드 정확히 일치.
+    """`$defs` 는 HwpDocument (root) 를 제외한 20개 노드 정확히 일치.
 
     v0.3.0 S1: ImageRef + PictureBlock (10 → 12).
     v0.3.0 S2: FormulaBlock + FootnoteBlock + EndnoteBlock (12 → 15).
-    이후 stage (ListItem / Caption / Toc / Field) 추가 시 갱신.
+    v0.3.0 S3: ListItemBlock + CaptionBlock + TocBlock + TocEntryBlock + FieldBlock (15 → 20).
     """
     schema = export_schema()
     defs = schema.get("$defs", {})
@@ -66,6 +66,12 @@ def test_export_schema_defs_are_exactly_the_known_nodes():
         "FormulaBlock",
         "FootnoteBlock",
         "EndnoteBlock",
+        # ^ S3 신규 5
+        "ListItemBlock",
+        "CaptionBlock",
+        "TocBlock",
+        "TocEntryBlock",
+        "FieldBlock",
     }
     assert set(defs.keys()) == expected_nodes
 
@@ -169,6 +175,33 @@ def test_paragraph_block_with_inlines_validates():
     )
     doc = HwpDocument(body=[block])
     validator.validate(doc.model_dump(mode="json"))
+
+
+def test_unknown_kind_routing_pydantic_matches_schema():
+    """Pydantic UnknownBlock 라우팅과 JSON Schema 통과가 동일 어휘여야 한다.
+
+    회귀 방지 — UnknownBlock 의 ``not.enum`` 은 ``_KNOWN_KINDS`` (Block 유니온
+    멤버) 만 포함해야 한다. ``$defs`` walk 로 모든 ``kind.const`` 를 모으면
+    leaf-only ``TocEntryBlock.kind="toc_entry"`` 가 포함되어 round-trip 깨짐.
+    """
+    schema = export_schema()
+    validator = Draft202012Validator(schema)
+    # ^ Pydantic 은 "toc_entry" 를 Block 유니온 멤버 아님으로 보고 UnknownBlock 에 라우팅
+    doc = HwpDocument.model_validate(
+        {
+            "body": [
+                {
+                    "kind": "toc_entry",
+                    "text": "fake leaf-only kind",
+                    "prov": {"section_idx": 0, "para_idx": 0},
+                }
+            ]
+        }
+    )
+    instance = doc.model_dump(mode="json")
+    # ^ schema 도 같은 어휘로 통과해야 함 — UnknownBlock 으로 매치
+    errors = list(validator.iter_errors(instance))
+    assert errors == [], f"Pydantic ↔ schema round-trip 깨짐: {[e.message for e in errors]}"
 
 
 def test_invalid_kind_fails_schema_validation():

@@ -62,6 +62,9 @@ def _empty_raw_para(section_idx: int = 0, para_idx: int = 0, text: str = "") -> 
         tables=[],
         pictures=[],
         formulas=[],
+        tocs=[],
+        fields=[],
+        list_info=None,
     )
 
 
@@ -148,6 +151,7 @@ def test_build_hwp_document_header_with_table_flattens_to_furniture():
                 "rows": 1,
                 "cols": 1,
                 "caption": None,
+                "caption_block": None,
                 "cells": [
                     {
                         "row": 0,
@@ -164,6 +168,9 @@ def test_build_hwp_document_header_with_table_flattens_to_furniture():
                                 "tables": [],
                                 "pictures": [],
                                 "formulas": [],
+                                "tocs": [],
+                                "fields": [],
+                                "list_info": None,
                             }
                         ],
                     }
@@ -172,6 +179,9 @@ def test_build_hwp_document_header_with_table_flattens_to_furniture():
         ],
         pictures=[],
         formulas=[],
+        tocs=[],
+        fields=[],
+        list_info=None,
     )
     raw = _empty_raw_doc(headers=[raw_para_with_table])
     ir = build_hwp_document(raw)

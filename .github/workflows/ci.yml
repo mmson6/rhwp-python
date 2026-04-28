@@ -70,6 +70,8 @@ jobs:
             tests/test_ir_iter_blocks.py tests/test_ir_schema_export.py \
             tests/test_ir_picture.py tests/test_ir_furniture.py \
             tests/test_ir_formula.py tests/test_ir_footnote.py \
+            tests/test_ir_list.py tests/test_ir_caption.py \
+            tests/test_ir_toc.py tests/test_ir_field.py \
             tests/conftest.py tests/type_check_samples.py
       - name: Run pyright (intentional errors — expect 4)
         if: matrix.lint

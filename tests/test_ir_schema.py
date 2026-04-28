@@ -139,16 +139,16 @@ def test_table_nested_three_levels():
 
 def test_discriminator_routes_unknown_kind():
     raw = {
-        # ^ "list_item" 은 v0.3.0 S3 에서 known 으로 승격 예정 — S2 시점에서는 unknown.
-        #   "picture"/"footnote" 는 이미 known (S1/S2) 이므로 미지 kind 로 적합한 라벨.
-        "kind": "list_item",
+        # ^ v0.3.0 S3 시점 known: paragraph/table/picture/formula/footnote/endnote/
+        #   list_item/caption/toc/field. 새 미지 kind 후보로 v0.4.0+ 가설적 변형 사용.
+        "kind": "revision_mark",
         "prov": {"section_idx": 0, "para_idx": 0},
         "level": 2,  # ^ extra="allow" 로 payload 보존 확인
     }
     doc = HwpDocument.model_validate({"body": [raw]})
     blk = doc.body[0]
     assert isinstance(blk, UnknownBlock)
-    assert blk.kind == "list_item"
+    assert blk.kind == "revision_mark"
     # ^ extra="allow" — 임의 필드 보존
     assert blk.model_extra == {"level": 2}
 
@@ -257,10 +257,10 @@ def test_schema_version_minor_bump_does_not_warn():
 # * Test 12 — UnknownBlock 은 임의 kind 수용
 
 
-@pytest.mark.parametrize("k", ["custom_x", "hwp_field", "list_item", "caption", "toc"])
+@pytest.mark.parametrize("k", ["custom_x", "hwp_field", "revision_mark", "side_note", "highlight"])
 def test_unknown_block_preserves_arbitrary_kind(k):
-    """v0.3.0 S1: "picture" known. S2: "formula"/"footnote"/"endnote" known.
-    "list_item"/"caption"/"toc"/"field" 는 S3 에서 known 이 되면 같은 패턴으로 교체."""
+    """v0.3.0 S1-S3 시점 known kinds (paragraph/table/picture/formula/footnote/endnote/
+    list_item/caption/toc/field) 외의 가설적 미래 변형이 UnknownBlock 으로 라우팅."""
     u = UnknownBlock(kind=k, prov=_prov())
     assert u.kind == k
     reloaded = UnknownBlock.model_validate_json(u.model_dump_json())
