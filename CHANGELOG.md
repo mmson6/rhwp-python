@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] — 2026-04-28
 
+### Changed — async API 의존성 정리
+
+- `rhwp.aparse` 가 `aiofiles` 대신 stdlib `asyncio.to_thread` 사용 — 외부 의존성 제거. `[async]` extras 키는 빈 배열로 보존 (`pip install rhwp[async]` 명령 호환 유지, v0.4.0 에서 키 자체 제거 검토). 의미·성능 동등 — Python `asyncio` 가 native async file I/O 를 미지원하는 한 모든 async file lib (aiofiles 포함) 도 결국 thread pool wrapping 이라 둘은 같은 메커니즘. CI `test-without-extras` skip count 5 → 4 (`test_async.py` 가 더 이상 gated 아님).
+
 MINOR release — Phase 2 두 축 동시 GA. v0.2.0 의 Document IR v1.0 위에 HWP 고유 의미 요소 8 종을 추가하고 (SchemaVersion 1.1), 동시에 Python 고유 가치 (IR/LangChain 청크/스키마 export) 를 shell 에서 직접 소비할 수 있는 `rhwp-py` CLI 를 재도입한다. 모든 v0.2.0 공개 API 보존 — 추가만 있고 기존 코드는 그대로 동작.
 
 상류 `edwardkim/rhwp` 커밋 핀은 v0.2.0 그대로 (`bea635b`) — IR 확장은 상류가 이미 노출하는 first-class struct/enum (Picture, Equation, Footnote/Endnote, Caption, Field/FieldType, Header/Footer, ParaShape) 의 매핑을 채우는 작업이며 상류 변경 없이 가능했다.

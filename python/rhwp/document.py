@@ -22,8 +22,9 @@
 - ``rhwp.Document`` 인스턴스는 생성한 스레드 에서만 사용
 
 async 환경에서 파일 I/O 를 non-blocking 으로 처리하려면 :func:`aparse` 사용 —
-``aiofiles`` 가 파일 읽기만 async 로 수행하고, 파싱 (``Document.from_bytes``) 은
-호출 스레드에서 동기 실행한다. 파싱 구간의 GIL 은 Rust ``py.detach`` 가 해제.
+stdlib ``asyncio.to_thread`` 가 파일 읽기만 thread pool 에 offload 하고, 파싱
+(``Document.from_bytes``) 은 호출 스레드에서 동기 실행한다. 파싱 구간의 GIL 은
+Rust ``py.detach`` 가 해제.
 
 ### IR 캐싱
 
@@ -279,12 +280,17 @@ async def aparse(path: str) -> Document:
 
     ``#[pyclass(unsendable)]`` 제약 상 Document 는 스레드 경계를 넘을 수 없다.
     따라서 ``asyncio.to_thread(parse, path)`` 패턴은 panic 을 일으킨다. 대신
-    ``aiofiles`` 로 **파일 I/O 만** async 로 수행하고, bytes 파싱은 호출 스레드
-    에서 동기 실행 (GIL 은 Rust ``py.detach`` 가 해제). 이 경로는 Document
-    인스턴스를 이벤트 루프 스레드에 유지하므로 panic 이 없다.
+    파일 read 만 stdlib ``asyncio.to_thread`` 로 thread pool 에 offload 하고,
+    bytes 파싱은 호출 스레드 (event loop) 에서 동기 실행 (GIL 은 Rust
+    ``py.detach`` 가 해제). 이 경로는 Document 인스턴스를 event loop 스레드에
+    유지하므로 panic 이 없다.
 
-    ``aiofiles`` 는 optional dependency — ``pip install rhwp-python[async]`` 또는
-    ``pip install aiofiles``. 미설치 시 ``ImportError``.
+    Python ``asyncio`` 가 native async file I/O 를 미지원하는 한 모든 async
+    file lib (aiofiles 등) 도 결국 thread pool wrapping — 본 구현이 stdlib 만
+    으로 동등 효과 달성. 외부 의존성 없음.
+
+    Cancellation: thread 위 blocking read 라 한 번 시작되면 cancel 어려움 —
+    aiofiles 도 동일 한계. 단발 read 이므로 실용 영향 없음.
 
     Args:
         path: HWP 또는 HWPX 파일 경로.
@@ -293,20 +299,18 @@ async def aparse(path: str) -> Document:
         파싱된 Document. 호출 스레드에 묶인다.
 
     Raises:
-        ImportError: ``aiofiles`` 미설치.
         FileNotFoundError: 파일이 존재하지 않을 때.
         PermissionError: 파일 접근 권한이 없을 때.
         OSError: 그 외 I/O 오류.
         ValueError: 파일 포맷이 유효하지 않을 때.
     """
-    try:
-        import aiofiles
-    except ImportError as e:
-        raise ImportError(
-            "rhwp.aparse requires aiofiles. "
-            "Install via `pip install rhwp-python[async]` or `pip install aiofiles`."
-        ) from e
+    import asyncio
 
-    async with aiofiles.open(path, "rb") as f:
-        data = await f.read()
+    data = await asyncio.to_thread(_read_bytes, path)
     return Document.from_bytes(data, source_uri=path)
+
+
+def _read_bytes(path: str) -> bytes:
+    """동기 파일 read 헬퍼 — ``aparse`` 가 ``asyncio.to_thread`` 로 offload 하는 단위."""
+    with open(path, "rb") as f:
+        return f.read()

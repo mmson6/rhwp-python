@@ -16,7 +16,7 @@
     HwpLoader("report.hwp", mode="ir-blocks").load()
 
 async 사용은 :meth:`aload` / :meth:`alazy_load` — 내부적으로 :func:`rhwp.aparse`
-(aiofiles 기반 파일 I/O) 를 호출하므로 ``pip install rhwp[async]`` 필요.
+(stdlib ``asyncio.to_thread`` 기반 파일 I/O) 를 호출. 추가 의존성 없음.
 """
 
 from collections.abc import AsyncIterator, Iterator
@@ -63,7 +63,6 @@ class HwpLoader(BaseLoader):
         ValueError: ``mode`` 값이 유효하지 않거나, 파일 포맷이 유효하지 않을 때.
         FileNotFoundError: 파일이 존재하지 않을 때.
         OSError: 그 외 I/O 오류.
-        ImportError: async 변형 사용 시 ``aiofiles`` 미설치.
     """
 
     def __init__(
@@ -96,20 +95,21 @@ class HwpLoader(BaseLoader):
         """
         yield from self._yield_documents(rhwp.parse(self.path))
 
-    # * Async — rhwp.aparse (aiofiles 기반) 로 파일 I/O 만 async, 이후 yield 는 sync.
-    #   Rust _Document 가 unsendable 이라 threadpool 오프로드 (to_thread) 는 panic —
-    #   대신 event loop 스레드에서 Document 를 생성하여 같은 스레드 에서 소비한다.
+    # * Async — rhwp.aparse (stdlib asyncio.to_thread 기반) 로 파일 I/O 만 async,
+    #   이후 yield 는 sync. Rust _Document 가 unsendable 이라 Document 자체의
+    #   threadpool 오프로드 (asyncio.to_thread(parse, path)) 는 panic — 대신
+    #   파일 read 만 thread offload, Document 는 event loop 스레드에서 생성·소비.
 
     async def aload(self) -> list[Document]:
-        """:meth:`load` 의 async 변형. ``aiofiles`` 로 파일 읽기만 async 처리."""
+        """:meth:`load` 의 async 변형. 파일 읽기만 async 처리, 추가 의존성 없음."""
         return [doc async for doc in self.alazy_load()]
 
     async def alazy_load(self) -> AsyncIterator[Document]:
         """:meth:`lazy_load` 의 async 변형.
 
-        파일 I/O 는 ``rhwp.aparse`` 가 aiofiles 로 async 처리, 이후 블록 순회는
-        event loop 스레드에서 sync 실행 — 각 yield 사이에서 event loop 에 제어
-        반환 (async for 는 자동으로 checkpoint 를 제공).
+        파일 I/O 는 ``rhwp.aparse`` 가 stdlib ``asyncio.to_thread`` 로 async 처리,
+        이후 블록 순회는 event loop 스레드에서 sync 실행 — 각 yield 사이에서
+        event loop 에 제어 반환 (async for 는 자동으로 checkpoint 를 제공).
         """
         rhwp_doc = await rhwp.aparse(self.path)
         for doc in self._yield_documents(rhwp_doc):
