@@ -157,16 +157,11 @@ Apple M2 (8 코어) release 빌드. Parse = 파일 읽기 + 전체 파싱 + Docu
 코어 수에 비례해 스케일. PDF 렌더링 자체는 `usvg` + `pdf-writer` 내부에서 CPU/allocator
 바운드라 2 ~ 3 워커에서 약 1.1× 정도만 향상됨 — 재현은 `benches/bench_gil.py` 참고.
 
-## 알려진 제약 (Phase 1)
+## 알려진 제약 / 운영 노트
 
-- `Document` 객체는 `#[pyclass(unsendable)]` — 단일 스레드 접근만 허용.
-  교차 스레드 접근 시 `RuntimeError`. 멀티스레드에선 `benches/bench_gil.py` 패턴 사용 —
-  워커 내에서 `parse + consume` 까지 완결한 뒤 원시 타입(`int`, `str`, `bytes`) 만 반환.
-- 폰트 임베딩 / 디버그 오버레이 / 페이지 메타데이터 API 없음 (Phase 2+).
-- HWP/HWPX **저장(serialization)** 미지원 — 읽기/렌더링 전용.
-- 표 / 이미지 / 수식 구조화 접근 없음 — 텍스트 추출만 지원.
-- PDF 렌더 경로가 rhwp 코어의 `[DEBUG_TAB_POS]` / `LAYOUT_OVERFLOW` 로그를
-  stdout 으로 출력. 필요 시 `grep -v -E "(DEBUG_TAB_POS|LAYOUT_OVERFLOW)"` 로 필터링.
+운영상 제약 (`Document` 의 단일 스레드 모델, async 진입점, PDF stdout 노이즈)
+및 미구현 영역 요약은 [KNOWN_ISSUES.md](KNOWN_ISSUES.md). 작업 중 / 계획 항목은
+[docs/roadmap/](docs/roadmap/README.md) 의 활성 spec 인덱스.
 
 ## 개발
 
