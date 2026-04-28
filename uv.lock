@@ -925,6 +925,14 @@ dependencies = [
 async = [
     { name = "aiofiles" },
 ]
+cli = [
+    { name = "typer" },
+]
+cli-chunks = [
+    { name = "langchain-core" },
+    { name = "langchain-text-splitters" },
+    { name = "typer" },
+]
 examples = [
     { name = "langchain-core" },
     { name = "langchain-text-splitters" },
@@ -932,6 +940,7 @@ examples = [
 ]
 langchain = [
     { name = "langchain-core" },
+    { name = "langchain-text-splitters" },
 ]
 
 [package.dev-dependencies]
@@ -945,6 +954,7 @@ all = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "typer" },
 ]
 dev = [
     { name = "maturin" },
@@ -962,18 +972,24 @@ testing = [
     { name = "maturin" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "typer" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "aiofiles", marker = "extra == 'async'", specifier = ">=23" },
+    { name = "langchain-core", marker = "extra == 'cli-chunks'", specifier = ">=0.2" },
     { name = "langchain-core", marker = "extra == 'examples'", specifier = ">=0.2" },
     { name = "langchain-core", marker = "extra == 'langchain'", specifier = ">=0.2" },
+    { name = "langchain-text-splitters", marker = "extra == 'cli-chunks'", specifier = ">=0.2" },
     { name = "langchain-text-splitters", marker = "extra == 'examples'", specifier = ">=0.2" },
+    { name = "langchain-text-splitters", marker = "extra == 'langchain'", specifier = ">=0.2" },
     { name = "pydantic", specifier = ">=2.5,<3" },
+    { name = "typer", marker = "extra == 'cli'", specifier = ">=0.12" },
+    { name = "typer", marker = "extra == 'cli-chunks'", specifier = ">=0.12" },
     { name = "typer", marker = "extra == 'examples'", specifier = ">=0.12" },
 ]
-provides-extras = ["async", "examples", "langchain"]
+provides-extras = ["async", "cli", "cli-chunks", "examples", "langchain"]
 
 [package.metadata.requires-dev]
 all = [
@@ -986,6 +1002,7 @@ all = [
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "typer", specifier = ">=0.12" },
 ]
 dev = [{ name = "maturin", specifier = ">=1.7" }]
 linting = [
@@ -1001,6 +1018,7 @@ testing = [
     { name = "maturin", specifier = ">=1.7" },
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-cov" },
+    { name = "typer", specifier = ">=0.12" },
 ]
 
 [[package]]

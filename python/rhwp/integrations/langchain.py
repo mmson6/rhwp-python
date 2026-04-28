@@ -53,6 +53,11 @@ class HwpLoader(BaseLoader):
             - ``"single"``   : 전체 문서를 단일 Document 로 (기본)
             - ``"paragraph"``: 문단 텍스트별 Document (RAG 청킹용)
             - ``"ir-blocks"``: Document IR 의 Block 단위 — 표 구조 보존 + Provenance 메타데이터
+        include_furniture: ``mode="ir-blocks"`` 일 때만 의미. True 면 본문 블록 다음에
+            furniture (page_headers / page_footers / footnotes / endnotes) 도
+            LangChain Document 로 추가 yield 한다 (각 Document metadata 에
+            ``scope="furniture"``). 다른 모드에서는 무시. 기본 False — RAG body
+            검색 오염 회피.
 
     Raises:
         ValueError: ``mode`` 값이 유효하지 않거나, 파일 포맷이 유효하지 않을 때.
@@ -61,13 +66,20 @@ class HwpLoader(BaseLoader):
         ImportError: async 변형 사용 시 ``aiofiles`` 미설치.
     """
 
-    def __init__(self, path: str, *, mode: LoadMode = "single") -> None:
+    def __init__(
+        self,
+        path: str,
+        *,
+        mode: LoadMode = "single",
+        include_furniture: bool = False,
+    ) -> None:
         if mode not in ("single", "paragraph", "ir-blocks"):
             raise ValueError(
                 f"mode 는 'single' / 'paragraph' / 'ir-blocks' 중 하나여야 합니다: {mode!r}"
             )
         self.path = path
         self.mode: LoadMode = mode
+        self.include_furniture: bool = include_furniture
 
     # * Sync
 
@@ -142,6 +154,19 @@ class HwpLoader(BaseLoader):
             yield Document(
                 page_content=content,
                 metadata={**base_metadata, **extra_meta},
+            )
+
+        # * include_furniture=True 면 page_headers/footers/footnotes/endnotes 도 yield.
+        #   각 Document 메타에 ``scope="furniture"`` — RAG 가 body/furniture 분리 색인.
+        if not self.include_furniture:
+            return
+        for block in ir.iter_blocks(scope="furniture", recurse=True):
+            content, extra_meta = _block_to_content_and_meta(block)
+            if not content.strip():
+                continue
+            yield Document(
+                page_content=content,
+                metadata={**base_metadata, **extra_meta, "scope": "furniture"},
             )
 
 

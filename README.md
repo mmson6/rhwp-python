@@ -122,14 +122,34 @@ docs = HwpLoader("report.hwp", mode="ir-blocks").load()
 #   para_idx / (표의 경우) rows / cols / text / caption 포함
 ```
 
-**JSON Schema** — `rhwp.ir.schema.export_schema()` 로 Draft 2020-12 스키마 생성,
-`load_schema()` 로 in-package 동봉 JSON 로드 (네트워크 불필요). `$id` 공개 URL:
-`https://danmeon.github.io/rhwp-python/schema/hwp_ir/v1/schema.json` — 불변 경로
-정책 (v1 영구). 외부 도구는 이 URL 또는 `*.hwp_ir.json` 파일명 convention 사용 가능.
+**JSON Schema** — `rhwp.ir.schema.export_schema()` / `load_schema()`. 공개 `$id`:
+`https://danmeon.github.io/rhwp-python/schema/hwp_ir/v1/schema.json` (불변 경로).
+v0.3.0+ 는 같은 디렉토리에 content-addressed alias `hwp_ir_v1-sha256-<hash>.json`
+도 alongside 발행 (reproducible 참조).
 
-미구현 블록 타입 (Picture / Formula / Footnote / ListItem / Caption / TocEntry /
-Field) 은 `UnknownBlock` catch-all 로 forward-compat — v0.3.0 에서 추가되어도
-v0.2.0 소비자가 깨지지 않는다.
+### v0.3.0 신규
+
+Picture / Formula / Footnote / Endnote / ListItem / Caption / Toc / Field 8 종
+블록 + `furniture.page_headers/footers/footnotes/endnotes` 채움. SchemaVersion
+`1.1` GA. 머리글/꼬리말/각주/미주도 LangChain Document 로 색인하려면
+`HwpLoader("report.hwp", mode="ir-blocks", include_furniture=True)` (furniture
+Document 는 `metadata.scope="furniture"` — body 와 분리 검색 가능). 변경 상세는
+[CHANGELOG](CHANGELOG.md#030--2026-04-28).
+
+## rhwp-py CLI (v0.3.0+)
+
+```bash
+pip install "rhwp-python[cli]"          # parse / version / schema / ir / blocks
+pip install "rhwp-python[cli-chunks]"    # + chunks (langchain text splitter)
+
+rhwp-py parse report.hwp
+rhwp-py blocks report.hwp --kind table --format ndjson | jq '.rows'
+rhwp-py chunks report.hwp --size 1000 --format ndjson
+```
+
+`rhwp-py` 는 구조 추출 (IR / 블록 / 청크 / 스키마) 전담 — 시각 출력 (SVG/PDF) /
+메타데이터 덤프는 상류 `rhwp` Rust 바이너리. 자세한 사용은 `rhwp-py --help`
+또는 [cli.md](docs/roadmap/v0.3.0/cli.md) 참조.
 
 ## 성능
 
