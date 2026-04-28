@@ -1,8 +1,7 @@
-"""Stage S5 — HwpLoader(mode="ir-blocks") pytest 스위트.
+"""HwpLoader(mode="ir-blocks") pytest 스위트.
 
-``test_langchain_loader.py`` 는 CLAUDE.md 규약상 exactly 29 테스트 유지 —
-IR 모드 추가 테스트는 본 파일로 분리한다. 둘 모두 ``langchain_core`` 미설치
-시 파일 레벨 importorskip 으로 auto-skip.
+``test_langchain_loader.py`` 와 분리 — 본 파일은 ir-blocks 모드 전용.
+``langchain_core`` 미설치 시 파일 레벨 importorskip 으로 auto-skip.
 """
 
 from pathlib import Path
