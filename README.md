@@ -13,7 +13,7 @@
 
 - **PyPI 패키지명**: `rhwp-python`
 - **Python import**: `import rhwp`
-- **Rust 코어**: [`external/rhwp`](external/) 에 git submodule 로 고정
+- **Rust 코어**: [`edwardkim/rhwp`](https://github.com/edwardkim/rhwp)
 
 ## 왜 rhwp-python 인가
 
@@ -89,10 +89,11 @@ chunks = RecursiveCharacterTextSplitter(chunk_size=500).split_documents(docs)
 모든 Document 메타데이터: `source`, `section_count`, `paragraph_count`,
 `page_count`, `rhwp_version`. `paragraph` 모드에서는 `paragraph_index` 추가.
 
-## Document IR (v0.2.0+)
+## Document IR
 
 RAG / LLM 파이프라인이 직접 소비하는 구조화 문서 모델. Pydantic V2 모델 + JSON
-Schema (Draft 2020-12) — HWP 의 구역 / 단락 / 표 / 서식 런을 손실 없이 노출한다.
+Schema (Draft 2020-12) — HWP 의 구역 / 단락 / 표 / 그림 / 수식 / 각주 / 목록 /
+캡션 / 목차 / 필드를 손실 없이 노출한다.
 
 ```python
 from rhwp.ir.nodes import ParagraphBlock, TableBlock
@@ -124,19 +125,8 @@ docs = HwpLoader("report.hwp", mode="ir-blocks").load()
 
 **JSON Schema** — `rhwp.ir.schema.export_schema()` / `load_schema()`. 공개 `$id`:
 `https://danmeon.github.io/rhwp-python/schema/hwp_ir/v1/schema.json` (불변 경로).
-v0.3.0+ 는 같은 디렉토리에 content-addressed alias `hwp_ir_v1-sha256-<hash>.json`
-도 alongside 발행 (reproducible 참조).
 
-### v0.3.0 신규
-
-Picture / Formula / Footnote / Endnote / ListItem / Caption / Toc / Field 8 종
-블록 + `furniture.page_headers/footers/footnotes/endnotes` 채움. SchemaVersion
-`1.1` GA. 머리글/꼬리말/각주/미주도 LangChain Document 로 색인하려면
-`HwpLoader("report.hwp", mode="ir-blocks", include_furniture=True)` (furniture
-Document 는 `metadata.scope="furniture"` — body 와 분리 검색 가능). 변경 상세는
-[CHANGELOG](CHANGELOG.md#030--2026-04-28).
-
-## rhwp-py CLI (v0.3.0+)
+## rhwp-py CLI
 
 ```bash
 pip install "rhwp-python[cli]"          # parse / version / schema / ir / blocks
@@ -180,43 +170,13 @@ Apple M2 (8 코어) release 빌드. Parse = 파일 읽기 + 전체 파싱 + Docu
 
 ## 개발
 
-이 리포는 rhwp Rust 코어를 `external/rhwp` git submodule 로 소비합니다.
-
-```bash
-git clone --recurse-submodules https://github.com/DanMeon/rhwp-python
-cd rhwp-python
-
-# dev + testing + linting 툴 일괄 설치
-uv sync --no-install-project --group all
-uv run maturin develop --release
-
-# 테스트 (core + LangChain, slow PDF 제외)
-uv run pytest tests/ -m "not slow"
-
-# PDF 렌더링 테스트
-uv run pytest tests/ -m slow
-
-# 타입 체크
-uv run pyright python/ tests/
-
-# GIL 해제 벤치마크
-uv run python benches/bench_gil.py 2>&1 | grep -v -E "(DEBUG_TAB_POS|LAYOUT_OVERFLOW)"
-```
-
-clone 시 `--recurse-submodules` 를 빠뜨렸다면:
-
-```bash
-git submodule update --init --recursive
-```
-
-테스트 fixture 는 submodule 내부 `external/rhwp/samples/` 에 있으며,
-`tests/conftest.py` 가 이 경로를 참조합니다.
+소스에서 빌드·테스트·기여하는 절차는 [CONTRIBUTING.md](CONTRIBUTING.md) 참조.
 
 ## 버전 관리
 
 이 Python 패키지와 `rhwp` Rust 코어는 **독립적으로** 버저닝됩니다.
 `rhwp.version()` 은 이 패키지 버전을, `rhwp.rhwp_core_version()` 은
-고정된 submodule 에 포함된 Rust 코어의 버전을 반환합니다.
+번들된 Rust 코어 버전을 반환합니다.
 
 ## 라이선스
 

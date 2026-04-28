@@ -22,8 +22,6 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 | v0.3.0 (IR 확장) | Draft | [v0.3.0/ir-expansion.md](v0.3.0/ir-expansion.md) | [design/v0.3.0/ir-expansion-research.md](../design/v0.3.0/ir-expansion-research.md) |
 | v0.3.0 (CLI) | Draft | [v0.3.0/cli.md](v0.3.0/cli.md) | [design/v0.3.0/cli-design-research.md](../design/v0.3.0/cli-design-research.md) |
 
-cross-version reference (버전 무관): [design/pyo3-bindings.md](../design/pyo3-bindings.md) (Active).
-
 ## Phase 인덱스
 
 Phase 는 여러 MINOR 릴리스에 걸친 기능 묶음. **구체 결정은 vX.Y.Z spec 이 보유** — phase 문서는 의도/스코프와 동시 GA 두 축 연동만 다룸.

@@ -1,4 +1,8 @@
-> 외부 binding (`rhwp-python`) 구현 중 업스트림에서 수정이 필요해 보이는 부분을 발견하여, Claude 로 조사를 진행한 결과입니다.
+# 업스트림 제안 — `find_control_text_positions` 외부 노출
+
+**Status**: Active · **Last updated**: 2026-04-27
+
+> 외부 binding (`rhwp-python`) 구현 중 업스트림에서 수정이 필요해 보이는 부분을 발견하여, Claude 로 조사를 진행한 결과입니다. 업스트림 머지 시 본 파일은 archive (또는 삭제) 처리.
 
 ## Summary
 
