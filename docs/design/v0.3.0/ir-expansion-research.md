@@ -1,6 +1,6 @@
 # v0.3.0 IR 확장 — 설계 의사결정 리서치 요약
 
-**Status**: Draft · **Target**: v0.3.0 · **Last updated**: 2026-04-26
+**Status**: Frozen · **GA**: v0.3.0 · **Last updated**: 2026-04-28
 
 [v0.3.0/ir-expansion.md](../../roadmap/v0.3.0/ir-expansion.md) 의 § 결정 사항 8 건의 업계 선례·대안·실패 시나리오·1차 소스를 기록한다. ir-expansion.md 본문이 최종 결정을 기술하고, 본 문서는 그 결정의 근거를 담는다.
 
@@ -562,7 +562,7 @@ CI workflow `.github/workflows/publish-schema.yml` 은 `keep_files: true` 정책
 ## 참조
 
 - 본 리서치의 결정 요약: [roadmap/v0.3.0/ir-expansion.md](../../roadmap/v0.3.0/ir-expansion.md)
-- 병행 문서 (CLI): [roadmap/v0.3.0/cli.md](../../roadmap/v0.3.0/cli.md), [design/v0.3.0/cli-design-research.md](cli-design-research.md)
+- 병행 문서 (CLI 축): [phase-2.md § v0.3.0 두 축의 연동](../../roadmap/phase-2.md) 경유
 - v0.2.0 IR 본문: [roadmap/v0.2.0/ir.md](../../roadmap/v0.2.0/ir.md)
 - v0.2.0 결정 증거 (리서치 문서 형식 선례): [design/v0.2.0/ir-design-research.md](../v0.2.0/ir-design-research.md)
 - Phase 2 로드맵 위치: [roadmap/phase-2.md](../../roadmap/phase-2.md)

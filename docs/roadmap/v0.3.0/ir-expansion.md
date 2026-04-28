@@ -1,6 +1,6 @@
 # v0.3.0 — Document IR v1.1 (블록 타입 확장)
 
-**Status**: Draft · **Target**: v0.3.0 · **Last updated**: 2026-04-26
+**Status**: Frozen · **GA**: v0.3.0 · **Last updated**: 2026-04-28
 
 v0.2.0 의 Document IR 위에 HWP 문서 고유 의미 요소를 더해 RAG/LLM 파이프라인이 표·단락 외에도 그림·수식·각주·목록·캡션·목차·필드를 구조화 형태로 직접 소비할 수 있게 한다. **`UnknownBlock` catch-all 안전장치 위에서 후방 호환을 유지하는 MINOR 증분** — v0.2.0 소비자는 새 `Block.kind` 를 만나도 `UnknownBlock` 으로 graceful skip 한다.
 

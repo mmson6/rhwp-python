@@ -1,6 +1,6 @@
 # v0.3.0 — `rhwp-py` 얇은 CLI
 
-**Status**: Draft · **Target**: v0.3.0 · **Last updated**: 2026-04-26
+**Status**: Frozen · **GA**: v0.3.0 · **Last updated**: 2026-04-28
 
 v0.2.0 에서 폐기했던 CLI 를 **이름을 분리한 Python 고유 command** 로 재도입한다. `pip install rhwp-python` 만 한 사용자가 shell pipeline 에서 바로 쓸 수 있게 하되, 상류 Rust `rhwp` 바이너리와 기능을 **중복 구현하지 않는다** — Python 레이어 고유 가치 (Document IR, LangChain 청크) 에 집중.
 

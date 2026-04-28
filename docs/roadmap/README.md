@@ -4,11 +4,11 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 
 본 문서는 Living — 자유 갱신.
 
-## 현재 상태 (2026-04-27)
+## 현재 상태 (2026-04-28)
 
 - **v0.1.0 / v0.1.1** — Frozen, PyPI 배포 완료
 - **v0.2.0** — Frozen, Document IR v1 GA (2026-04-25)
-- **v0.3.0** — Draft, Phase 2 (IR 확장 + `rhwp-py` CLI) 진행 중. IR 확장 S1~S3 완료 (S4 Schema GA + CLI/LangChain 마무리 남음)
+- **v0.3.0** — Frozen, Phase 2 (IR 확장 + `rhwp-py` CLI) GA (2026-04-28)
 - **v0.4.0+** — 미착수, Phase 3 이후
 
 ## 활성 spec 인덱스
@@ -19,8 +19,8 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 |---|---|---|---|
 | v0.1.0 / v0.1.1 | Frozen | [v0.1.0/rhwp-python.md](v0.1.0/rhwp-python.md) | — |
 | v0.2.0 | Frozen | [v0.2.0/ir.md](v0.2.0/ir.md) | [design/v0.2.0/ir-design-research.md](../design/v0.2.0/ir-design-research.md) |
-| v0.3.0 (IR 확장) | Draft | [v0.3.0/ir-expansion.md](v0.3.0/ir-expansion.md) | [design/v0.3.0/ir-expansion-research.md](../design/v0.3.0/ir-expansion-research.md) |
-| v0.3.0 (CLI) | Draft | [v0.3.0/cli.md](v0.3.0/cli.md) | [design/v0.3.0/cli-design-research.md](../design/v0.3.0/cli-design-research.md) |
+| v0.3.0 (IR 확장) | Frozen | [v0.3.0/ir-expansion.md](v0.3.0/ir-expansion.md) | [design/v0.3.0/ir-expansion-research.md](../design/v0.3.0/ir-expansion-research.md) |
+| v0.3.0 (CLI) | Frozen | [v0.3.0/cli.md](v0.3.0/cli.md) | [design/v0.3.0/cli-design-research.md](../design/v0.3.0/cli-design-research.md) |
 
 ## Phase 인덱스
 
@@ -42,7 +42,7 @@ Phase 1 (v0.1.x) 은 GA 완료로 별도 phase 문서 없음.
 |---|---|---|
 | v0.1.0 | [implementation/v0.1.0/migration.md](../implementation/v0.1.0/migration.md) | [verification/v0.1.0/spinoff-review.md](../verification/v0.1.0/spinoff-review.md) |
 | v0.2.0 | [implementation/v0.2.0/stages/](../implementation/v0.2.0/stages/) (S1~S5) | — |
-| v0.3.0 (in-progress) | [implementation/v0.3.0/stages/](../implementation/v0.3.0/stages/) (S1~S3) | — |
+| v0.3.0 | [implementation/v0.3.0/stages/](../implementation/v0.3.0/stages/) (S1~S4) + [aparse-cleanup.md](../implementation/v0.3.0/aparse-cleanup.md) | — |
 
 ## 원칙
 

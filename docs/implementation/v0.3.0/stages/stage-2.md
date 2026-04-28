@@ -1,6 +1,6 @@
 # Stage S2 — FormulaBlock + Footnote/Endnote (완료)
 
-**Status**: Frozen · **Target**: v0.3.0 · **Last updated**: 2026-04-26
+**Status**: Frozen · **GA**: v0.3.0 · **Last updated**: 2026-04-26
 
 **작업일**: 2026-04-26
 **계획 문서**: [roadmap/v0.3.0/ir-expansion.md](../../../roadmap/v0.3.0/ir-expansion.md) §구현 스테이지 분할
