@@ -66,7 +66,6 @@ def test_export_schema_defs_are_exactly_the_known_nodes():
         "FormulaBlock",
         "FootnoteBlock",
         "EndnoteBlock",
-        # ^ S3 신규 5
         "ListItemBlock",
         "CaptionBlock",
         "TocBlock",

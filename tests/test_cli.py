@@ -1,8 +1,8 @@
 """rhwp-py CLI 서브커맨드 smoke + 통합 테스트.
 
-cli.md § 테스트 전략 — typer.testing.CliRunner 기반 smoke + 실제 sample 통합.
-파일 레벨 ``importorskip("typer")`` 로 typer 미설치 시 file 전체 skip
-(CI ``test-without-extras`` 잡의 5 skipped 카운트 중 1).
+typer.testing.CliRunner 기반 smoke + 실제 sample 통합. 파일 레벨
+``importorskip("typer")`` 로 typer 미설치 시 file 전체 skip — gated 파일
+총 카운트 검증은 CI ``test-without-extras`` 잡이 SSOT.
 """
 
 import json
@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-# ^ typer / langchain extras 가드 — typer 미설치 시 file 전체 skip (1 카운트)
+# ^ typer extras 가드 — 미설치 시 file 전체 skip
 pytest.importorskip("typer")
 import rhwp  # noqa: E402
 from rhwp.cli.app import app  # noqa: E402
