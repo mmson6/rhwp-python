@@ -19,9 +19,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # * 코드 변경 감지 — docs/*.md / LICENSE / .gitignore 만 변경되면 test job 들이
-  #   if-skip (status: success). predicate-quantifier: every 라 모든 변경 파일이
-  #   exclusion 패턴에 다 해당해야 code:false (= docs-only commit).
+  # * 코드 변경 감지 — docs / LICENSE / .gitignore 전용 변경이면 test 잡 if-skip
+  #   (status: success). 모든 변경 파일이 exclude 패턴에 매치돼야 code=false.
+  #   base SHA 부재 / zero SHA 면 안전 측면으로 code=true (= 전체 실행).
   changes:
     name: Detect code changes
     runs-on: ubuntu-latest
@@ -29,16 +29,23 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
     steps:
       - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@v4
-        id: filter
         with:
-          predicate-quantifier: every
-          filters: |
-            code:
-              - '!**.md'
-              - '!docs/**'
-              - '!LICENSE*'
-              - '!.gitignore'
+          fetch-depth: 0
+      - id: filter
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # ^ three-dot diff = base..HEAD 공통 조상부터의 변경만 (PR diff 와 동일)
+          if git diff --name-only "$BASE_SHA"...HEAD \
+              | grep -qvE '(^|/)([^/]+\.md|LICENSE[^/]*|\.gitignore)$|^docs/'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
 
   # * Linux abi3 wheel 1회 빌드 → 모든 Linux 잡(test×4 / slow / core-only)이 공유
   #   abi3-py310 이라 py3.10/3.11/3.12/3.13 가 동일 wheel 재사용 가능.
