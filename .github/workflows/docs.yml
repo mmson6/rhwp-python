@@ -1,0 +1,41 @@
+name: Docs lint
+
+# 트리거: docs/*.md / scripts/_doc_lint.py / hook 변경 시. 빌드/테스트와 분리.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - 'scripts/_doc_lint.py'
+      - 'scripts/lint_docs.py'
+      - '.claude/hooks/docs-lint.py'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - 'scripts/_doc_lint.py'
+      - 'scripts/lint_docs.py'
+      - '.claude/hooks/docs-lint.py'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: Lint docs (frontmatter / pair / supersede / links)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/lint_docs.py docs/
