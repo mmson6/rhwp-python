@@ -42,10 +42,10 @@ jobs:
       - uses: astral-sh/setup-uv@v8.1.0
         with:
           python-version: "3.12"
-      # ^ uv run --with 로 typer ad-hoc 설치 (ubuntu PEP 668 externally-managed 회피).
-      #   full all 그룹은 CI 빌드용 — lint 는 가벼우니 uv 가 만든 임시 venv 면 충분.
+      # ^ --no-project: pyproject.toml 의 maturin build (Rust + submodule 필요) skip.
+      #   --with: typer 만 ad-hoc 설치 (lint 는 rhwp import 안 함, 가벼움).
       - name: Lint docs
-        run: uv run --with "typer>=0.12" python scripts/lint_docs.py docs/
+        run: uv run --no-project --with "typer>=0.12" python scripts/lint_docs.py docs/
       - name: Verify spec trace report up to date
         # ^ tests/ 의 @pytest.mark.spec 변경 시 docs/traces/coverage.md 동기화 필수.
-        run: uv run --with "typer>=0.12" python scripts/generate_spec_trace.py --check
+        run: uv run --no-project --with "typer>=0.12" python scripts/generate_spec_trace.py --check
