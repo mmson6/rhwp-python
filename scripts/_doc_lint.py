@@ -256,6 +256,9 @@ def validate_cross_link(rel_str: str, text: str) -> list[str]:
 
 
 # * Rule 8: broken .md link
+# ^ external/ submodule (예: external/rhwp/) 안의 파일은 lint 검증 skip —
+#   외부 의존성 추적은 docs/upstream-pins.yaml 이 담당. CI 가 submodule
+#   체크아웃 안 해도 lint 통과하도록.
 def validate_broken_link(rel_str: str, text: str, repo: Path) -> list[str]:
     target_dir = (repo / rel_str).parent
     errors: list[str] = []
@@ -264,6 +267,13 @@ def validate_broken_link(rel_str: str, text: str, repo: Path) -> list[str]:
         if not link_target or link_target.startswith("http"):
             continue
         resolved = (target_dir / link_target).resolve()
+        try:
+            resolved_rel = resolved.relative_to(repo)
+        except ValueError:
+            # ^ repo 외부 절대경로 — 검증 skip
+            continue
+        if str(resolved_rel).startswith("external/"):
+            continue
         if not resolved.exists():
             errors.append(f"broken .md link {link!r} (resolved: {resolved})")
     return errors
