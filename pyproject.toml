@@ -127,6 +127,10 @@ addopts = ["-ra", "--strict-markers"]
 markers = [
     "slow: 느린 테스트 (PDF 렌더링 등)",
     "langchain: LangChain 통합 테스트 (rhwp-python[langchain] extras 필요)",
+    # ^ spec(spec_id) — 본 테스트가 검증하는 spec 인수조건 식별자.
+    #   형식: 'vX.Y.Z/<topic>#AC-<N>' (CONVENTIONS § Trace report).
+    #   v0.4.0+ 신규 spec 부터 적용 — 기존 v0.1.0~v0.3.0 Frozen 은 marker 없음.
+    "spec(spec_id): link this test to a spec acceptance criterion (e.g. 'v0.4.0/cli#AC-3')",
 ]
 
 [tool.pyright]

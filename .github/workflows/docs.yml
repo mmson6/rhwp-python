@@ -7,8 +7,10 @@ on:
     paths:
       - '**.md'
       - 'docs/**'
+      - 'tests/**'
       - 'scripts/_doc_lint.py'
       - 'scripts/lint_docs.py'
+      - 'scripts/generate_spec_trace.py'
       - '.claude/hooks/docs-lint.py'
       - '.github/workflows/docs.yml'
   pull_request:
@@ -16,8 +18,10 @@ on:
     paths:
       - '**.md'
       - 'docs/**'
+      - 'tests/**'
       - 'scripts/_doc_lint.py'
       - 'scripts/lint_docs.py'
+      - 'scripts/generate_spec_trace.py'
       - '.claude/hooks/docs-lint.py'
       - '.github/workflows/docs.yml'
   workflow_dispatch: {}
@@ -40,4 +44,8 @@ jobs:
           python-version: "3.12"
       # ^ typer 만 필요 (testing 그룹에 포함). full all 그룹은 CI 빌드용 — lint 는 가벼움.
       - run: uv pip install --system "typer>=0.12"
-      - run: python scripts/lint_docs.py docs/
+      - name: Lint docs
+        run: python scripts/lint_docs.py docs/
+      - name: Verify spec trace report up to date
+        # ^ tests/ 의 @pytest.mark.spec 변경 시 docs/traces/coverage.md 동기화 필수.
+        run: python scripts/generate_spec_trace.py --check
