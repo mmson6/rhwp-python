@@ -16,7 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/lint_docs.py` + `scripts/_doc_lint.py` (공통 lib) 신설 — frontmatter schema / supersede chain / kebab-case / 페어 / cross-link 방향성 / 깨진 링크 8 룰 일괄 검증. `.claude/hooks/docs-lint.py` 가 동일 lib 재사용. CI `docs.yml` workflow 분리 (paths-filter — build/test 와 독립).
 - `pytest.mark.spec("vX.Y.Z/topic#AC-N")` marker + `scripts/generate_spec_trace.py` (AST 정적 분석) → `docs/traces/coverage.md` (Living) 자동 매핑. v0.4.0+ 신규 spec 부터 적용, 기존 v0.1.0 ~ v0.3.0 Frozen 미변경.
 - `/new-spec <version> <topic>` Claude Code skill 신설 — 새 version spec + 짝 페어 ADR + README 인덱스 row + EARS placeholder 일괄 생성, lint 자동 검증.
-- `docs/upstream-pins.yaml` (Living) SSOT + `scripts/update_upstream_pin.py` (typer + pyyaml round-trip 안정) — `external/rhwp` 커밋 핀 자동 추출. CHANGELOG prose 와 yaml 어긋나면 yaml 이 SSOT.
 - `last_updated` 자동 갱신 hook (`.claude/hooks/update-last-updated.py`, PostToolUse) — Frozen / Superseded / Living 은 skip.
 - CONVENTIONS.md 갱신: EARS notation (v0.4.0+) / CHANGELOG ↔ implementation log 역할 분리 / 상대경로 implicit 표준 / Frozen 외부 의존성 부패 정책 / Trace report / verification 약화 / meta-level implementation 슬롯.
 - 부수 정리: 상류 `edwardkim/rhwp#390` (find_control_text_positions) 옵션 A 채택 → cherry-pick 머지 → 본 spec in-place Frozen 전환 + RESOLVED notice. design 파일 `<topic>-design-research.md` → `<topic>-research.md` 명명 통일 (v0.2.0/ir, v0.3.0/cli rename + 24 cross-link 일괄 정정).

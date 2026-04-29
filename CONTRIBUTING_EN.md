@@ -58,4 +58,4 @@ All of these run in CI; running locally first saves a round trip:
 - **Project rules + architecture**: [AGENTS.md](AGENTS.md) — same content as `CLAUDE.md` (symlink). Async patterns, GIL release rules, extras-gated test counting, etc.
 - **Documentation policy**: [docs/CONVENTIONS.md](docs/CONVENTIONS.md) — lifecycle (Living/Active/Draft/Frozen/Superseded), frontmatter schema, EARS notation, supersede chain
 - **Active spec index**: [docs/roadmap/README.md](docs/roadmap/README.md) — what's GA, what's in progress, what's planned
-- **Upstream commit pin**: [docs/upstream-pins.yaml](docs/upstream-pins.yaml) — which `external/rhwp` commit each release uses
+- **Upstream commit pin per release**: the git submodule itself is authoritative — `git ls-tree <tag> external/rhwp`, plus the prose note in CHANGELOG

@@ -140,7 +140,6 @@ docs/
 │   └── coverage.md                   Living  — spec ↔ test 자동 매핑
 ├── upstream/
 │   └── <topic>.md                    Active  — 외부 (rhwp Rust 코어) 이슈 초안. 업스트림 머지 시 archive
-├── upstream-pins.yaml                Living  — external/rhwp 커밋 핀 SSOT
 └── verification/
     └── v<X.Y.Z>/...                  Frozen  — 큰 단위 작업 검증 리포트 (한정)
 ```

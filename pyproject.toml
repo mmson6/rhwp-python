@@ -73,8 +73,7 @@ examples = [
 rhwp-py = "rhwp.cli:app"
 
 [dependency-groups]
-# ^ pyyaml: scripts/update_upstream_pin.py 의 round-trip (load + modify + dump)
-dev = ["maturin>=1.7", "pyyaml>=6"]
+dev = ["maturin>=1.7"]
 testing = [
     {include-group = "dev"},
     "pytest>=8",

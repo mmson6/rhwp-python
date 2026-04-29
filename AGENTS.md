@@ -48,7 +48,7 @@ Project-specific instructions. Inherits all rules from `~/.claude/CLAUDE.md` (gl
 - **Cargo.toml is the version source of truth** via `dynamic = ["version"]` in pyproject.toml. Always bump Cargo.toml before tagging — `publish.yml`'s `verify-version` aborts on mismatch
 - **No breaking changes across Phase boundaries** (Phase 1 → 2 must keep existing APIs)
 - Release trigger: GitHub Release `published` event fires `publish.yml`. Draft releases don't trigger
-- Every release records the `external/rhwp` submodule commit hash in CHANGELOG (SSOT: `docs/upstream-pins.yaml`)
+- Every release records the `external/rhwp` submodule commit hash in CHANGELOG. The git submodule itself (visible via `git ls-tree <tag> external/rhwp`) is the authoritative pin per release
 - Integration-only runtime deps (LangChain, typer, jsonschema) belong in `[project.optional-dependencies]`, never `[project] dependencies` — keeps the core wheel dependency-free
 
 ### Documentation
