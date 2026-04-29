@@ -8,46 +8,44 @@ arguments:
 disable-model-invocation: true
 ---
 
-# /new-spec — 새 spec 스캐폴드
+# /new-spec — scaffold a new version spec
 
-목적: `<version>` (예: `v0.4.0`) + `<topic>` (예: `view-renderer`) 인자로 신규 per-version spec + 짝 페어 ADR + roadmap 인덱스 row 를 일괄 생성.
+Given `<version>` (e.g. `v0.4.0`) and `<topic>` (e.g. `view-renderer`), create a new per-version spec, its paired ADR (design research), and the index entry in one shot.
 
-## 산출물
+## Outputs
 
-다음 4가지를 한 번에 생성/갱신:
+1. `docs/roadmap/<version>/<topic>.md` — the spec body (frontmatter `status: Draft`, `target: <version>`)
+2. `docs/design/<version>/<topic>-research.md` — the paired ADR (same frontmatter)
+3. `docs/roadmap/README.md` — append a row to the active spec index table
+4. EARS notation placeholder section inside the spec body
 
-1. **`docs/roadmap/<version>/<topic>.md`** — spec 본문 (frontmatter `status: Draft`, `target: <version>`)
-2. **`docs/design/<version>/<topic>-research.md`** — 짝 페어 ADR (frontmatter `status: Draft`, `target: <version>`)
-3. **`docs/roadmap/README.md`** — § 활성 spec 인덱스 표에 row 추가
-4. **§ 인수조건 placeholder** — EARS 5종 키워드 예시 (Ubiquitous / Event-Driven / State-Driven / Optional / Unwanted)
+## Procedure
 
-## 작업 절차
+When this skill is invoked, execute the following steps in order:
 
-본 skill 호출 시 모델은 다음 순서로 진행:
+1. **Validate arguments**
+   - `version` must match the SemVer pattern `vX.Y.Z`
+   - `topic` must be kebab-case (`[a-z0-9]+(-[a-z0-9]+)*`)
+   - Abort if `docs/roadmap/<version>/<topic>.md` already exists — never overwrite an existing spec
 
-1. **인자 검증**
-   - `version` 이 `vX.Y.Z` SemVer 형식인지
-   - `topic` 이 kebab-case 인지
-   - `docs/roadmap/<version>/<topic>.md` 가 이미 존재하면 abort (기존 spec 침해 방지)
+2. **Re-read `docs/CONVENTIONS.md`** before writing — apply the current frontmatter schema, naming rules, cross-link direction, and EARS notation section. Conventions may have evolved since the last skill invocation.
 
-2. **CONVENTIONS.md 정독** — frontmatter schema / 명명 규칙 / cross-link 방향성 / EARS notation 섹션을 읽고 본 작업에 적용
-
-3. **디렉토리 생성** (없으면)
+3. **Create directories** if missing:
    - `docs/roadmap/<version>/`
    - `docs/design/<version>/`
 
-4. **`docs/roadmap/<version>/<topic>.md` 작성** — 아래 템플릿:
+4. **Write `docs/roadmap/<version>/<topic>.md`** using this template (placeholders in `<...>` must be filled by Claude based on user intent; section headers and Korean prose stay as-is — they become Korean docs):
 
    ```markdown
    ---
    status: Draft
    target: <version>
-   last_updated: <오늘 YYYY-MM-DD>
+   last_updated: <today YYYY-MM-DD>
    ---
 
-   # <version> — <topic 의 한국어 요약 제목>
+   # <version> — <Korean summary title for the topic>
 
-   <한 문단 요약 — 본 spec 이 무엇을 도입하고 왜 필요한지>.
+   <One paragraph in Korean — what this spec introduces and why>.
 
    주요 결정의 근거·대안·실패 시나리오는 짝 페어: [<topic>-research.md](../../design/<version>/<topic>-research.md).
 
@@ -59,7 +57,8 @@ disable-model-invocation: true
 
    ## 인수조건
 
-   <!-- EARS notation (CONVENTIONS § 인수조건 형식) — AC-N ID 부여, 테스트 marker 와 1:1 매핑 -->
+   <!-- EARS notation (CONVENTIONS § 인수조건 형식) — assign AC-N IDs;
+        each maps 1:1 to a `pytest.mark.spec("<version>/<topic>#AC-N")` -->
 
    - **AC-1** (Ubiquitous) — `THE <system> SHALL <response>`
    - **AC-2** (Event-Driven) — `WHEN <trigger>, THE <system> SHALL <response>`
@@ -69,20 +68,20 @@ disable-model-invocation: true
 
    ## 영구 비목표
 
-   - (본 spec 의 범위에서 명시적으로 제외하는 항목)
+   - <items explicitly out of scope for this spec>
 
    ## 참조
 
    - 짝 페어 (ADR): [<topic>-research.md](../../design/<version>/<topic>-research.md)
    ```
 
-5. **`docs/design/<version>/<topic>-research.md` 작성** — 아래 템플릿:
+5. **Write `docs/design/<version>/<topic>-research.md`** using this template:
 
    ```markdown
    ---
    status: Draft
    target: <version>
-   last_updated: <오늘 YYYY-MM-DD>
+   last_updated: <today YYYY-MM-DD>
    ---
 
    # <version> <topic> — 설계 의사결정 리서치 요약
@@ -95,7 +94,7 @@ disable-model-invocation: true
    |---|---|---|---|---|
    | 1 | (placeholder) | A: ... / B: ... / C: ... | (?) | (?) |
 
-   ## 1. <첫 결정 항목>
+   ## 1. <first decision item>
 
    ### 팩트
    ### 검증자 반박
@@ -107,24 +106,22 @@ disable-model-invocation: true
    - [roadmap/<version>/<topic>.md](../../roadmap/<version>/<topic>.md) — 본 리서치의 결정 요약
    ```
 
-6. **`docs/roadmap/README.md` 의 § 활성 spec 인덱스 표에 row 추가** — 기존 표 마지막 줄 다음에:
+6. **Append a row to `docs/roadmap/README.md`** in the active spec index table (find `## 활성 spec 인덱스` section, add at the end of the table):
 
    ```markdown
    | <version> (<topic>) | Draft | [<version>/<topic>.md](<version>/<topic>.md) | [design/<version>/<topic>-research.md](../design/<version>/<topic>-research.md) |
    ```
 
-7. **무결성 검증** — 작업 후 `python3 scripts/lint_docs.py docs/` 실행. 위반 시 사용자에게 보고하고 수정 안내.
+7. **Run integrity check**: `uv run --no-project --with "typer>=0.12" python scripts/lint_docs.py docs/`. If violations are reported, surface them to the user and propose corrections — do not silently fix.
 
-## 규칙 (CONVENTIONS.md 준수)
+## Rules (must comply with `docs/CONVENTIONS.md`)
 
-- frontmatter schema 정확 적용 (status enum / target SemVer / last_updated YYYY-MM-DD)
-- spec ↔ research 페어 외 다른 spec 파일 직접 link **금지** (인덱스 경유)
-- kebab-case 파일명, vX.Y.Z 디렉토리명
-- 상대경로 implicit (`./` prefix 금지)
+- Frontmatter schema: `status` enum, `target` SemVer, `last_updated` `YYYY-MM-DD`
+- Spec ↔ research pair files may link directly; **all other spec ↔ spec direct links are forbidden** — route through index pages
+- Filenames must be kebab-case; directories use `vX.Y.Z` SemVer
+- Relative paths are implicit (`foo.md`, `subdir/foo.md`); no `./` prefix; external resources use fully-qualified URLs
 
-## 한계
+## Limits
 
-- spec 본문은 placeholder — 실제 결정 / 인수조건 / 비목표는 사용자가 채움
-- design research 의 결정 매트릭스도 placeholder — N개 결정의 실제 비교는 사용자가 작성
-
-본 skill 은 **구조 일관성** (frontmatter / 페어 / 인덱스 / EARS placeholder) 만 자동화. 콘텐츠 결정은 사람의 판단.
+- Spec body and decision matrix are placeholders — actual decisions / acceptance criteria / non-goals must be filled by the user
+- This skill automates **structural consistency** only (frontmatter / pair / index / EARS placeholder). Content judgment is the user's.
