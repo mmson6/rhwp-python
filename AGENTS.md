@@ -10,10 +10,6 @@ Project-specific instructions. Inherits all rules from `~/.claude/CLAUDE.md` (gl
 - **License**: MIT — dual copyright (Edward Kim for rhwp core, DanMeon for bindings). Both LICENSE files are bundled in the wheel (`license-files = ["LICENSE", "external/rhwp/LICENSE"]`)
 - **Status**: unofficial community package. The `rhwp` name on PyPI is intentionally left for the upstream maintainer
 
-## Global rules inherited
-
-All rules from `~/.claude/CLAUDE.md` apply. This file adds only project-specific details — do not restate global rules here.
-
 ## Project-specific rules
 
 ### Rust + Python hybrid build
