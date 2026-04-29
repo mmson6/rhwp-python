@@ -112,6 +112,16 @@ When this skill is invoked, execute the following steps in order:
 
 7. **Run integrity check**: `uv run --no-project --with "typer>=0.12" python scripts/lint_docs.py docs/`. If violations are reported, surface them to the user and propose corrections — do not silently fix.
 
+8. **Spawn fresh-context architect-reviewer subagent** for independent review (작성자 ≠ 검증자 원칙). Use the `Agent` tool with `subagent_type: "architect-reviewer"` and a self-contained prompt that includes:
+   - Project context (rhwp-python, spec-driven release model, `docs/CONVENTIONS.md` SSOT)
+   - The exact paths of the new spec body, paired ADR, and the README index row
+   - Cross-check sources to read (`docs/CONVENTIONS.md` for convention compliance, primary code/files relevant to the spec's technical claims)
+   - Explicit ask: P0/P1/P2 findings with file:line citations covering — (a) internal consistency (decisions ↔ ACs ↔ ADR matrix), (b) convention compliance, (c) technical accuracy of upstream/code claims, (d) logical gaps / unstated assumptions, (e) scope discipline (anything in spec that's actually a future version's work, anything in non-goals that's actually in scope)
+   - Output verdict: `APPROVE` / `REQUEST CHANGES` / `REJECT`
+   - Length cap (~600 words)
+
+   Surface findings verbatim to the user. **Do not silently apply fixes** — the user reviews the findings and decides which to address. False-positive rate is non-zero (~30% in practice); the user is the final arbiter. After fixes, re-run lint (step 7) and re-run review (step 8) only if the user requests a second pass — don't auto-loop.
+
 ## Rules (must comply with `docs/CONVENTIONS.md`)
 
 - Frontmatter schema: `status` enum, `target` SemVer, `last_updated` `YYYY-MM-DD`
@@ -122,4 +132,5 @@ When this skill is invoked, execute the following steps in order:
 ## Limits
 
 - Spec body and decision matrix are placeholders — actual decisions / acceptance criteria / non-goals must be filled by the user
-- This skill automates **structural consistency** only (frontmatter / pair / index / EARS placeholder). Content judgment is the user's.
+- This skill automates **structural consistency** (frontmatter / pair / index / EARS placeholder, step 1–7) and **delegates independent review** (step 8) — but content judgment, accept/reject of reviewer findings, and any fix application remain the user's call. False-positive rate of the reviewer is non-zero; never blindly accept.
+- Auto-spawned review (step 8) is intentional for *new spec* creation (high-stakes, low-frequency, Frozen-after-GA). Other skills (commit-message / docstring-edit / etc.) should NOT copy this pattern by default — verifier-spawn cost is justified only when miss-cost outweighs invocation overhead.
