@@ -74,7 +74,9 @@ def _previous_pin(pins: dict, current_version: str) -> dict | None:
 
     def key(v: str) -> tuple[int, int, int]:
         m = re.match(r"v(\d+)\.(\d+)\.(\d+)", v)
-        return (int(m.group(1)), int(m.group(2)), int(m.group(3))) if m else (0, 0, 0)
+        if not m:
+            raise ValueError(f"malformed pin key {v!r} — expected vX.Y.Z")
+        return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
 
     target = key(current_version)
     candidates = sorted(

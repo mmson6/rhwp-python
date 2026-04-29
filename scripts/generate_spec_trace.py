@@ -56,7 +56,8 @@ def main(
 
 
 def _collect_spec_markers(tests_dir: Path) -> dict[str, list[str]]:
-    """spec_id → list of pytest nodeids."""
+    """spec_id → list of pytest nodeids. ``class TestFoo`` 안의 메서드도 정확히
+    `tests/x.py::TestFoo::test_bar` 형식으로 출력 (ast.walk 평탄화 회피)."""
     mapping: dict[str, list[str]] = defaultdict(list)
     if not tests_dir.is_dir():
         return mapping
@@ -67,15 +68,42 @@ def _collect_spec_markers(tests_dir: Path) -> dict[str, list[str]]:
         except SyntaxError:
             continue
         rel = py_file.relative_to(REPO)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-                if not node.name.startswith("test_"):
-                    continue
-                for decorator in node.decorator_list:
-                    spec_id = _extract_spec_id(decorator)
-                    if spec_id and SPEC_ID_RE.match(spec_id):
-                        mapping[spec_id].append(f"{rel}::{node.name}")
+        visitor = _SpecMarkerVisitor(rel)
+        visitor.visit(tree)
+        for spec_id, nodeids in visitor.mapping.items():
+            mapping[spec_id].extend(nodeids)
     return mapping
+
+
+class _SpecMarkerVisitor(ast.NodeVisitor):
+    """class 컨텍스트 stack 을 유지하며 @pytest.mark.spec(...) 추출."""
+
+    def __init__(self, file_rel: Path) -> None:
+        self.file_rel = file_rel
+        self.class_stack: list[str] = []
+        self.mapping: dict[str, list[str]] = defaultdict(list)
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        self.class_stack.append(node.name)
+        self.generic_visit(node)
+        self.class_stack.pop()
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._maybe_add(node)
+        self.generic_visit(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._maybe_add(node)
+        self.generic_visit(node)
+
+    def _maybe_add(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+        if not node.name.startswith("test_"):
+            return
+        for decorator in node.decorator_list:
+            spec_id = _extract_spec_id(decorator)
+            if spec_id and SPEC_ID_RE.match(spec_id):
+                parts = [*self.class_stack, node.name]
+                self.mapping[spec_id].append(f"{self.file_rel}::{'::'.join(parts)}")
 
 
 def _extract_spec_id(node: ast.AST) -> str | None:

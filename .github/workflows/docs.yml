@@ -4,8 +4,9 @@ name: Docs lint
 on:
   push:
     branches: [main]
+    # ^ 'docs/**' 가 docs 안 모든 .md 포괄. README/CHANGELOG 등 lint 무관 .md
+    #   변경에 fire 안 하려고 '**.md' 제외. tests/** 는 spec-trace 검증 때문에 유지.
     paths:
-      - '**.md'
       - 'docs/**'
       - 'tests/**'
       - 'scripts/_doc_lint.py'
@@ -16,7 +17,6 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - '**.md'
       - 'docs/**'
       - 'tests/**'
       - 'scripts/_doc_lint.py'

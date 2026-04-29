@@ -66,11 +66,25 @@ def parse_frontmatter(text: str) -> dict[str, str] | None:
             continue
         k, _, v = line.partition(":")
         v = v.strip()
+        # ^ trailing inline comment ('foo: bar  # note') strip — quoted value 안의
+        #   '#' 는 보호 (flat key:value 가정상 quote 처리 후 안전)
+        if not (v.startswith(("'", '"'))):
+            v = v.split(" #", 1)[0].rstrip()
         # ^ 양쪽 동일 quote 만 unwrap (mismatched 는 그대로)
         if len(v) >= 2 and v[0] == v[-1] and v[0] in ("'", '"'):
             v = v[1:-1]
         meta[k.strip()] = v
     return meta
+
+
+# * code fence stripper — fence 안 예시 link / 백틱 인라인 link 를 lint 대상에서 배제
+def _strip_code(text: str) -> str:
+    """Remove ```...``` 블록 + 인라인 `...` 백틱. lint regex 는 raw text 가
+    아니라 본 출력에 적용 — fence 안 예시 link 가 broken/cross-link 위반으로
+    오인식되는 false positive 방지."""
+    text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
+    text = re.sub(r"`[^`\n]+`", "", text)
+    return text
 
 
 # * Rule 1+2: frontmatter schema + supersede chain
@@ -138,8 +152,12 @@ def _validate_supersede_chain(rel_str: str, meta: dict[str, str], repo: Path) ->
     rel = Path(rel_str)
 
     superseded_by = meta.get("superseded_by")
+    # ^ supersede 경로 base: vX.Y.Z 하위면 docs/<kind>/, meta-level 평면이면 docs/<kind>/
+    #   format: vX.Y.Z 파일은 '<vX.Y.Z>/<topic>.md', meta-level 은 '<topic>.md'.
+    base, expected = _supersede_base(rel)
+
     if superseded_by:
-        target_rel = rel.parent.parent / superseded_by
+        target_rel = base / superseded_by
         target = repo / target_rel
         if not target.exists():
             errors.append(
@@ -151,24 +169,35 @@ def _validate_supersede_chain(rel_str: str, meta: dict[str, str], repo: Path) ->
                 errors.append(
                     f"frontmatter: superseded_by target {superseded_by!r} lacks frontmatter"
                 )
-            else:
-                expected = str(rel.relative_to(rel.parent.parent))
-                if target_meta.get("supersedes") != expected:
-                    errors.append(
-                        f"frontmatter: supersede chain broken — target's "
-                        f"'supersedes' is {target_meta.get('supersedes')!r}, "
-                        f"expected {expected!r}"
-                    )
+            elif target_meta.get("supersedes") != expected:
+                errors.append(
+                    f"frontmatter: supersede chain broken — target's "
+                    f"'supersedes' is {target_meta.get('supersedes')!r}, "
+                    f"expected {expected!r}"
+                )
 
     supersedes = meta.get("supersedes")
     if supersedes:
-        target_rel = rel.parent.parent / supersedes
+        target_rel = base / supersedes
         if not (repo / target_rel).exists():
             errors.append(
                 f"frontmatter: supersedes {supersedes!r} not found (resolved: {target_rel})"
             )
 
     return errors
+
+
+def _supersede_base(rel: Path) -> tuple[Path, str]:
+    """supersede chain 의 base 디렉토리 + 본 파일의 expected 역참조 ID.
+
+    vX.Y.Z 파일 (`docs/<kind>/<vX.Y.Z>/<file>.md`) → base=`docs/<kind>/`,
+    expected=`<vX.Y.Z>/<file>.md`.
+    Meta-level 평면 (`docs/<kind>/<file>.md`) → base=`docs/<kind>/`,
+    expected=`<file>.md`.
+    """
+    if re.fullmatch(r"v\d+\.\d+\.\d+", rel.parent.name):
+        return rel.parent.parent, str(rel.relative_to(rel.parent.parent))
+    return rel.parent, rel.name
 
 
 # * Rule 3+4: filename kebab-case + vX.Y.Z directory SemVer
@@ -242,7 +271,7 @@ def validate_cross_link(rel_str: str, text: str) -> list[str]:
     self_link = f"{base}.md"
 
     errors: list[str] = []
-    for link in re.findall(r"\]\(([^)]+\.md)[^)]*\)", text):
+    for link in re.findall(r"\]\(([^)]+\.md)[^)]*\)", _strip_code(text)):
         link_target = link.split("#")[0]
         if "/" in link_target:
             continue
@@ -262,7 +291,7 @@ def validate_cross_link(rel_str: str, text: str) -> list[str]:
 def validate_broken_link(rel_str: str, text: str, repo: Path) -> list[str]:
     target_dir = (repo / rel_str).parent
     errors: list[str] = []
-    for link in re.findall(r"\]\(([^)]+\.md)[^)]*\)", text):
+    for link in re.findall(r"\]\(([^)]+\.md)[^)]*\)", _strip_code(text)):
         link_target = link.split("#")[0].split("?")[0]
         if not link_target or link_target.startswith("http"):
             continue
