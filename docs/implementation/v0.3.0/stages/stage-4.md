@@ -1,6 +1,10 @@
-# Stage S4 — Schema v1.1 GA + rhwp-py CLI + LangChain include_furniture (완료)
+---
+status: Frozen
+ga: v0.3.0
+last_updated: 2026-04-28
+---
 
-**Status**: Frozen · **GA**: v0.3.0 · **Last updated**: 2026-04-28
+# Stage S4 — Schema v1.1 GA + rhwp-py CLI + LangChain include_furniture (완료)
 
 **작업일**: 2026-04-28
 **계획 문서**: [roadmap/v0.3.0/ir-expansion.md](../../../roadmap/v0.3.0/ir-expansion.md) §구현 스테이지 분할 + [roadmap/v0.3.0/cli.md](../../../roadmap/v0.3.0/cli.md)
@@ -136,7 +140,7 @@ S4 가 GA 의 마지막 stage. release 진입 전 다음 명시:
 ## 참조
 
 - 상위 설계: [roadmap/v0.3.0/ir-expansion.md](../../../roadmap/v0.3.0/ir-expansion.md), [roadmap/v0.3.0/cli.md](../../../roadmap/v0.3.0/cli.md)
-- 결정 사항 증거: [design/v0.3.0/ir-expansion-research.md](../../../design/v0.3.0/ir-expansion-research.md), [design/v0.3.0/cli-design-research.md](../../../design/v0.3.0/cli-design-research.md)
+- 결정 사항 증거: [design/v0.3.0/ir-expansion-research.md](../../../design/v0.3.0/ir-expansion-research.md), [design/v0.3.0/cli-research.md](../../../design/v0.3.0/cli-research.md)
 - 선행 stage: [stage-1.md](stage-1.md), [stage-2.md](stage-2.md), [stage-3.md](stage-3.md)
 - 상류 제안 이슈 (S2 시점 정리): [docs/upstream/issue-find-control-text-positions.md](../../../upstream/issue-find-control-text-positions.md)
 - v0.2.0 선례: [implementation/v0.2.0/stages/](../../v0.2.0/stages/) (S1~S5)

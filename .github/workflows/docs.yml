@@ -1,0 +1,51 @@
+name: Docs lint
+
+# 트리거: docs/*.md / scripts/_doc_lint.py / hook 변경 시. 빌드/테스트와 분리.
+on:
+  push:
+    branches: [main]
+    # ^ 'docs/**' 가 docs 안 모든 .md 포괄. README/CHANGELOG 등 lint 무관 .md
+    #   변경에 fire 안 하려고 '**.md' 제외. tests/** 는 spec-trace 검증 때문에 유지.
+    paths:
+      - 'docs/**'
+      - 'tests/**'
+      - 'scripts/_doc_lint.py'
+      - 'scripts/lint_docs.py'
+      - 'scripts/generate_spec_trace.py'
+      - '.claude/hooks/docs-lint.py'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'tests/**'
+      - 'scripts/_doc_lint.py'
+      - 'scripts/lint_docs.py'
+      - 'scripts/generate_spec_trace.py'
+      - '.claude/hooks/docs-lint.py'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: Lint docs (frontmatter / pair / supersede / links)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8.1.0
+        with:
+          python-version: "3.12"
+      # ^ --no-project: pyproject.toml 의 maturin build (Rust + submodule 필요) skip.
+      #   --with: typer 만 ad-hoc 설치 (lint 는 rhwp import 안 함, 가벼움).
+      - name: Lint docs
+        run: uv run --no-project --with "typer>=0.12" python scripts/lint_docs.py docs/
+      - name: Verify spec trace report up to date
+        # ^ tests/ 의 @pytest.mark.spec 변경 시 docs/traces/coverage.md 동기화 필수.
+        run: uv run --no-project --with "typer>=0.12" python scripts/generate_spec_trace.py --check

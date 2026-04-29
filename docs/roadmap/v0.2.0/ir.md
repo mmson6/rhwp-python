@@ -1,6 +1,10 @@
-# 0.2.0 — Document IR v1 (JSON 직렬화형 문서 모델)
+---
+status: Frozen
+ga: v0.2.0
+last_updated: 2026-04-25
+---
 
-**Status**: Frozen · **GA**: v0.2.0 · **Last updated**: 2026-04-25
+# 0.2.0 — Document IR v1 (JSON 직렬화형 문서 모델)
 
 `rhwp-python` 을 단순 텍스트 추출기에서 **RAG/LLM 파이프라인이 직접 소비 가능한 구조화 문서 라이브러리** 로 전환하는 첫 단계. Pydantic V2 기반 공개 데이터 모델과 JSON 스키마를 고정하고, Rust 코어가 보유한 구조 정보를 Python 사용자에게 타입-안전하게 노출한다.
 
@@ -138,7 +142,7 @@ v0.2.0 에서 enum 에만 선언하고 v0.3.0+ 에서 구현:
 
 ### 블록 태그드 유니온
 
-**Callable Discriminator 패턴** — `UnknownBlock` catch-all variant 를 v1.0 부터 포함. 이유: Pydantic V2 의 string discriminator 는 미지의 `kind` 를 만나면 `union_tag_invalid` 로 **문서 전체 파싱을 거부**한다. v0.3.0 에서 `PictureBlock` 이 추가될 때 v0.2.0 소비자가 **읽기 불가 상태** 가 되는 것을 방지. 상세 근거: [ir-design-research.md § 1](../../design/v0.2.0/ir-design-research.md#1-block-유니온-확장--minor-bump--unknownblock-안전장치).
+**Callable Discriminator 패턴** — `UnknownBlock` catch-all variant 를 v1.0 부터 포함. 이유: Pydantic V2 의 string discriminator 는 미지의 `kind` 를 만나면 `union_tag_invalid` 로 **문서 전체 파싱을 거부**한다. v0.3.0 에서 `PictureBlock` 이 추가될 때 v0.2.0 소비자가 **읽기 불가 상태** 가 되는 것을 방지. 상세 근거: [ir-research.md § 1](../../design/v0.2.0/ir-research.md#1-block-유니온-확장--minor-bump--unknownblock-안전장치).
 
 ```python
 from typing import Annotated, Any, Literal, Union
@@ -255,11 +259,11 @@ class Provenance(BaseModel):
 
 모든 `Block` 노드가 `prov: Provenance` 를 보유.
 
-**단위는 Unicode codepoint** — Python `str[i]` 인덱싱과 직접 호환. 상류 `ir-diff` 는 UTF-16 기준이지만 Python 사용자 ergonomics 가 더 중요 (이모지·SMP CJK 혼용 시 UTF-16 오프셋으로 `text[a:b]` 하면 off-by-one 발생). Rust 바인딩 레이어가 상류 `char_offsets` (UTF-16) → codepoint 변환을 `to_ir()` 시점 1회 수행. LSP/JS interop 수요가 생기면 v0.3.0+ 에서 `char_start_utf16` 병렬 필드 추가 (backward-compatible). 상세 근거: [ir-design-research.md § 3](../../design/v0.2.0/ir-design-research.md#3-char-오프셋-단위--unicode-codepoint).
+**단위는 Unicode codepoint** — Python `str[i]` 인덱싱과 직접 호환. 상류 `ir-diff` 는 UTF-16 기준이지만 Python 사용자 ergonomics 가 더 중요 (이모지·SMP CJK 혼용 시 UTF-16 오프셋으로 `text[a:b]` 하면 off-by-one 발생). Rust 바인딩 레이어가 상류 `char_offsets` (UTF-16) → codepoint 변환을 `to_ir()` 시점 1회 수행. LSP/JS interop 수요가 생기면 v0.3.0+ 에서 `char_start_utf16` 병렬 필드 추가 (backward-compatible). 상세 근거: [ir-research.md § 3](../../design/v0.2.0/ir-research.md#3-char-오프셋-단위--unicode-codepoint).
 
 ### 스키마 버저닝
 
-**Docling 패턴 채택** (`Annotated[str, StringConstraints]` + validator): `$id` URL + 루트 `schema_version` 필드 병용. **`Literal` 은 사용하지 않음** — forward-read 가 원천 차단되어 라이브러리 목적 (기존 파일 읽기) 에 반함. 상세 근거: [ir-design-research.md § 4](../../design/v0.2.0/ir-design-research.md#4-schema_version-필드-타입--annotatedstr-stringconstraints--validator).
+**Docling 패턴 채택** (`Annotated[str, StringConstraints]` + validator): `$id` URL + 루트 `schema_version` 필드 병용. **`Literal` 은 사용하지 않음** — forward-read 가 원천 차단되어 라이브러리 목적 (기존 파일 읽기) 에 반함. 상세 근거: [ir-research.md § 4](../../design/v0.2.0/ir-research.md#4-schema_version-필드-타입--annotatedstr-stringconstraints--validator).
 
 ```python
 from typing import Annotated, Final
@@ -361,7 +365,7 @@ for blk in ir.body:               # 본문 리스트 직접 순회
 headers = ir.furniture.page_headers  # 장식 요소 직접 접근
 ```
 
-`iter_blocks` 는 scope+recurse 조합이 필요한 경우용 (`sum(1 for b in doc.iter_blocks(scope="all") if isinstance(b, TableBlock))`). 설계 배경: [ir-design-research.md § 5](../../design/v0.2.0/ir-design-research.md#5-iter-api--docbody--docfurniture-속성--iter_blocksscope-recurse).
+`iter_blocks` 는 scope+recurse 조합이 필요한 경우용 (`sum(1 for b in doc.iter_blocks(scope="all") if isinstance(b, TableBlock))`). 설계 배경: [ir-research.md § 5](../../design/v0.2.0/ir-research.md#5-iter-api--docbody--docfurniture-속성--iter_blocksscope-recurse).
 
 **Breaking change 없음** — 기존 `Document.paragraphs()`/`extract_text()` 는 변경 없이 유지.
 
@@ -385,7 +389,7 @@ python/rhwp/
 
 ### Rust 경계 패턴 + 캐싱
 
-**Rust → Python dict → Pydantic `model_validate`** 경로 채택. `pyo3-pydantic` 크레이트(실험적) 는 배제. **캐싱은 Rust `OnceCell<PyObject>` 필드로 구현** — `#[pyclass(dict)]` 불필요 (abi3 limited API 호환 우려 회피). `unsendable` 덕분에 단일 스레드 보장 → lock 불필요. 상세 근거: [ir-design-research.md § 7](../../design/v0.2.0/ir-design-research.md#7-to_ir-캐싱--rust-oncecellpyobject--frozen-ir).
+**Rust → Python dict → Pydantic `model_validate`** 경로 채택. `pyo3-pydantic` 크레이트(실험적) 는 배제. **캐싱은 Rust `OnceCell<PyObject>` 필드로 구현** — `#[pyclass(dict)]` 불필요 (abi3 limited API 호환 우려 회피). `unsendable` 덕분에 단일 스레드 보장 → lock 불필요. 상세 근거: [ir-research.md § 7](../../design/v0.2.0/ir-research.md#7-to_ir-캐싱--rust-oncecellpyobject--frozen-ir).
 
 ```rust
 // src/document.rs
@@ -428,7 +432,7 @@ def build_document(raw: dict) -> HwpDocument:
 
 ### JSON Schema 공개
 
-**4축 배포** (1차 In-package · 2차 GitHub Pages · 3차 content-addressed · 4차 SchemaStore 카탈로그). 근거: [ir-design-research.md § 8](../../design/v0.2.0/ir-design-research.md#8-json-schema-id-호스팅--github-pages--불변-경로--schemastore--in-package).
+**4축 배포** (1차 In-package · 2차 GitHub Pages · 3차 content-addressed · 4차 SchemaStore 카탈로그). 근거: [ir-research.md § 8](../../design/v0.2.0/ir-research.md#8-json-schema-id-호스팅--github-pages--불변-경로--schemastore--in-package).
 
 ```python
 # python/rhwp/ir/schema.py
@@ -532,7 +536,7 @@ def load_schema() -> dict:
 
 ## 결정 사항 (리서치 기반 확정)
 
-초안 작성 시점의 미결 8건 중 #6 은 사용자 결정으로 스킵, 나머지 7건은 **수행자 + 검증자 2인 1조 × 7 팀 병렬 리서치** 로 확정. 세부 증거·대안 비교·실패 시나리오는 [docs/design/v0.2.0/ir-design-research.md](../../design/v0.2.0/ir-design-research.md) 참조.
+초안 작성 시점의 미결 8건 중 #6 은 사용자 결정으로 스킵, 나머지 7건은 **수행자 + 검증자 2인 1조 × 7 팀 병렬 리서치** 로 확정. 세부 증거·대안 비교·실패 시나리오는 [docs/design/v0.2.0/ir-research.md](../../design/v0.2.0/ir-research.md) 참조.
 
 | # | 이슈 | 결정 | 핵심 근거 |
 |---|---|---|---|

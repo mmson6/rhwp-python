@@ -16,7 +16,8 @@ from langchain_core.documents import Document  # noqa: E402
 from langchain_text_splitters import RecursiveCharacterTextSplitter  # noqa: E402
 from rhwp.integrations.langchain import HwpLoader  # noqa: E402
 
-pytestmark = pytest.mark.langchain
+pytestmark = [pytest.mark.langchain, pytest.mark.spec("v0.2.0/ir")]
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests
 
 
 # * 생성자

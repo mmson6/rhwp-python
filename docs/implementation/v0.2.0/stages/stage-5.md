@@ -1,10 +1,14 @@
-# Stage S5 — `iter_blocks` + LangChain IR 통합 (완료)
+---
+status: Frozen
+ga: v0.2.0
+last_updated: 2026-04-24
+---
 
-**Status**: Frozen · **GA**: v0.2.0 · **Last updated**: 2026-04-24
+# Stage S5 — `iter_blocks` + LangChain IR 통합 (완료)
 
 **작업일**: 2026-04-24
 **계획 문서**: [roadmap/v0.2.0/ir.md](../../../roadmap/v0.2.0/ir.md) §Python API §iter API + §모듈 구조
-**설계 근거**: [design/v0.2.0/ir-design-research.md](../../../design/v0.2.0/ir-design-research.md) §5 (iter API 설계)
+**설계 근거**: [design/v0.2.0/ir-research.md](../../../design/v0.2.0/ir-research.md) §5 (iter API 설계)
 
 ## 스코프
 

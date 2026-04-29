@@ -1,6 +1,10 @@
-# v0.3.0 `rhwp-py` CLI — 설계 의사결정 리서치 요약
+---
+status: Frozen
+ga: v0.3.0
+last_updated: 2026-04-28
+---
 
-**Status**: Frozen · **GA**: v0.3.0 · **Last updated**: 2026-04-28
+# v0.3.0 `rhwp-py` CLI — 설계 의사결정 리서치 요약
 
 [v0.3.0/cli.md](../../roadmap/v0.3.0/cli.md) §결정 사항 중 외부 독자가 "왜?" 를 던질 만한 3건 (이름 선정 · 업스트림 overlap=0 정책 · 기본 출력 포맷) 의 업계 선례·대안·실패 시나리오를 기록한다. cli.md 본문이 최종 결정을 기술하고, 본 문서는 그 결정의 근거를 담는다.
 
@@ -165,10 +169,10 @@
 3. **§서브커맨드 스펙** — `blocks` 의 기본 포맷이 NDJSON 인 이유를 한 줄 추가 (streaming pipeline 친화)
 4. **§결정 사항 테이블 #3** — "shell pipeline 과 CI 친화" 표현을 "kubectl/aws/gh 의 스크립팅-primary 관행 준수" 로 구체화
 
-본 문서를 cli.md 에서 `상세 증거: [cli-design-research.md](../../design/v0.3.0/cli-design-research.md)` 로 cross-link — v0.2.0 ir.md ↔ ir-design-research.md 와 동일 패턴.
+본 문서를 cli.md 에서 `상세 증거: [cli-research.md](../../design/v0.3.0/cli-research.md)` 로 cross-link — v0.2.0 ir.md ↔ ir-research.md 와 동일 패턴.
 
 ## 참조
 
 - [roadmap/v0.3.0/cli.md](../../roadmap/v0.3.0/cli.md) — 본 리서치의 결정 요약
 - [roadmap/v0.2.0/ir.md](../../roadmap/v0.2.0/ir.md) §방향 전환 배경 — CLI 폐기→재도입 맥락
-- [design/v0.2.0/ir-design-research.md](../v0.2.0/ir-design-research.md) — 리서치 문서 포맷 선례
+- [design/v0.2.0/ir-research.md](../v0.2.0/ir-research.md) — 리서치 문서 포맷 선례

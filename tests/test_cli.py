@@ -17,6 +17,9 @@ import rhwp  # noqa: E402
 from rhwp.cli.app import app  # noqa: E402
 from typer.testing import CliRunner  # noqa: E402  (importorskip 뒤 import)
 
+pytestmark = pytest.mark.spec("v0.3.0/cli")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 # * Click 8.2+ 부터 CliRunner 가 stdout/stderr 를 기본 분리 — result.stderr 단독 검증 가능
 _RUNNER = CliRunner()
 

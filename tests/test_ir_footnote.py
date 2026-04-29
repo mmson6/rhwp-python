@@ -25,6 +25,9 @@ from rhwp.ir.nodes import (
     TableCell,
 )
 
+pytestmark = pytest.mark.spec("v0.3.0/ir-expansion")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 
 def _prov(section_idx: int = 0, para_idx: int = 0) -> Provenance:
     return Provenance(section_idx=section_idx, para_idx=para_idx)

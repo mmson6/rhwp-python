@@ -149,6 +149,8 @@ git submodule update --init --recursive
 Test fixtures live in the submodule at `external/rhwp/samples/`; `tests/conftest.py`
 reads from that path.
 
+For the full build / test / contribute flow, see [CONTRIBUTING_EN.md](CONTRIBUTING_EN.md).
+
 ## Versioning
 
 This Python package and the `rhwp` Rust core are versioned **independently**.

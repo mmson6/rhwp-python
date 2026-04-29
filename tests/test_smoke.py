@@ -4,6 +4,10 @@ import re
 
 import rhwp
 
+import pytest
+pytestmark = pytest.mark.spec("v0.1.0/rhwp-python")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+(?:[-+].+)?$")
 
 

@@ -21,6 +21,9 @@ import rhwp
 from pydantic import ValidationError
 from rhwp.ir.nodes import DocumentSource, HwpDocument, ParagraphBlock, TableBlock
 
+pytestmark = pytest.mark.spec("v0.2.0/ir")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 # * 반환 타입 / 캐시
 
 

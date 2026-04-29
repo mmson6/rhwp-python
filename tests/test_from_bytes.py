@@ -9,6 +9,9 @@ from pathlib import Path
 import pytest
 import rhwp
 
+pytestmark = pytest.mark.spec("v0.1.0/rhwp-python")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 
 def test_from_bytes_returns_document(hwp_sample: Path) -> None:
     data = hwp_sample.read_bytes()

@@ -1,6 +1,10 @@
-# 분사·이관 작업 로그
+---
+status: Frozen
+ga: v0.1.0
+last_updated: 2026-04-23
+---
 
-**Status**: Frozen · **GA**: v0.1.0 · **Last updated**: 2026-04-23
+# 분사·이관 작업 로그
 
 **작업일**: 2026-04-23
 **작업자**: Claude (Opus 4.7) + DanMeon

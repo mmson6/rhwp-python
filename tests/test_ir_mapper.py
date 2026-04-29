@@ -18,6 +18,10 @@ from rhwp.ir._mapper import (
 )
 from rhwp.ir._raw_types import RawCell, RawCharRun, RawParagraph, RawTable
 
+import pytest
+pytestmark = pytest.mark.spec("v0.2.0/ir")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 # * escape_html — & 우선 치환 규칙 보존 (이중 escape 방지)
 
 

@@ -1,6 +1,10 @@
-# v0.7.0 MCP server — 설계 의사결정 리서치 요약
+---
+status: Draft
+target: v0.7.0
+last_updated: 2026-04-28
+---
 
-**Status**: Draft · **Target**: v0.7.0 · **Last updated**: 2026-04-28
+# v0.7.0 MCP server — 설계 의사결정 리서치 요약
 
 [v0.7.0/mcp.md](../../roadmap/v0.7.0/mcp.md) §결정 사항 중 외부 독자가 "왜?" 를 던질 만한 4건 (SDK 채택 · transport 우선순위 · handler 동시성 모델 · 도구 분할 정책) 의 업계 선례·대안·실패 시나리오를 기록한다. mcp.md 본문이 최종 결정을 기술하고, 본 문서는 그 결정의 근거를 담는다.
 
