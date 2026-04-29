@@ -940,15 +940,18 @@ all = [
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "pyyaml" },
     { name = "ruff" },
     { name = "typer" },
 ]
 dev = [
     { name = "maturin" },
+    { name = "pyyaml" },
 ]
 linting = [
     { name = "maturin" },
     { name = "pyright" },
+    { name = "pyyaml" },
     { name = "ruff" },
 ]
 testing = [
@@ -958,6 +961,7 @@ testing = [
     { name = "maturin" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "pyyaml" },
     { name = "typer" },
 ]
 
@@ -985,13 +989,18 @@ all = [
     { name = "pyright" },
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-cov" },
+    { name = "pyyaml", specifier = ">=6" },
     { name = "ruff" },
     { name = "typer", specifier = ">=0.12" },
 ]
-dev = [{ name = "maturin", specifier = ">=1.7" }]
+dev = [
+    { name = "maturin", specifier = ">=1.7" },
+    { name = "pyyaml", specifier = ">=6" },
+]
 linting = [
     { name = "maturin", specifier = ">=1.7" },
     { name = "pyright" },
+    { name = "pyyaml", specifier = ">=6" },
     { name = "ruff" },
 ]
 testing = [
@@ -1001,6 +1010,7 @@ testing = [
     { name = "maturin", specifier = ">=1.7" },
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-cov" },
+    { name = "pyyaml", specifier = ">=6" },
     { name = "typer", specifier = ">=0.12" },
 ]
 
