@@ -5,6 +5,9 @@ from pathlib import Path
 import pytest
 import rhwp
 
+pytestmark = pytest.mark.spec("v0.1.0/rhwp-python")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 
 class TestFileNotFound:
     # ^ FileNotFoundError 는 OSError 서브클래스. 메시지는 OS 마다 다르므로 타입만 검증.

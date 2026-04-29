@@ -19,6 +19,10 @@ from rhwp.ir.nodes import (
     UnknownBlock,
 )
 
+import pytest
+pytestmark = pytest.mark.spec("v0.2.0/ir")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 _PROV = Provenance(section_idx=0, para_idx=0)
 
 

@@ -76,12 +76,31 @@ def _collect_spec_markers(tests_dir: Path) -> dict[str, list[str]]:
 
 
 class _SpecMarkerVisitor(ast.NodeVisitor):
-    """class 컨텍스트 stack 을 유지하며 @pytest.mark.spec(...) 추출."""
+    """class 컨텍스트 stack + module-level pytestmark 를 유지하며
+    @pytest.mark.spec(...) 추출.
+
+    pytestmark = pytest.mark.spec("vX.Y.Z/topic") (단일 또는 list) 형식의
+    파일-단위 marker 도 지원 — 모든 test_* 함수에 자동 적용. soft retrofit
+    (per-file mapping) 에 사용.
+    """
 
     def __init__(self, file_rel: Path) -> None:
         self.file_rel = file_rel
         self.class_stack: list[str] = []
+        self.module_specs: list[str] = []
         self.mapping: dict[str, list[str]] = defaultdict(list)
+
+    def visit_Module(self, node: ast.Module) -> None:
+        # ^ pre-pass: module-level 'pytestmark = ...' 캡처
+        for stmt in node.body:
+            if not isinstance(stmt, ast.Assign):
+                continue
+            if not (len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name)):
+                continue
+            if stmt.targets[0].id != "pytestmark":
+                continue
+            self.module_specs.extend(_extract_spec_ids_from_value(stmt.value))
+        self.generic_visit(node)
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self.class_stack.append(node.name)
@@ -99,11 +118,24 @@ class _SpecMarkerVisitor(ast.NodeVisitor):
     def _maybe_add(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
         if not node.name.startswith("test_"):
             return
+        spec_ids: list[str] = list(self.module_specs)
         for decorator in node.decorator_list:
             spec_id = _extract_spec_id(decorator)
-            if spec_id and SPEC_ID_RE.match(spec_id):
-                parts = [*self.class_stack, node.name]
-                self.mapping[spec_id].append(f"{self.file_rel}::{'::'.join(parts)}")
+            if spec_id:
+                spec_ids.append(spec_id)
+        parts = [*self.class_stack, node.name]
+        nodeid = f"{self.file_rel}::{'::'.join(parts)}"
+        for spec_id in spec_ids:
+            if SPEC_ID_RE.match(spec_id):
+                self.mapping[spec_id].append(nodeid)
+
+
+def _extract_spec_ids_from_value(value: ast.AST) -> list[str]:
+    """pytestmark 의 RHS — 단일 marker call 또는 list of marker calls."""
+    if isinstance(value, ast.List | ast.Tuple):
+        return [s for elt in value.elts if (s := _extract_spec_id(elt)) is not None]
+    spec_id = _extract_spec_id(value)
+    return [spec_id] if spec_id else []
 
 
 def _extract_spec_id(node: ast.AST) -> str | None:

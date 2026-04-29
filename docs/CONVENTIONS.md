@@ -256,25 +256,31 @@ CHANGELOG 한 줄로 충분한 변경 (typo 정리, 단순 dep bump, 작은 docs
 
 같은 사실 중복 기록 금지 — CHANGELOG 가 *what*, log 가 *why/how*. 결정 비교 (a/b/c) 가치가 없는 변경 (단순 dep bump, typo) 은 CHANGELOG 한 줄로 충분 — implementation log 작성 안 함.
 
-## 인수조건 형식 — EARS notation (v0.4.0+ 신규 spec)
+## 인수조건 형식 (v0.4.0+ 신규 spec)
 
-v0.4.0+ 신규 spec 의 § 인수조건 섹션은 [EARS notation](https://alistairmavin.com/ears/) (Easy Approach to Requirements Syntax, Rolls-Royce) 5종 키워드로 작성한다. 각 항목에 `AC-N` ID 부여 — 테스트 `pytest.mark.spec("vX.Y.Z/topic#AC-N")` 와 1:1 매핑.
+v0.4.0+ 신규 spec 의 § 인수조건 섹션은 각 항목에 `AC-N` ID 를 부여한다 (테스트 marker 와 1:1 매핑용). 형식은 자유 — testable 하고 명확하면 plain prose 도 OK. 모호성이 우려되면 [EARS notation](https://alistairmavin.com/ears/) (`THE ... SHALL`, `WHEN ..., THE ... SHALL` 등) 같은 구조화 패턴을 참고 가능 (강제 아님).
 
-| 패턴 | 형식 | 용도 |
-|---|---|---|
-| Ubiquitous | `THE {system} SHALL {response}` | 항상 성립 |
-| Event-Driven | `WHEN {trigger}, THE {system} SHALL {response}` | 이벤트 시 |
-| State-Driven | `WHILE {state}, THE {system} SHALL {response}` | 상태 지속 중 |
-| Optional | `WHERE {feature}, THE {system} SHALL {response}` | 옵션 켜진 경우 |
-| Unwanted | `IF {condition}, THEN THE {system} SHALL {response}` | 예외/실패 |
+```markdown
+## 인수조건
 
-기존 v0.1.0 ~ v0.3.0 Frozen spec 은 미변경 — historical record 보존.
+- **AC-1** — typer 미설치 시 CLI 가 친절 에러 + exit 2
+- **AC-2** — `rhwp-py parse <file>` 출력은 사람 가독 텍스트
+- **AC-3** — `rhwp-py ir <file>` 출력은 valid JSON (stdout)
+- **AC-4** — 입력 파일 없으면 exit 2 + stderr 에 에러
+```
+
+기존 v0.1.0 ~ v0.3.0 Frozen spec 은 본 형식 미적용 — historical record 보존. 단 트레이스 매핑은 spec 단위 (AC-N 생략) 로 retrofit 적용 (Trace report 섹션 참조).
 
 ## Trace report — pytest spec markers
 
-v0.4.0+ 부터 테스트는 `pytest.mark.spec("vX.Y.Z/topic#AC-N")` marker 로 spec 인수조건과 1:1 매핑. CI 에서 `scripts/generate_spec_trace.py` 가 매 빌드 시 `docs/traces/coverage.md` (Living) 자동 갱신 — spec 별 인수조건 ↔ 테스트 mapping 표.
+테스트는 `pytest.mark.spec(spec_id)` marker 로 spec 과 매핑. `spec_id` 형식:
 
-기존 v0.1.0 ~ v0.3.0 Frozen spec 은 AC ID 부여 안 함 — marker 없는 테스트 허용.
+- **v0.4.0+ spec**: `"vX.Y.Z/topic#AC-N"` — AC 단위 매핑 (full)
+- **v0.1.0 ~ v0.3.0 spec**: `"vX.Y.Z/topic"` — spec 단위 매핑 (soft, AC 생략)
+
+파일 단위 적용 (모든 테스트가 같은 spec 검증): module top 에 `pytestmark = pytest.mark.spec("vX.Y.Z/topic")` 한 줄. 개별 테스트가 추가 spec 검증 시 `@pytest.mark.spec(...)` 데코레이터 추가 (양쪽 누적).
+
+CI 에서 `scripts/generate_spec_trace.py` 가 AST 정적 분석으로 marker 추출 → `docs/traces/coverage.md` (Living) 자동 갱신.
 
 ## Archive 정책 (v1.0+)
 

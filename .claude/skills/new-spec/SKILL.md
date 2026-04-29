@@ -57,14 +57,13 @@ When this skill is invoked, execute the following steps in order:
 
    ## 인수조건
 
-   <!-- EARS notation (CONVENTIONS § 인수조건 형식) — assign AC-N IDs;
-        each maps 1:1 to a `pytest.mark.spec("<version>/<topic>#AC-N")` -->
+   <!-- Assign AC-N IDs; each maps 1:1 to `pytest.mark.spec("<version>/<topic>#AC-N")`.
+        Format is free — testable + clear is the bar. EARS notation
+        (`THE ... SHALL`, `WHEN ..., THE ... SHALL`, etc.) optional for
+        ambiguity-prone statements. -->
 
-   - **AC-1** (Ubiquitous) — `THE <system> SHALL <response>`
-   - **AC-2** (Event-Driven) — `WHEN <trigger>, THE <system> SHALL <response>`
-   - **AC-3** (State-Driven) — `WHILE <state>, THE <system> SHALL <response>`
-   - **AC-4** (Optional) — `WHERE <feature>, THE <system> SHALL <response>`
-   - **AC-5** (Unwanted) — `IF <condition>, THEN THE <system> SHALL <response>`
+   - **AC-1** — <testable statement>
+   - **AC-2** — <testable statement>
 
    ## 영구 비목표
 

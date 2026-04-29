@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 import rhwp
 
-pytestmark = pytest.mark.slow
+pytestmark = [pytest.mark.slow, pytest.mark.spec("v0.1.0/rhwp-python")]
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests
 
 
 class TestRenderPdf:

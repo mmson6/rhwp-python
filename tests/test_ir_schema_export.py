@@ -26,6 +26,9 @@ from rhwp.ir.schema import (
     load_schema,
 )
 
+pytestmark = pytest.mark.spec("v0.2.0/ir")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 # * export_schema 구조
 
 

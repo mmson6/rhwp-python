@@ -21,6 +21,9 @@ from rhwp.ir.nodes import (
     Provenance,
 )
 
+pytestmark = pytest.mark.spec("v0.3.0/ir-expansion")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 # * 모델 단독 — ImageRef
 
 

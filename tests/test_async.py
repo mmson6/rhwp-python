@@ -18,6 +18,9 @@ import pytest
 
 import rhwp
 
+pytestmark = pytest.mark.spec("v0.1.0/rhwp-python")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 
 def test_aparse_returns_document_instance(hwp_sample: Path) -> None:
     doc = asyncio.run(rhwp.aparse(str(hwp_sample)))

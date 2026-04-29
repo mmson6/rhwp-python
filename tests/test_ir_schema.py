@@ -21,6 +21,9 @@ from rhwp.ir.nodes import (
     UnknownBlock,
 )
 
+pytestmark = pytest.mark.spec("v0.2.0/ir")
+# ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
+
 # * 공통 픽스처 헬퍼
 
 
