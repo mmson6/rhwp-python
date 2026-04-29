@@ -1,6 +1,10 @@
-# Stage S4 — JSON Schema 공개 (완료)
+---
+status: Frozen
+ga: v0.2.0
+last_updated: 2026-04-24
+---
 
-**Status**: Frozen · **GA**: v0.2.0 · **Last updated**: 2026-04-24
+# Stage S4 — JSON Schema 공개 (완료)
 
 **작업일**: 2026-04-24
 **계획 문서**: [roadmap/v0.2.0/ir.md](../../../roadmap/v0.2.0/ir.md) §JSON Schema 공개

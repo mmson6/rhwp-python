@@ -1,6 +1,10 @@
-# v0.3.0 IR 확장 — 설계 의사결정 리서치 요약
+---
+status: Frozen
+ga: v0.3.0
+last_updated: 2026-04-28
+---
 
-**Status**: Frozen · **GA**: v0.3.0 · **Last updated**: 2026-04-28
+# v0.3.0 IR 확장 — 설계 의사결정 리서치 요약
 
 [v0.3.0/ir-expansion.md](../../roadmap/v0.3.0/ir-expansion.md) 의 § 결정 사항 8 건의 업계 선례·대안·실패 시나리오·1차 소스를 기록한다. ir-expansion.md 본문이 최종 결정을 기술하고, 본 문서는 그 결정의 근거를 담는다.
 

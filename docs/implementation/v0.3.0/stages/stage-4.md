@@ -1,6 +1,10 @@
-# Stage S4 — Schema v1.1 GA + rhwp-py CLI + LangChain include_furniture (완료)
+---
+status: Frozen
+ga: v0.3.0
+last_updated: 2026-04-28
+---
 
-**Status**: Frozen · **GA**: v0.3.0 · **Last updated**: 2026-04-28
+# Stage S4 — Schema v1.1 GA + rhwp-py CLI + LangChain include_furniture (완료)
 
 **작업일**: 2026-04-28
 **계획 문서**: [roadmap/v0.3.0/ir-expansion.md](../../../roadmap/v0.3.0/ir-expansion.md) §구현 스테이지 분할 + [roadmap/v0.3.0/cli.md](../../../roadmap/v0.3.0/cli.md)

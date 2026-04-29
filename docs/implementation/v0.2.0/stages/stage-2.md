@@ -1,6 +1,10 @@
-# Stage S2 — Rust → dict 매퍼 + `Document.to_ir()` 바인딩 (완료)
+---
+status: Frozen
+ga: v0.2.0
+last_updated: 2026-04-24
+---
 
-**Status**: Frozen · **GA**: v0.2.0 · **Last updated**: 2026-04-24
+# Stage S2 — Rust → dict 매퍼 + `Document.to_ir()` 바인딩 (완료)
 
 **작업일**: 2026-04-24
 **계획 문서**: [roadmap/v0.2.0/ir.md](../../../roadmap/v0.2.0/ir.md) §구현 스테이지 분할

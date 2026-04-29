@@ -1,6 +1,10 @@
-# v0.7.0 — MCP server (`rhwp-mcp`)
+---
+status: Draft
+target: v0.7.0
+last_updated: 2026-04-28
+---
 
-**Status**: Draft · **Target**: v0.7.0 · **Last updated**: 2026-04-28
+# v0.7.0 — MCP server (`rhwp-mcp`)
 
 [Model Context Protocol](https://modelcontextprotocol.io/) (Anthropic, 2024) 기반의 MCP 서버를 새 entry point `rhwp-mcp` 로 노출한다. LLM 에이전트 (Claude Desktop / IDE 통합 / 자체 에이전트) 가 HWP/HWPX 파일을 직접 파싱·요약·청크화할 수 있도록 표준 프로토콜 표면을 제공한다.
 

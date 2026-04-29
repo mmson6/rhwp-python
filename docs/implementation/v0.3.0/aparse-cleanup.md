@@ -1,6 +1,10 @@
-# v0.3.0 — `aparse` aiofiles 제거 (stdlib `asyncio.to_thread` 전환)
+---
+status: Frozen
+ga: v0.3.0
+last_updated: 2026-04-28
+---
 
-**Status**: Frozen · **GA**: v0.3.0 · **Last updated**: 2026-04-28
+# v0.3.0 — `aparse` aiofiles 제거 (stdlib `asyncio.to_thread` 전환)
 
 v0.2.0 에서 도입한 `rhwp.aparse` 의 `aiofiles` 기반 우회를 stdlib `asyncio.to_thread` 로 정리. v0.3.0 GA 전 cleanup — 별도 patch (v0.3.1) 로 분리하지 않고 v0.3.0 에 합침. 본 implementation note 는 결정 근거 (거부된 대안 비교) 를 보존 — CHANGELOG 한 줄로는 표현 부족한 정보.
 
@@ -82,7 +86,7 @@ return Document.from_bytes(data, source_uri=path)
 | B. `cfg(target_arch)` 분기 | zero | medium (코드 두 갈래) | 두 코드패스 유지 부담 — 메인테이너 보통 거부 |
 | C. Cache 구조 분리 refactor | zero (read-only `Arc` + `OnceLock`) | large | 가장 우아. cache 사용 패턴 전수 분석 필요 |
 
-**현 시점 우선순위 낮음** — 우리 측 wrapping (stdlib `asyncio.to_thread`) 비용이 낮고 위험도 작음. [find-control-text-positions](../../../upstream/issue-find-control-text-positions.md) 쪽이 IR Provenance 정확도에 직접 영향이라 상류 push 우선순위가 더 높음. 본 항목은 issue 등록 후보로만 추적.
+**현 시점 우선순위 낮음** — 우리 측 wrapping (stdlib `asyncio.to_thread`) 비용이 낮고 위험도 작음. [find-control-text-positions](../../upstream/issue-find-control-text-positions.md) 쪽이 IR Provenance 정확도에 직접 영향이라 상류 push 우선순위가 더 높음. 본 항목은 issue 등록 후보로만 추적.
 
 ## 5. 산출물 (코드 / CI / 문서)
 
@@ -135,4 +139,4 @@ return Document.from_bytes(data, source_uri=path)
 
 - `external/rhwp/src/document_core/` — `RefCell` 기반 cache (unsendable 의 근본 원인)
 - `src/document.rs` (rhwp-python) — `#[pyclass(unsendable)]` 선언 위치
-- [docs/upstream/issue-find-control-text-positions.md](../../../upstream/issue-find-control-text-positions.md) — 상류 visibility 변경 요청 선례 (참고)
+- [docs/upstream/issue-find-control-text-positions.md](../../upstream/issue-find-control-text-positions.md) — 상류 visibility 변경 요청 선례 (참고)

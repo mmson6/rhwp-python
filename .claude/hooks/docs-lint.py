@@ -52,15 +52,20 @@ text = target.read_text(encoding="utf-8")
 errors: list[str] = []
 
 
-# * 1. Status header (required outside Living docs)
+# * 1. Status metadata (YAML frontmatter or legacy inline) — required outside Living docs
+# ^ Commit 3 (spec-system-overhaul): accept either YAML frontmatter or legacy inline
+#   format during the transition. Commit 4 will tighten to frontmatter-only + add
+#   schema validation (status enum, ga ↔ target mutex, supersede chain).
 LIVING_FILES = {"docs/CONVENTIONS.md", "docs/roadmap/README.md"}
 if rel_str not in LIVING_FILES:
-    if not re.search(r"^\*\*Status\*\*:", text, re.MULTILINE):
+    has_inline = re.search(r"^\*\*Status\*\*:", text, re.MULTILINE)
+    has_frontmatter = text.startswith("---\n") and re.search(r"^status:\s*", text, re.MULTILINE)
+    if not (has_inline or has_frontmatter):
         errors.append(
-            "missing Status header — add '**Status**: "
-            "<Active|Draft|Frozen|Superseded by [link]> · "
-            "**GA|Target**: vX.Y.Z · **Last updated**: YYYY-MM-DD' "
-            "(CONVENTIONS § Status header format)"
+            "missing Status metadata — add YAML frontmatter "
+            "'---\\nstatus: <Active|Draft|Frozen|Superseded>\\n"
+            "ga|target: vX.Y.Z\\nlast_updated: YYYY-MM-DD\\n---' "
+            "(CONVENTIONS § Status 메타데이터)"
         )
 
 
