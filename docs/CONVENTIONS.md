@@ -163,8 +163,11 @@ docs/
 
 ### upstream/
 
-- `<topic>.md` (Active) — 업스트림 (`edwardkim/rhwp` 등) 에 제출 검토 중인 이슈/제안 초안. 머지·해결 시 archive 또는 삭제. per-version 매핑 없음
+- `<topic>.md` (Active) — 업스트림 (`edwardkim/rhwp` 등) 에 제출 검토 중인 이슈/제안 초안. per-version 매핑 없음
 - 본 디렉토리는 외부 시스템 (GitHub Issues) 으로 흘러가기 전 단계의 staging — 정식 spec 의 일부가 아님
+- **해결 시** — 두 가지 옵션:
+  - **삭제** — 다른 spec 이 본 파일을 참조하지 않을 때. 정보는 GitHub permalink + 본 PR commit history 가 보존
+  - **in-place Frozen 전환** — 다른 Frozen spec 이 본 파일을 참조할 때. frontmatter `status: Frozen` (`ga` 생략 — 특정 버전 미귀속), 본문 첫 헤더 위에 `> **RESOLVED** — 상류 PR/commit 참조 …` 한 줄 인용 블록 추가. 기존 body 보존 (historical record)
 
 ### verification/
 

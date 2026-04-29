@@ -1,7 +1,9 @@
 ---
-status: Active
-last_updated: 2026-04-27
+status: Frozen
+last_updated: 2026-04-29
 ---
+
+> **RESOLVED 2026-04-28** — 옵션 A 채택, [edwardkim/rhwp#390](https://github.com/edwardkim/rhwp/issues/390) closed by cherry-pick into `devel` (commits `2a69fe1` / `b855e2a` / `a59ce71`, [PR #405](https://github.com/edwardkim/rhwp/pull/405)). 상류 main 미반영 — 다음 `external/rhwp` pin bump 시 흡수 예정. 본 파일은 historical record 로 in-place Frozen (다른 v0.3.0 Frozen spec 이 본 파일 참조 → 삭제 대신 보존).
 
 # 업스트림 제안 — `find_control_text_positions` 외부 노출
 
