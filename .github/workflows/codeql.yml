@@ -3,18 +3,8 @@ name: CodeQL
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'LICENSE*'
-      - '.gitignore'
   pull_request:
     branches: [main]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'LICENSE*'
-      - '.gitignore'
   schedule:
     - cron: "0 6 * * 1"
 
@@ -23,8 +13,30 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # * 코드 변경 감지 — docs-only PR 은 analyze job 을 if-skip (status: success).
+  #   schedule 트리거 (주 1회 cron) 은 코드 변경 무관하게 항상 분석.
+  changes:
+    name: Detect code changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          predicate-quantifier: every
+          filters: |
+            code:
+              - '!**.md'
+              - '!docs/**'
+              - '!LICENSE*'
+              - '!.gitignore'
+
   analyze:
     name: Analyze
+    needs: changes
+    if: github.event_name == 'schedule' || needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     permissions:
       security-events: write
