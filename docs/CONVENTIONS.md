@@ -7,7 +7,7 @@
 | 분류 | 의미 | 갱신 정책 | 예시 |
 |---|---|---|---|
 | **Living** | 항상 최신 — 다른 문서의 위치 포인터 + 시간선 + 규칙 | 자유 갱신, 매 변경 시 손봐도 무방 | `docs/CONVENTIONS.md` (자체), `docs/roadmap/README.md`, `CHANGELOG.md`, `CLAUDE.md`, `AGENTS.md`, `README.md` |
-| **Active** | 현재 진행 중 — 의도/스코프 수준의 진화하는 문서 | 큰 변경만, in-place 갱신 OK | `docs/roadmap/phase-N.md` |
+| **Active** | 외부 시스템으로 흘러가기 전 staging | 큰 변경만, in-place 갱신 OK | `docs/upstream/<topic>.md` |
 | **Draft** | 작성 중인 spec — 해당 버전 GA 전까지 활발 갱신 | 버전 GA 전까지 자유 갱신, GA 후 Frozen 으로 전환 | `docs/roadmap/v0.7.0/mcp.md` (현재 v0.7.0 GA 전) |
 | **Frozen** | GA 완료된 spec / 완료된 stage / 완료된 검증 | **변경 금지** — 오타·링크 수정만 in-place 허용. 큰 변경은 새 spec + supersede | `docs/roadmap/v0.2.0/ir.md` (v0.2.0 GA 완료), `docs/implementation/v0.2.0/stages/*.md` |
 
@@ -56,7 +56,7 @@ last_updated: 2026-04-28
 | `superseded_by` | `<vX.Y.Z>/<topic>.md` | `status: Superseded` 일 때 필수 |
 | `last_updated` | `YYYY-MM-DD` | 필수. 의미 변경 commit 시 자동 갱신 ([D3 hook](#last_updated-자동-갱신)) |
 
-`Active` (예: `phase-N.md`, `upstream/<topic>.md`) 는 `ga` / `target` 둘 다 생략.
+`Active` (예: `upstream/<topic>.md`) 는 `ga` / `target` 둘 다 생략.
 
 `Living` 은 frontmatter 없음 — 정의상 항상 최신. 대신 README 같은 인덱스가 다른 문서들의 Status 를 노출.
 
@@ -90,7 +90,7 @@ last_updated: 2026-04-28
 [Model Context Protocol](https://modelcontextprotocol.io/)...
 ```
 
-**Active** (Phase 진행 중):
+**Active** (외부 시스템 staging):
 
 ```markdown
 ---
@@ -98,9 +98,9 @@ status: Active
 last_updated: 2026-04-26
 ---
 
-# Phase 3 — view 렌더러 + RAG 프레임워크 통합
+# upstream issue 초안 — find_control_text_positions 누락
 
-**대상 버전**: v0.4.0 ~ v0.6.0
+[edwardkim/rhwp](https://github.com/edwardkim/rhwp) 의 `Document::find_control_text_positions` ...
 ```
 
 **Superseded** (새 spec 으로 대체된 Frozen):
@@ -128,8 +128,7 @@ Claude Code PostToolUse hook (`.claude/hooks/update-last-updated.py`) 이 docs/*
 docs/
 ├── CONVENTIONS.md                    Living  — 본 문서. 정책 SSOT
 ├── roadmap/
-│   ├── README.md                     Living  — 활성 spec 인덱스
-│   ├── phase-{2,3,4}.md              Active  — Phase 의도/스코프 (구체 결정 미포함)
+│   ├── README.md                     Living  — 활성 spec 인덱스 + 미착수 narrative
 │   └── v<X.Y.Z>/<topic>.md           Draft → Frozen on GA — per-version spec
 ├── design/
 │   └── v<X.Y.Z>/<topic>-research.md  Draft → Frozen on GA — ADR-style 결정 증거
@@ -146,8 +145,7 @@ docs/
 
 ### roadmap/
 
-- `README.md` (Living) — 활성 spec 인덱스. 어느 spec 이 어느 버전을 향하는지의 SSOT
-- `phase-N.md` (Active) — Phase 의 의도/스코프만. **구체 결정/미결 이슈는 두지 않음** — 그것들은 `vX.Y.Z/*.md` 의 영역. Phase 의 대상 버전이 바뀌거나 phase boundary 가 이동할 때만 갱신
+- `README.md` (Living) — 활성 spec 인덱스 + 미착수 작업 계획 narrative. 어느 spec 이 어느 버전을 향하는지의 SSOT, 미착수 minor 의 의도/스코프도 본 문서가 보유
 - `vX.Y.Z/<topic>.md` (Draft → Frozen) — per-version spec. v0.2.0 의 `ir.md` 처럼 한 릴리스의 한 큰 주제 = 한 파일
 
 ### design/
@@ -192,7 +190,7 @@ Living  ───→  Active  ───→  Draft  ───→  Frozen
 ### Spec ↔ spec 직접 link 금지 (예외 1 종)
 
 - **금지**: 같은 디렉토리 안의 spec 끼리 직접 link (예: `v0.3.0/cli.md` ↔ `v0.3.0/ir-expansion.md`). 새 spec 추가 시 기존 spec 도 손봐야 하는 연쇄 발생
-- **대신**: `roadmap/README.md` 또는 `phase-N.md` 가 묶어서 노출
+- **대신**: `roadmap/README.md` 가 묶어서 노출
 - **예외**: **짝 페어** — `roadmap/vX.Y.Z/<topic>.md` 와 `design/vX.Y.Z/<topic>-research.md` 는 1:1 짝 (spec ↔ ADR). 짝끼리는 직접 link 유지 (두 문서가 사실상 한 결정의 두 면)
 
 ## 새 spec 추가 절차
@@ -204,8 +202,7 @@ Living  ───→  Active  ───→  Draft  ───→  Frozen
 1. 디렉토리 생성: `docs/roadmap/v<X.Y.Z>/`, `docs/design/v<X.Y.Z>/`
 2. spec 파일 작성 — frontmatter `status: Draft`, `target: vX.Y.Z`
 3. 짝이 되는 design research 파일 작성 — 같은 frontmatter
-4. `docs/roadmap/README.md` 의 인덱스 표에 행 추가
-5. 해당 phase 가 있다면 `phase-N.md` 의 § 대상 버전 / § 산하 spec 갱신 (Active 갱신은 자유)
+4. `docs/roadmap/README.md` 의 인덱스 표에 행 추가 (해당 minor 가 미착수 narrative 에 있었다면 거기서 promote)
 
 ### 버전 GA 후
 
@@ -213,17 +210,6 @@ Living  ───→  Active  ───→  Draft  ───→  Frozen
 2. `docs/roadmap/README.md` 인덱스 갱신 (Status 컬럼)
 3. `CHANGELOG.md` 의 해당 버전 섹션 마무리
 4. 구현 로그 작성 — `docs/implementation/v<X.Y.Z>/...` (작성 즉시 Frozen)
-
-### Phase 완료 후
-
-`phase-N.md` 의 모든 대상 vX.Y.Z 가 GA 되면 해당 phase 문서를 삭제한다.
-
-1. cross-link 정리 — Frozen spec 본문의 `phase-N.md` 참조: link 만 제거 (인용된 결정 텍스트는 본문에 흡수). 진행 중 spec / Active 문서의 참조: README 인덱스로 redirect 또는 단순 제거
-2. `docs/roadmap/README.md` § Phase 인덱스 표에서 해당 행 제거
-3. `docs/roadmap/phase-N.md` 파일 삭제
-4. CHANGELOG 에 phase 정리 기록
-
-근거: phase 문서는 진행 중 phase 의 의도/스코프 SSOT — 모두 GA 되면 historical record 는 `v<X.Y.Z>/*.md` spec 들이 보유. phase 문서를 보존하면 활성 인덱스가 비대해지고 "phase 가 살아있는 것처럼" 오해 유발.
 
 ### Frozen 후 결정 변경이 필요한 경우
 
