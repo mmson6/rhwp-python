@@ -41,7 +41,7 @@ Project-specific instructions. Inherits all rules from `~/.claude/CLAUDE.md` (gl
 - Branch naming: **MINOR** = `feature/vX.Y.0` (long-lived, isolates external contract changes across stages). **PATCH** = `<type>/<topic>` (short-lived, merges directly to main, tag only `vX.Y.Z`) where `<type>` follows [Conventional Commits](https://www.conventionalcommits.org/) (`fix` / `chore` / `refactor` / `docs` / `build` / `ci` / `perf` / `test` / `revert`)
 - Commit subject: lowercase `type: description` (seed commit: `init: 프로젝트 초기화`)
 - PR body follows [.github/pull_request_template.md](.github/pull_request_template.md) — Summary / Why / Related Issues
-- Full contributor flow (fork, pre-submit checks, rhwp-core changes): [CONTRIBUTING.md](CONTRIBUTING.md)
+- Full contributor flow (fork, pre-submit checks, rhwp-core changes): [CONTRIBUTING_EN.md](CONTRIBUTING_EN.md) (Korean: [CONTRIBUTING.md](CONTRIBUTING.md))
 
 ### Versioning / release
 - Git tags `vX.Y.Z`, SemVer, MINOR-sized increments
