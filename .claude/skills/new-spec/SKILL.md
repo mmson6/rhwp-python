@@ -1,11 +1,10 @@
 ---
 name: new-spec
-description: Scaffold a new version spec and paired ADR following docs/CONVENTIONS.md
+description: Scaffold a new version spec and paired ADR following docs/CONVENTIONS.md. Invoke when the user wants to start a new version spec (e.g. "v0.4.0 view 렌더러 시작", "phase 3 첫 spec"). Idempotent — aborts if spec already exists. State the version + topic before invoking and wait for user confirmation.
 argument-hint: <version> <topic>
 arguments:
   - version
   - topic
-disable-model-invocation: true
 ---
 
 # /new-spec — scaffold a new version spec
