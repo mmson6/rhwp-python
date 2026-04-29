@@ -169,10 +169,10 @@ last_updated: 2026-04-28
 3. **§서브커맨드 스펙** — `blocks` 의 기본 포맷이 NDJSON 인 이유를 한 줄 추가 (streaming pipeline 친화)
 4. **§결정 사항 테이블 #3** — "shell pipeline 과 CI 친화" 표현을 "kubectl/aws/gh 의 스크립팅-primary 관행 준수" 로 구체화
 
-본 문서를 cli.md 에서 `상세 증거: [cli-design-research.md](../../design/v0.3.0/cli-design-research.md)` 로 cross-link — v0.2.0 ir.md ↔ ir-design-research.md 와 동일 패턴.
+본 문서를 cli.md 에서 `상세 증거: [cli-research.md](../../design/v0.3.0/cli-research.md)` 로 cross-link — v0.2.0 ir.md ↔ ir-research.md 와 동일 패턴.
 
 ## 참조
 
 - [roadmap/v0.3.0/cli.md](../../roadmap/v0.3.0/cli.md) — 본 리서치의 결정 요약
 - [roadmap/v0.2.0/ir.md](../../roadmap/v0.2.0/ir.md) §방향 전환 배경 — CLI 폐기→재도입 맥락
-- [design/v0.2.0/ir-design-research.md](../v0.2.0/ir-design-research.md) — 리서치 문서 포맷 선례
+- [design/v0.2.0/ir-research.md](../v0.2.0/ir-research.md) — 리서치 문서 포맷 선례

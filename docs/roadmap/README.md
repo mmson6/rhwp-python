@@ -18,9 +18,9 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 | 버전 | Status | Roadmap spec | Design research (ADR) |
 |---|---|---|---|
 | v0.1.0 / v0.1.1 | Frozen | [v0.1.0/rhwp-python.md](v0.1.0/rhwp-python.md) | — |
-| v0.2.0 | Frozen | [v0.2.0/ir.md](v0.2.0/ir.md) | [design/v0.2.0/ir-design-research.md](../design/v0.2.0/ir-design-research.md) |
+| v0.2.0 | Frozen | [v0.2.0/ir.md](v0.2.0/ir.md) | [design/v0.2.0/ir-research.md](../design/v0.2.0/ir-research.md) |
 | v0.3.0 (IR 확장) | Frozen | [v0.3.0/ir-expansion.md](v0.3.0/ir-expansion.md) | [design/v0.3.0/ir-expansion-research.md](../design/v0.3.0/ir-expansion-research.md) |
-| v0.3.0 (CLI) | Frozen | [v0.3.0/cli.md](v0.3.0/cli.md) | [design/v0.3.0/cli-design-research.md](../design/v0.3.0/cli-design-research.md) |
+| v0.3.0 (CLI) | Frozen | [v0.3.0/cli.md](v0.3.0/cli.md) | [design/v0.3.0/cli-research.md](../design/v0.3.0/cli-research.md) |
 | v0.7.0 (MCP server) | Draft | [v0.7.0/mcp.md](v0.7.0/mcp.md) | [design/v0.7.0/mcp-research.md](../design/v0.7.0/mcp-research.md) |
 
 ## Phase 인덱스

@@ -8,7 +8,7 @@ last_updated: 2026-04-28
 
 [v0.3.0/ir-expansion.md](../../roadmap/v0.3.0/ir-expansion.md) 의 § 결정 사항 8 건의 업계 선례·대안·실패 시나리오·1차 소스를 기록한다. ir-expansion.md 본문이 최종 결정을 기술하고, 본 문서는 그 결정의 근거를 담는다.
 
-조사는 v0.2.0 ir-design-research.md 와 동일 형식: 라이브러리별 패턴 비교 → 검증자 반박 (실패 모드) → 최종 결정 → 1차 소스 인용. 1 차 소스 검증 없이 search-result 제목만 인용하지 않는다. RevisionMark 항목은 상류 zero-support 가 명백하여 본 리서치에서 다루지 않고 ir-expansion.md § 영구 비목표 한 줄로 처리.
+조사는 v0.2.0 ir-research.md 와 동일 형식: 라이브러리별 패턴 비교 → 검증자 반박 (실패 모드) → 최종 결정 → 1차 소스 인용. 1 차 소스 검증 없이 search-result 제목만 인용하지 않는다. RevisionMark 항목은 상류 zero-support 가 명백하여 본 리서치에서 다루지 않고 ir-expansion.md § 영구 비목표 한 줄로 처리.
 
 ## 결정 매트릭스
 
@@ -542,7 +542,7 @@ CI workflow `.github/workflows/publish-schema.yml` 은 `keep_files: true` 정책
 
 - v0.2.0 § JSON Schema 공개 (불변 경로): [v0.2.0/ir.md](../../roadmap/v0.2.0/ir.md#json-schema-공개)
 - v0.2.0 § 스키마 버저닝 (버전 증가 규칙 표): [v0.2.0/ir.md](../../roadmap/v0.2.0/ir.md#스키마-버저닝)
-- v0.2.0 frozen IR 결정 증거: [design/v0.2.0/ir-design-research.md § 7](../v0.2.0/ir-design-research.md#7-to_ir-캐싱--rust-oncecellpyobject--frozen-ir)
+- v0.2.0 frozen IR 결정 증거: [design/v0.2.0/ir-research.md § 7](../v0.2.0/ir-research.md#7-to_ir-캐싱--rust-oncecellpyobject--frozen-ir)
 
 ---
 
@@ -567,5 +567,5 @@ CI workflow `.github/workflows/publish-schema.yml` 은 `keep_files: true` 정책
 
 - 본 리서치의 결정 요약: [roadmap/v0.3.0/ir-expansion.md](../../roadmap/v0.3.0/ir-expansion.md)
 - v0.2.0 IR 본문: [roadmap/v0.2.0/ir.md](../../roadmap/v0.2.0/ir.md)
-- v0.2.0 결정 증거 (리서치 문서 형식 선례): [design/v0.2.0/ir-design-research.md](../v0.2.0/ir-design-research.md)
+- v0.2.0 결정 증거 (리서치 문서 형식 선례): [design/v0.2.0/ir-research.md](../v0.2.0/ir-research.md)
 - 활성 spec 인덱스: [roadmap/README.md](../../roadmap/README.md)

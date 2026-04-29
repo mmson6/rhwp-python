@@ -532,4 +532,4 @@ class Document:
 ### v0.2.0 선례
 
 - 본문 v0.2.0 IR 설계: [v0.2.0/ir.md](../v0.2.0/ir.md)
-- v0.2.0 결정 증거: [design/v0.2.0/ir-design-research.md](../../design/v0.2.0/ir-design-research.md)
+- v0.2.0 결정 증거: [design/v0.2.0/ir-research.md](../../design/v0.2.0/ir-research.md)

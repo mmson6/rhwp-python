@@ -191,8 +191,7 @@ def validate_filename(rel_str: str) -> list[str]:
 
 
 # * Rule 5: <topic>.md ↔ <topic>-research.md pair existence
-# ^ Grandfather: v0.1.0 spec (spinoff transfer, no design research) +
-#   legacy "-design-research" suffix (v0.2.0/ir, v0.3.0/cli) preserved.
+# ^ Grandfather: v0.1.0 (spinoff transfer, design research 미진행 — 역사적 예외).
 PAIR_EXEMPT_VERSIONS = {"v0.1.0"}
 
 
@@ -205,22 +204,13 @@ def validate_pair(rel_str: str, repo: Path) -> list[str]:
         return []
 
     if side == "roadmap":
-        candidates = (
-            repo / "docs" / "design" / ver / f"{base}-research.md",
-            repo / "docs" / "design" / ver / f"{base}-design-research.md",
-        )
-        if not any(c.exists() for c in candidates):
+        pair = repo / "docs" / "design" / ver / f"{base}-research.md"
+        if not pair.exists():
             return [f"pair file missing — expected docs/design/{ver}/{base}-research.md"]
     else:
-        # ^ design-side: accept both <topic>-research / <topic>-design-research
-        if base.endswith("-design-research"):
-            topic = base.removesuffix("-design-research")
-        elif base.endswith("-research"):
-            topic = base.removesuffix("-research")
-        else:
-            return [
-                f"design file {base!r} must end with '-research' (or legacy '-design-research')"
-            ]
+        if not base.endswith("-research"):
+            return [f"design file {base!r} must end with '-research'"]
+        topic = base.removesuffix("-research")
         pair = repo / "docs" / "roadmap" / ver / f"{topic}.md"
         if not pair.exists():
             return [f"pair file missing — expected docs/roadmap/{ver}/{topic}.md"]
