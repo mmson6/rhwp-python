@@ -9,7 +9,7 @@
 | 이슈 | Status | 상류 등록 | RESOLVED | 비고 |
 |---|---|---|---|---|
 | [issue-find-control-text-positions.md](issue-find-control-text-positions.md) | Frozen | [edwardkim/rhwp#390](https://github.com/edwardkim/rhwp/issues/390) | 2026-04-28 ([PR #405](https://github.com/edwardkim/rhwp/pull/405)) | `Paragraph::control_text_positions(&self)` 옵션 A 채택. v0.3.1 spec 이 본 파일 참조 → 삭제 대신 in-place Frozen |
-| [issue-utf16-pos-to-char-idx.md](issue-utf16-pos-to-char-idx.md) | Active | (미등록) | — | #390 후속 같은 결. `helpers::utf16_pos_to_char_idx` 외부 노출 |
+| [issue-utf16-pos-to-char-idx.md](issue-utf16-pos-to-char-idx.md) | Active | [edwardkim/rhwp#484](https://github.com/edwardkim/rhwp/issues/484) | — | #390 후속 같은 결. `helpers::utf16_pos_to_char_idx` 외부 노출 |
 
 ## Archive 정책
 
