@@ -733,26 +733,6 @@ fn field_type_to_str(ft: FieldType) -> &'static str {
     }
 }
 
-/// `bin_data_id` (1-based) 에 해당하는 raw bytes 를 반환.
-///
-/// 상류 `renderer/layout/utils.rs::find_bin_data` 와 동일한 lookup —
-/// `bin_data_content` 는 Embedding 타입만 채워져 있고 인덱스는 1-based.
-/// Embedding 이 아니거나 (`Link` / `Storage`) 누락 시 None.
-///
-/// **인덱스 정합성 가정**: `bin_data_content` 와 `bin_data_list` 는 같은 순서로
-/// 같은 길이여야 한다 — 즉 모든 BinData entry 가 Embedding 타입이어야 정확.
-/// 혼합 (Link + Embedding) 문서에서는 상류 `bin_data_content` 가 Embedding 만
-/// 추려 더 짧으므로 잘못된 entry 를 반환할 수 있다 — 상류 renderer 도 같은
-/// 가정을 공유하므로 SVG/PDF 렌더링도 같은 잘못된 lookup 을 한다 (상류 패리티).
-pub(crate) fn lookup_bin_data_bytes(doc: &Document, bin_data_id: u16) -> Option<&[u8]> {
-    if bin_data_id == 0 {
-        return None;
-    }
-    doc.bin_data_content
-        .get((bin_data_id as usize) - 1)
-        .map(|bdc| bdc.data.as_slice())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -771,12 +751,6 @@ mod tests {
         assert_eq!(utf16_to_cp(&offsets, 2, 4), 2); // offset 2 는 char_offsets 에 없음 → 다음 >=2 인 3을 가진 인덱스 2
         assert_eq!(utf16_to_cp(&offsets, 3, 4), 2);
         assert_eq!(utf16_to_cp(&offsets, 5, 4), 4); // fallback
-    }
-
-    #[test]
-    fn lookup_bin_data_zero_id_returns_none() {
-        let doc = Document::default();
-        assert!(lookup_bin_data_bytes(&doc, 0).is_none());
     }
 
     // * simple_eq_text_alt — 토큰 경계 인식 검증
