@@ -90,7 +90,7 @@ jobs:
         with:
           path: pages
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
 # v2 추가 절차 (breaking change 발생 시):
 # 1) python/rhwp/ir/schema/hwp_ir_v2.json 생성 (v1 파일은 절대 수정 금지)
