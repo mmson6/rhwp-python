@@ -85,7 +85,7 @@ jobs:
             echo "::error::no hwp_ir_v*.json files found under python/rhwp/ir/schema/"
             exit 1
           fi
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
           path: pages
