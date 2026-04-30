@@ -6,7 +6,7 @@ last_updated: 2026-04-30
 
 # 업스트림 제안 — `utf16_pos_to_char_idx` 외부 노출
 
-> 외부 binding (`rhwp-python`) 구현 중 업스트림에서 수정이 필요해 보이는 부분을 발견하여, Claude 로 조사를 진행한 결과입니다.
+> 외부 binding (`rhwp-python`) 구현 중 업스트림에서 수정이 필요해 보이는 부분을 발견하여, Claude 로 조사 및 다차례 사실 검증을 거친 결과입니다.
 
 ## Summary
 
@@ -16,13 +16,22 @@ last_updated: 2026-04-30
 
 ## 문제 상황
 
-`Paragraph.char_shapes[i].start_pos` 는 UTF-16 코드 유닛 단위 위치이고 (`paragraph.rs:121-126` `CharShapeRef.start_pos: u32`), `Paragraph.char_offsets` 의 doc-comment 도 "원본 UTF-16 코드 유닛 인덱스" 로 명시 (`paragraph.rs:23-24`) 되어 있습니다.
+`Paragraph.char_shapes[i].start_pos` 는 UTF-16 코드 유닛 단위 위치이고 (`paragraph.rs:121-126` `CharShapeRef.start_pos: u32`), `Paragraph.char_offsets` 의 doc-comment 도 "원본 UTF-16 코드 유닛 인덱스" 로 명시 (`paragraph.rs:22-24`) 되어 있습니다.
 
 외부 binding 이 IR / RAG 매핑 작업에서 character (codepoint) 단위 인덱스로 정규화된 character run 을 출고해야 하는 경우, 매 char_shape 의 `start_pos` 를 codepoint 인덱스로 변환할 helper 가 필요합니다. 알고리즘은 `char_offsets.iter().position(|&off| off >= utf16_pos)` 의 단일 라인이지만, 다음 이유로 외부 자체 구현 회피가 안전해 보입니다:
 
 - 단순해 보여도 boundary 처리 (utf16_pos > 모든 offsets 인 sentinel 케이스의 fallback) 가 정확히 일치해야 상류 렌더링·클립보드 결과와 어긋나지 않습니다.
-- 상류 자체가 3 군데 직접 호출 (cursor / clipboard 경로) + 5 군데 inline 으로 동일 패턴을 사용 중이라, 외부 자체 복사는 silent drift 위험이 있습니다.
-- `Paragraph.char_offsets` 의 의미 (UTF-16 코드 유닛, 컨트롤 갭 8 코드 유닛 등) 는 상류가 단일 source-of-truth 로 갖는 contract 입니다.
+- 상류 자체가 3 군데 직접 호출 (cursor / clipboard 경로) + 5 군데 inline 으로 같은 본체 패턴 (`char_offsets.iter().position(|&off| off >= ...)`) 을 사용 중입니다. inline 5 군데의 fallback (`unwrap_or(...)`) 은 호출자 컨텍스트별로 상이 — `text_len` / `text_end` / `0` / `inserted_chars` — helper 의 `char_offsets.len()` 과는 의도가 다릅니다. 외부 binding 은 paragraph 레벨 정규화 케이스라 helper 와 동일 fallback 이 필요한데, 외부 자체 복사 시 boundary 미묘한 차이로 렌더링 결과와 어긋날 위험이 있습니다.
+- `Paragraph.char_offsets` 의 의미 (UTF-16 코드 유닛 인덱스, `paragraph.rs:22-24` doc-comment) 는 상류가 단일 source-of-truth 로 갖는 contract 입니다.
+
+본 binding 의 호출은 paragraph 레벨 character run 정규화 hot path 로, char_shapes 길이만큼 반복합니다 — 옵션 A 채택 시:
+
+```rust
+for cs in &para.char_shapes {
+    let char_idx = para.utf16_pos_to_char_idx(cs.start_pos);
+    // ... character run 의 시작 인덱스로 사용
+}
+```
 
 ## 현재 상태
 
@@ -39,9 +48,10 @@ pub(crate) fn utf16_pos_to_char_idx(char_offsets: &[u32], utf16_pos: u32) -> usi
 
 이 함수는 `v0.5.0` initial commit 부터 helpers 모듈에 존재해 온 helper 로, 현재 다음 경로에서 prod 사용 중이라 contract 가 안정된 상태로 보입니다:
 
-- `src/document_core/queries/cursor_rect.rs:8` (import)
 - `src/document_core/queries/cursor_nav.rs:8, 112, 159` (import + 2 회 호출)
 - `src/document_core/commands/clipboard.rs:11, 845` (import + 1 회 호출)
+
+(`src/document_core/queries/cursor_rect.rs:8` 에도 import 가 있으나 호출은 부재 — dead import 로 보이며, 옵션 A 채택 시 함께 제거 가능)
 
 추가로 동일 패턴이 inline 으로 사용된 경로 (총 5 군데):
 
@@ -65,9 +75,8 @@ pub(crate) fn utf16_pos_to_char_idx(char_offsets: &[u32], utf16_pos: u32) -> usi
 ```rust
 // src/model/paragraph.rs (impl Paragraph 안)
 
-/// `text` 의 codepoint 인덱스 (= `text.chars().nth(i)`) 중 UTF-16 위치
-/// `utf16_pos` 이상인 첫 번째 인덱스를 반환. 없으면 `text.chars().count()`
-/// (= `char_offsets.len()`).
+/// `text` 의 codepoint 중 UTF-16 위치 `utf16_pos` 이상인 첫 번째 codepoint
+/// 의 인덱스를 반환. 없으면 `text.chars().count()` (= `char_offsets.len()`).
 ///
 /// `char_shapes[i].start_pos` 와 `line_segs[i].text_start` 같은 UTF-16 단위
 /// 위치 필드를 codepoint 인덱스로 정규화할 때 사용.
@@ -93,7 +102,7 @@ pub fn utf16_pos_to_char_idx(char_offsets: &[u32], utf16_pos: u32) -> usize { ..
 ## 영향
 
 - 알고리즘 변경 없음 (visibility 완화 또는 메서드 캡슐화만) — semver MINOR
-- 기존 내부 사용처 (cursor_rect, cursor_nav, clipboard) 영향 없음 — 옵션 A 채택 시 기존 helper 는 thin wrapper 로 유지하거나 호출부를 `&self` 메서드로 점진 전환 가능
+- 기존 내부 사용처 (cursor_nav, clipboard) 영향 없음 — 옵션 A 채택 시 기존 helper 는 thin wrapper 로 유지하거나 호출부를 `&self` 메서드로 점진 전환 가능
 - 외부 binding 이 char_shape / line_seg 의 UTF-16 위치 필드를 codepoint 인덱스로 변환 가능
 
 ## 관련 이슈
@@ -104,6 +113,6 @@ pub fn utf16_pos_to_char_idx(char_offsets: &[u32], utf16_pos: u32) -> usize { ..
 
 - `src/document_core/helpers.rs:189-192` (현재 구현, `pub(crate)`)
 - `src/document_core/mod.rs:6` (`pub(crate) mod helpers;`)
-- `src/model/paragraph.rs:23-24` (`Paragraph.char_offsets` doc-comment, UTF-16 단위 명시)
+- `src/model/paragraph.rs:22-24` (`Paragraph.char_offsets` doc-comment, UTF-16 단위 명시)
 - `src/model/paragraph.rs:121-126` (`CharShapeRef.start_pos`, UTF-16 단위)
 - `src/model/paragraph.rs:730` (옵션 A 시 메서드 추가 위치 — `control_text_positions` 인근)
