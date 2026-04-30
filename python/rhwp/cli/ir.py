@@ -1,9 +1,8 @@
 """rhwp-py ir / blocks 서브커맨드.
 
-cli.md §S2 (ir / blocks) + phase-2.md § 두 축 연동 — IR 확장 8 신규 kind 를
-``--kind`` enum 에 노출하여 IR 확장 GA (S4) 와 동기. 출력 포맷은 cli.md
-§기본 출력 포맷 채택: ``ir`` 은 단일 JSON, ``blocks`` 는 NDJSON 기본
-(jq streaming 친화).
+cli.md §S2 (ir / blocks) — IR 확장 8 신규 kind 를 ``--kind`` enum 에
+노출하여 IR 확장 GA (S4) 와 동기. 출력 포맷은 cli.md §기본 출력 포맷
+채택: ``ir`` 은 단일 JSON, ``blocks`` 는 NDJSON 기본 (jq streaming 친화).
 """
 
 import json

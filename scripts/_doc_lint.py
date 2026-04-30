@@ -225,7 +225,7 @@ def validate_filename(rel_str: str) -> list[str]:
 
 
 # * Rule 5: <topic>.md ↔ <topic>-research.md pair existence
-# ^ Grandfather: v0.1.0 (spinoff transfer, design research 미진행 — 역사적 예외).
+# ^ Pair-exempt: v0.1.0 (spinoff transfer, design research 미진행 — 역사적 예외).
 PAIR_EXEMPT_VERSIONS = {"v0.1.0"}
 
 
@@ -282,10 +282,7 @@ def validate_cross_link(rel_str: str, text: str) -> list[str]:
             continue
         if link_target in (allowed_link, self_link):
             continue
-        errors.append(
-            f"same-version spec direct link {link!r} — "
-            "route through phase-N.md or roadmap/README.md"
-        )
+        errors.append(f"same-version spec direct link {link!r} — route through roadmap/README.md")
     return errors
 
 

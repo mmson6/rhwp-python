@@ -18,7 +18,7 @@ MCP 는 RAG 프레임워크 (LangChain / LlamaIndex / Haystack) 가 아니라 **
 v0.7.0 시점이 sweet spot 인 이유:
 
 - **노출할 도구가 풍부**: parse + IR (v0.2~0.3 GA) + view (v0.4 GA) + LangChain chunks (v0.3 GA) + LlamaIndex node (v0.5 GA) + Haystack converter (v0.6 GA) — Phase 3 통합 wave 종료 후라 MCP tool surface 가 유의미한 기능을 모두 묶어낼 수 있음
-- **외부 의존성 0**: Phase 4 baseline (v0.7.0 약속) 은 rhwp Rust 코어의 writer API 안정에 좌우되어 일정 유동적 — phase-4.md 자체가 "Phase 4 시작 전 업스트림 상태 재평가" 명시. MCP 는 readonly 라 외부 의존 없어 v0.7.0 슬롯의 안정 채움 역할
+- **외부 의존성 0**: HWP writer API 안정에 좌우되는 작업 (IR → HWP 역생성, [roadmap/README.md § v0.8.0 ~ v1.0.0](../README.md)) 은 rhwp Rust 코어 일정에 좌우되어 유동적 — "시작 전 업스트림 상태 재평가" 명시. MCP 는 readonly 라 외부 의존 없어 v0.7.0 슬롯의 안정 채움 역할
 - **통합 패턴 정착**: LangChain (v0.3) → LlamaIndex (v0.5) → Haystack (v0.6) 세 통합으로 `python/rhwp/integrations/<framework>.py` + 옵셔널 extras 패턴이 완전 정립된 이후 — MCP 도 동일 패턴 답습
 
 ## 목표와 비목표
@@ -195,6 +195,20 @@ python/rhwp/mcp/
 | 5 | 인증 / sandboxing | 미내장 (운영자 책임) | stdio = OS 권한 / streamable-http = reverse proxy. 라이브러리 레이어가 보안 책임지면 부분적 보호로 오해 유발 |
 | 6 | extras 명명 | `[mcp]` / `[mcp-chunks]` | CLI extras (`[cli]` / `[cli-chunks]`) 와 일관 패턴 |
 | 7 | 모듈 위치 | `python/rhwp/mcp/` (top-level) | entry point + lifecycle 보유 — `integrations/` (passive) 와 성격 다름. CLI 와 같은 위계 |
+
+## 인수조건
+
+- **AC-1** — `mcp` extras 미설치 시 `rhwp-mcp` 호출이 친절 에러 + exit 2 (CLI extras gate 패턴 동일, 결정 6)
+- **AC-2** — `rhwp-mcp` stdio 기동 후 MCP `tools/list` 응답이 7 개 도구 (`parse_hwp_summary` / `extract_text` / `get_ir` / `iter_blocks` / `to_markdown` / `to_html` / `chunks`) 정확히 노출 (§ 노출 도구, 결정 4)
+- **AC-3** — `iter_blocks(kind="invalid_value")` 호출 시 Pydantic validation error → MCP `CallToolResult.isError=True` 응답 (panic 아님, § 단위 테스트)
+- **AC-4** — `extract_text("nonexistent.hwp")` 호출 시 `FileNotFoundError` → MCP `isError=True` 응답 (§ 단위 테스트)
+- **AC-5** — 모든 7 도구 handler 가 sync 함수 (`async def` 아님) — handler 안에서 `rhwp.parse(path)` → 소비 → primitive 반환 (Document 가 thread 경계 미보유). `asyncio.to_thread(rhwp.parse, ...)` 패턴 코드 내 부재 (결정 3, § `unsendable` 안전 패턴)
+- **AC-6** — `to_markdown(path)` / `to_html(path, include_css=False)` 도구가 v0.4.0 view API (`HwpDocument.to_markdown()` / `HwpDocument.to_html()`) 위 thin wrapper 로 동작 (S2)
+- **AC-7** — `chunks` 도구 호출 시 `langchain-text-splitters` 미설치면 MCP `isError=True` 응답 — 서버 기동은 정상 + 다른 6 도구는 사용 가능 (런타임 extras gate, S3)
+- **AC-8** — `rhwp-mcp --transport streamable-http --port N` 옵션이 uvicorn ASGI 로 기동, MCP `initialize` + `tools/list` round-trip 정상 (결정 2, S4 — endpoint path 는 SDK 기본값 추종)
+- **AC-9** — `pyproject.toml` 에 `[project.optional-dependencies]` `mcp = ["mcp>=1.12"]` + `mcp-chunks` extras 등록 + `[project.scripts]` `rhwp-mcp = "rhwp.mcp:run"` entry point 등록 (§ 의존성 / 배포)
+- **AC-10** — `python/rhwp/mcp/` 모듈 위치 (top-level, `integrations/` 가 아님 — 결정 7). `__init__.py` 는 빈 파일 또는 docstring only (CLAUDE.md 규칙)
+- **AC-11** — CI `test-without-extras` job 의 expected skip count 가 4 → 5 로 증가 (`tests/test_mcp_server.py` 가 module-level `pytest.importorskip("mcp")` 로 1 skip 기여). `.github/workflows/ci.yml` + `AGENTS.md` § Tests 동시 갱신 (§ 다른 산출물의 파급)
 
 ## 미확정 이슈
 

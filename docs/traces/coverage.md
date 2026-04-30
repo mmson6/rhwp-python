@@ -2,7 +2,7 @@
 
 자동 생성 — `scripts/generate_spec_trace.py`. Living.
 
-v0.4.0+ 신규 spec 의 인수조건 ↔ 테스트 매핑. 기존 v0.1.0 ~ v0.3.0 Frozen spec 은 AC ID 부여 안 함 (CONVENTIONS § Trace report).
+spec-system-overhaul (2026-04-29) 이후 신규 작성 spec + retrofit 적용된 Draft 의 인수조건 ↔ 테스트 매핑. v0.1.0 ~ v0.3.0 Frozen spec 은 본문 변경 금지로 AC ID 부여 안 함 (CONVENTIONS § Trace report).
 
 | Spec | AC | Tests |
 |---|---|---|
