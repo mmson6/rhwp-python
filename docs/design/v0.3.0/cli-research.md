@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.3.0 CLI ADR — 'rhwp-py' 이름 선정 / 업스트림 overlap=0 정책 / 기본 출력 포맷 (NDJSON / JSON) 결정의 업계 선례·근거"
 ga: v0.3.0
 last_updated: 2026-04-28
 ---

@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.1.0 분사 작업 독립 검증 리포트 — code-reviewer + architect-reviewer 병렬 스폰. 8 건 즉시 반영, 나머지 운영 개선"
 ga: v0.1.0
 last_updated: 2026-04-23
 ---

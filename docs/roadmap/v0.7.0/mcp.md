@@ -1,7 +1,8 @@
 ---
 status: Draft
+description: "v0.7.0 — 'rhwp-mcp' MCP 서버. LLM 에이전트가 HWP/HWPX 직접 파싱·요약·청크화 가능한 표준 프로토콜 표면"
 target: v0.7.0
-last_updated: 2026-04-28
+last_updated: 2026-04-30
 ---
 
 # v0.7.0 — MCP server (`rhwp-mcp`)

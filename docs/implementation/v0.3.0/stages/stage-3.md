@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.3.0 S3 작업 로그 — ListItem + Caption + Toc + Field 4 종 블록 일괄 도입 (Block 유니온 11 멤버)"
 ga: v0.3.0
 last_updated: 2026-04-27
 ---

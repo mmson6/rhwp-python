@@ -38,6 +38,7 @@ When this skill is invoked, execute the following steps in order:
    ```markdown
    ---
    status: Draft
+   description: <version> — <한 줄 요약: spec 이 도입하는 것 + 핵심 결정 압축, 50-150 자>
    target: <version>
    last_updated: <today YYYY-MM-DD>
    ---
@@ -78,6 +79,7 @@ When this skill is invoked, execute the following steps in order:
    ```markdown
    ---
    status: Draft
+   description: <version> <topic> ADR — <짝 spec 의 결정 N 건 / 핵심 옵션 비교 한 줄, 50-150 자>
    target: <version>
    last_updated: <today YYYY-MM-DD>
    ---

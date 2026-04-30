@@ -4,7 +4,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 
 본 문서는 Living — 자유 갱신.
 
-## 현재 상태 (2026-04-28)
+## 현재 상태 (2026-04-30)
 
 - **v0.1.0 / v0.1.1** — Frozen, PyPI 배포 완료
 - **v0.2.0** — Frozen, Document IR v1 GA (2026-04-25)

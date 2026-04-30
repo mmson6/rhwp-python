@@ -6,7 +6,7 @@
 
 | 분류 | 의미 | 갱신 정책 | 예시 |
 |---|---|---|---|
-| **Living** | 항상 최신 — 다른 문서의 위치 포인터 + 시간선 + 규칙 | 자유 갱신, 매 변경 시 손봐도 무방 | `docs/CONVENTIONS.md` (자체), `docs/roadmap/README.md`, `CHANGELOG.md`, `CLAUDE.md`, `AGENTS.md`, `README.md` |
+| **Living** | 항상 최신 — 다른 문서의 위치 포인터 + 시간선 + 규칙 | 자유 갱신, 매 변경 시 손봐도 무방 | `docs/CONVENTIONS.md` (자체), `docs/roadmap/README.md`, `docs/upstream/README.md`, `CHANGELOG.md`, `CLAUDE.md`, `AGENTS.md`, `README.md` |
 | **Active** | 외부 시스템으로 흘러가기 전 staging | 큰 변경만, in-place 갱신 OK | `docs/upstream/<topic>.md` |
 | **Draft** | 작성 중인 spec — 해당 버전 GA 전까지 활발 갱신 | 버전 GA 전까지 자유 갱신, GA 후 Frozen 으로 전환 | `docs/roadmap/v0.7.0/mcp.md` (현재 v0.7.0 GA 전) |
 | **Frozen** | GA 완료된 spec / 완료된 stage / 완료된 검증 | **변경 금지** — 오타·링크 수정만 in-place 허용. 큰 변경은 새 spec + supersede | `docs/roadmap/v0.2.0/ir.md` (v0.2.0 GA 완료), `docs/implementation/v0.2.0/stages/*.md` |
@@ -36,6 +36,7 @@ Frozen 본문은 historical record. 시간 흐르며 외부 의존성 (라이브
 ```markdown
 ---
 status: Frozen
+description: <한 줄 요약 — optional, 50-150 자 권장>
 ga: v0.3.0
 last_updated: 2026-04-28
 ---
@@ -50,11 +51,20 @@ last_updated: 2026-04-28
 | 필드 | 타입 | 규칙 |
 |---|---|---|
 | `status` | enum: `Active` / `Draft` / `Frozen` / `Superseded` | 필수 |
+| `description` | non-empty string (50-150 자 권장) | 필수. 한 줄 요약 — 인덱스/검색/툴팁용 (MkDocs / Hugo / Astro 패턴) |
 | `ga` | `vX.Y.Z` SemVer | `status: Frozen` 또는 `Superseded` 일 때 필수. `target` 과 mutex |
 | `target` | `vX.Y.Z` SemVer | `status: Draft` 일 때 필수. `ga` 와 mutex |
 | `supersedes` | `<vX.Y.Z>/<topic>.md` 또는 생략 | 새 spec 이 무엇을 대체하는지 |
 | `superseded_by` | `<vX.Y.Z>/<topic>.md` | `status: Superseded` 일 때 필수 |
 | `last_updated` | `YYYY-MM-DD` | 필수. 의미 변경 commit 시 자동 갱신 ([D3 hook](#last_updated-자동-갱신)) |
+
+`description` 가이드:
+
+- 한 줄 요약 — 본문 첫 단락 또는 제목+핵심 결정 압축. 50-150 자 권장 (한국어 기준)
+- 본문 의미 추가 금지 — 이미 본문에 있는 정보의 압축이어야 함. 새 결정 / 인용 / 사실 추가 안 됨 (특히 Frozen 본문은 immutability 원칙)
+- non-semantic 형식 변경이라 Frozen 면제 조항 [Living-policy schema migration](#frozen-면제-조항--living-policy-schema-migration) 적용 — Frozen spec 도 in-place 추가 가능
+- 모든 문서 종류 (roadmap / design / implementation / upstream / verification) 에 의미 있어 schema 갈래 없음
+- **Quoting** — 값 전체를 큰따옴표 `"..."` 로 감싸고 inline code/식별자는 작은따옴표 `'rhwp-py'` 로 표기 (YAML 안전 + flat parser 호환). 예: `description: "v0.3.0 — 'rhwp-py' 얇은 CLI..."`
 
 `Active` (예: `upstream/<topic>.md`) 는 `ga` / `target` 둘 다 생략.
 
@@ -67,6 +77,7 @@ last_updated: 2026-04-28
 ```markdown
 ---
 status: Frozen
+description: "v0.3.0 — 'rhwp-py' 얇은 CLI 재도입. 업스트림 'rhwp' 바이너리와 overlap=0 + Python 고유 가치 (IR / 청크) 집중"
 ga: v0.3.0
 last_updated: 2026-04-28
 ---
@@ -81,6 +92,7 @@ v0.2.0 에서 폐기했던 CLI 를...
 ```markdown
 ---
 status: Draft
+description: "v0.7.0 — 'rhwp-mcp' MCP 서버. LLM 에이전트가 HWP/HWPX 직접 파싱·요약·청크화 가능한 표준 프로토콜 표면"
 target: v0.7.0
 last_updated: 2026-04-28
 ---
@@ -95,6 +107,7 @@ last_updated: 2026-04-28
 ```markdown
 ---
 status: Active
+description: "업스트림 제안 — 'find_control_text_positions' 외부 노출 (paragraph 안 inline 컨트롤 character 위치 helper)"
 last_updated: 2026-04-26
 ---
 
@@ -108,6 +121,7 @@ last_updated: 2026-04-26
 ```markdown
 ---
 status: Superseded
+description: "v0.2.0 Document IR v1 (v0.4.0/ir-correction.md 로 대체)"
 ga: v0.2.0
 superseded_by: v0.4.0/ir-correction.md
 last_updated: 2026-04-25
@@ -138,6 +152,7 @@ docs/
 ├── traces/
 │   └── coverage.md                   Living  — spec ↔ test 자동 매핑
 ├── upstream/
+│   ├── README.md                     Living  — 활성 / 해결 이슈 인덱스 + archive 정책
 │   └── <topic>.md                    Active  — 외부 (rhwp Rust 코어) 이슈 초안. 업스트림 머지 시 archive
 └── verification/
     └── v<X.Y.Z>/...                  Frozen  — 큰 단위 작업 검증 리포트 (한정)
@@ -160,7 +175,8 @@ docs/
 
 ### upstream/
 
-- `<topic>.md` (Active) — 업스트림 (`edwardkim/rhwp` 등) 에 제출 검토 중인 이슈/제안 초안. per-version 매핑 없음
+- `README.md` (Living) — 활성 / 해결 이슈 인덱스 + archive 정책 SSOT. 자체 추적 메타 (상류 등록 여부 / RESOLVED 일자 / 관련 spec 참조) 보유
+- `<topic>.md` (Active) — 업스트림 (`edwardkim/rhwp` 등) 에 제출 검토 중인 이슈/제안 초안. per-version 매핑 없음. **본문은 가능한 한 GitHub 이슈 본문에 그대로 등록 가능한 형태** — 자체 추적 문장은 본문에 두지 않고 위 README 인덱스가 관리
 - 본 디렉토리는 외부 시스템 (GitHub Issues) 으로 흘러가기 전 단계의 staging — 정식 spec 의 일부가 아님
 - **해결 시** — 두 가지 옵션:
   - **삭제** — 다른 spec 이 본 파일을 참조하지 않을 때. 정보는 GitHub permalink + 본 PR commit history 가 보존

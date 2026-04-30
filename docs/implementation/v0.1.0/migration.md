@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.1.0 분사·이관 작업 로그 — 'rhwp-python-heuristic/rhwp-python/' → 'DanMeon/rhwp-python' 별도 리포 분사 + copier 템플릿 적용"
 ga: v0.1.0
 last_updated: 2026-04-23
 ---

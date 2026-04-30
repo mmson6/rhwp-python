@@ -1,7 +1,8 @@
 ---
 status: Draft
+description: "v0.3.1 — inline 컨트롤 마커 character offset 출고. 상류 v0.7.8 'Paragraph::control_text_positions()' 활용 (schema 변경 없음)"
 target: v0.3.1
-last_updated: 2026-04-29
+last_updated: 2026-04-30
 ---
 
 # v0.3.1 — inline 컨트롤 마커의 character offset 출고

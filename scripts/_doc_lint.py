@@ -6,6 +6,7 @@ CONVENTIONS.md 정책 enforcement. 룰 일람:
 1. **Frontmatter (YAML)** — Living 외 모든 spec
    - status enum: Active / Draft / Frozen / Superseded
    - last_updated: YYYY-MM-DD (필수)
+   - description: 필수 (non-empty string)
    - status:Active → ga / target 둘 다 금지
    - status:Draft → target 필수, ga 금지
    - status:Frozen → ga 필수 (예외: meta-level docs/implementation/<topic>.md /
@@ -31,6 +32,7 @@ LIVING_FILES = {
     "docs/CONVENTIONS.md",
     "docs/roadmap/README.md",
     "docs/traces/coverage.md",
+    "docs/upstream/README.md",
 }
 HISTORICAL_FROZEN_PREFIXES = ("docs/implementation/v0.1.0/",)
 FORBIDDEN_KEYWORDS = (
@@ -100,6 +102,9 @@ def validate_frontmatter(rel_str: str, meta: dict[str, str], repo: Path) -> list
     last_updated = meta.get("last_updated", "")
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", last_updated):
         errors.append(f"frontmatter: 'last_updated' must be YYYY-MM-DD (got {last_updated!r})")
+
+    if not meta.get("description", "").strip():
+        errors.append("frontmatter: 'description' is required (non-empty string)")
 
     has_ga = "ga" in meta
     has_target = "target" in meta

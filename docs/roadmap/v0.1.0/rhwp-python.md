@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.1.0 — PyO3 바인딩 분사 + PyPI 배포. 'rhwp-python-heuristic' 모노레포에서 별도 리포로 이관 (기능 추가 없음)"
 ga: v0.1.0
 last_updated: 2026-04-23
 ---

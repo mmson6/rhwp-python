@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.2.0 S3 작업 로그 — TableBlock 통합 (cells + HTML + text 3중 표현) + 중첩 표 재귀"
 ga: v0.2.0
 last_updated: 2026-04-24
 ---

@@ -1,7 +1,8 @@
 ---
 status: Draft
+description: "v0.3.1 ADR — API source / char_start·char_end 의미 / 빈 paragraph 폴백 / schema 버전 4 결정의 근거"
 target: v0.3.1
-last_updated: 2026-04-29
+last_updated: 2026-04-30
 ---
 
 # v0.3.1 ir-marker-char-offset — 설계 의사결정 리서치 요약

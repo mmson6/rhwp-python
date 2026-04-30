@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.3.0 S2 작업 로그 — FormulaBlock + Footnote/Endnote + Furniture 라우팅 + Provenance.marker_prov 패턴 도입"
 ga: v0.3.0
 last_updated: 2026-04-26
 ---

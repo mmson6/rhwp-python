@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.2.0 S5 작업 로그 — 'iter_blocks' Python 메서드 + LangChain mode='ir-blocks' IR 통합 (v0.2.0 마지막 stage)"
 ga: v0.2.0
 last_updated: 2026-04-24
 ---

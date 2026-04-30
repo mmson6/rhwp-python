@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.2.0 — Document IR v1. Pydantic V2 기반 RAG/LLM 파이프라인용 구조화 문서 모델 + JSON Schema 고정"
 ga: v0.2.0
 last_updated: 2026-04-25
 ---

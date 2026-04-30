@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "업스트림 제안 — 'find_control_text_positions' 외부 노출 (paragraph 안 inline 컨트롤 character 위치 helper). RESOLVED via PR #405"
 last_updated: 2026-04-29
 ---
 
@@ -7,7 +8,7 @@ last_updated: 2026-04-29
 
 # 업스트림 제안 — `find_control_text_positions` 외부 노출
 
-> 외부 binding (`rhwp-python`) 구현 중 업스트림에서 수정이 필요해 보이는 부분을 발견하여, Claude 로 조사를 진행한 결과입니다. 업스트림 머지 시 본 파일은 archive (또는 삭제) 처리.
+> 외부 binding (`rhwp-python`) 구현 중 업스트림에서 수정이 필요해 보이는 부분을 발견하여, Claude 로 조사를 진행한 결과입니다.
 
 ## Summary
 

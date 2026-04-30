@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.3.0 — Document IR v1.1. Picture / Formula / Footnote / List / Caption / Toc / Field 8 종 블록 확장 (UnknownBlock 위 MINOR 증분)"
 ga: v0.3.0
 last_updated: 2026-04-28
 ---

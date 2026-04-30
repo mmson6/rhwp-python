@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.3.0 S4 작업 로그 — Schema v1.1 GA + 'rhwp-py' CLI 재도입 + LangChain include_furniture (IR 확장 + CLI 두 축 동시 GA)"
 ga: v0.3.0
 last_updated: 2026-04-28
 ---

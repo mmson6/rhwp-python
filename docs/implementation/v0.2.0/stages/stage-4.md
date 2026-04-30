@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.2.0 S4 작업 로그 — JSON Schema 공개 + Draft 2020-12 meta-validation + GitHub Pages 배포 파이프라인"
 ga: v0.2.0
 last_updated: 2026-04-24
 ---
