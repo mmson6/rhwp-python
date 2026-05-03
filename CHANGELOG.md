@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONVENTIONS.md 갱신: EARS notation (v0.4.0+) / CHANGELOG ↔ implementation log 역할 분리 / 상대경로 implicit 표준 / Frozen 외부 의존성 부패 정책 / Trace report / verification 약화 / meta-level implementation 슬롯.
 - 부수 정리: 상류 `edwardkim/rhwp#390` (find_control_text_positions) 옵션 A 채택 → cherry-pick 머지 → 본 spec in-place Frozen 전환 + RESOLVED notice. design 파일 `<topic>-design-research.md` → `<topic>-research.md` 명명 통일 (v0.2.0/ir, v0.3.0/cli rename + 24 cross-link 일괄 정정).
 - 본 PR 의 a/b/c 결정 비교 + 14개 결정 historical record 는 [docs/implementation/spec-system-overhaul.md](docs/implementation/spec-system-overhaul.md) (Frozen) 가 보유.
+- spec body 구조 SSOT 정착 — `/new-spec` skill 안 `templates/spec.md` + `templates/adr.md` 신설 (skeleton + 섹션별 룰 보유, body 구조 SSOT). `docs/CONVENTIONS.md` 에 § Spec / ADR 본문 구조 (짧은 pointer) + § 섹션 역할 분리 — 정보 배치 룩업 (spec ↔ ADR ↔ CHANGELOG ↔ implementation log 의 cross-cutting 표) 신설. SKILL.md step 2/4/5 가 두 template 파일을 markdown 링크로 자연 참조 (공식 Claude Code skill 패턴 — 명령형). multi-template `templates/` sub-dir 은 Anthropic 공식 docs 의 `examples/` / `scripts/` 카테고리 sub-dir 패턴 + GitHub ISSUE_TEMPLATE 선례 follow.
 
 ## [0.3.1] — 2026-05-02
 
