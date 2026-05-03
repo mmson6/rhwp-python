@@ -1,8 +1,10 @@
 ---
-status: Active
+status: Frozen
 description: "업스트림 제안 — 'utf16_pos_to_char_idx' 외부 노출 (UTF-16 위치 → codepoint 인덱스 변환 helper). #390/PR #405 후속 같은 결"
 last_updated: 2026-04-30
 ---
+
+> **RESOLVED 2026-04-30** — 상류 [PR #494](https://github.com/edwardkim/rhwp/pull/494) 머지로 본 issue 해결.
 
 # 업스트림 제안 — `utf16_pos_to_char_idx` 외부 노출
 

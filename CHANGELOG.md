@@ -22,6 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 본 PR 의 a/b/c 결정 비교 + 14개 결정 historical record 는 [docs/implementation/spec-system-overhaul.md](docs/implementation/spec-system-overhaul.md) (Frozen) 가 보유.
 - spec body 구조 SSOT 정착 — `/new-spec` skill 안 `templates/spec.md` + `templates/adr.md` 신설 (skeleton + 섹션별 룰 보유, body 구조 SSOT). `docs/CONVENTIONS.md` 에 § Spec / ADR 본문 구조 (짧은 pointer) + § 섹션 역할 분리 — 정보 배치 룩업 (spec ↔ ADR ↔ CHANGELOG ↔ implementation log 의 cross-cutting 표) 신설. SKILL.md step 2/4/5 가 두 template 파일을 markdown 링크로 자연 참조 (공식 Claude Code skill 패턴 — 명령형). multi-template `templates/` sub-dir 은 Anthropic 공식 docs 의 `examples/` / `scripts/` 카테고리 sub-dir 패턴 + GitHub ISSUE_TEMPLATE 선례 follow.
 
+## [0.3.2] — 2026-05-03
+
+PATCH release. v0.2.0 IR 매핑이 보유해 온 자체 UTF-16 → codepoint 변환 복사본 (`src/ir.rs::utf16_to_cp`) 을 상류 `Paragraph::utf16_pos_to_char_idx` ([PR #494](https://github.com/edwardkim/rhwp/pull/494) / [Task #484](https://github.com/edwardkim/rhwp/issues/484), v0.7.9 GA) 로 치환해 SSOT 를 단일화한다. 알고리즘 동등 — IR 출력 byte-equal, 공개 API 변경 없음, SchemaVersion `"1.1"` 유지.
+
+### Build
+
+- `src/ir.rs::utf16_to_cp` 자체 복사본 + `u32::MAX` short-circuit + `fallback_end` 인자 + 짝 단위 테스트 2건 (`utf16_to_cp_sentinel_returns_fallback`, `utf16_to_cp_matches_first_ge`) 제거. `build_char_runs` 호출부를 `para.utf16_pos_to_char_idx(start_utf16)` / `(end_utf16)` 로 치환. 본 binding 운영 정책 ("상류 신뢰 + 결함 시 PR") 일관 적용 — v0.3.1 의 `Paragraph::control_text_positions` 채택과 같은 결.
+- `external/rhwp` submodule pin `0fb3e67` 유지 — 핀 history 에 PR #494 머지 commit `60eaa91` (2026-04-30) 포함, `cargo build` 가 시그니처 해소로 직접 검증. v0.7.9 GA 흡수는 직교 영역, 본 PATCH 영구 비목표.
+- 부수 정리: 본 binding 이 제출한 issue 초안 `docs/upstream/issue-utf16-pos-to-char-idx.md` in-place Frozen 전환 + `docs/upstream/README.md` 인덱스 RESOLVED 컬럼 채움.
+
 ## [0.3.1] — 2026-05-02
 
 PATCH release. v0.3.0 의 IR 출고에서 inline 컨트롤 마커의 `Provenance.char_start` / `char_end` 가 항상 null 이던 문제를 정정. 상류 v0.7.8 의 `Paragraph::control_text_positions()` ([PR #405](https://github.com/edwardkim/rhwp/pull/405) / [Task #390](https://github.com/edwardkim/rhwp/issues/390)) 노출을 활용해 7 종 블록 (각주·미주 마커, 그림, 수식, 필드, TOC, 표) 의 zero-width character 위치를 채운다. SchemaVersion 변경 없음 (`"1.1"` 유지) — 기존에 nullable 슬롯에 정의된 `int | None` 에 non-null 값을 출고할 뿐, schema 호환 100%.
@@ -245,7 +255,8 @@ The `rhwp` Rust core is consumed via git submodule pinned to upstream commit `16
 - Local `maturin build --release` wheel (3.0 MB) verified end-to-end in a clean venv: install → import → `rhwp.parse` → `HwpLoader` load. (Note: the v0.1.0 sdist exceeded PyPI's 100 MB limit and did not upload; fixed in [0.1.1](#011--2026-04-23).)
 - GitHub Actions workflow (`publish.yml`) builds Linux (x86_64 + aarch64) / macOS (x86_64 + aarch64) / Windows wheels + sdist on release publish, then uploads via PyPI Trusted Publisher (OIDC).
 
-[Unreleased]: https://github.com/DanMeon/rhwp-python/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/DanMeon/rhwp-python/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.3.2
 [0.3.1]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.3.1
 [0.3.0]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.3.0
 [0.2.0]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.2.0
