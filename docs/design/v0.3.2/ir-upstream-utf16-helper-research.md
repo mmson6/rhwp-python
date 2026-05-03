@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.3.2 ir-upstream-utf16-helper ADR — API source / 'u32::MAX' sentinel / 'fallback_end' 인자 / 단위 테스트 처리 4 결정의 근거"
-target: v0.3.2
+ga: v0.3.2
 last_updated: 2026-05-03
 ---
 

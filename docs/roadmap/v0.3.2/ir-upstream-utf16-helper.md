@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.3.2 — UTF-16 → codepoint 변환 SSOT 단일화. 상류 'Paragraph::utf16_pos_to_char_idx' (PR #494) 활용 (schema 변경 없음)"
-target: v0.3.2
+ga: v0.3.2
 last_updated: 2026-05-03
 ---
 
