@@ -160,8 +160,8 @@ def test_toc_entry_block_is_not_in_block_union():
 # * mapper — RawToc → TocBlock
 
 
-def _raw_toc(*, entries: list[RawTocEntry] | None = None) -> RawToc:
-    return RawToc(section_idx=1, para_idx=3, entries=entries or [])
+def _raw_toc(*, entries: list[RawTocEntry] | None = None, char_offset: int | None = None) -> RawToc:
+    return RawToc(section_idx=1, para_idx=3, entries=entries or [], char_offset=char_offset)
 
 
 def test_build_toc_block_empty_entries():

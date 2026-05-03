@@ -147,8 +147,14 @@ def test_load_schema_is_valid_draft_2020_12():
 # * 실제 인스턴스가 schema 를 통과
 
 
+@pytest.mark.spec("v0.3.1/ir-marker-char-offset#AC-10")
 def test_real_hwp_document_validates_against_schema(parsed_hwp):
-    """실제 HWP 파싱 결과가 JSON Schema validation 을 통과."""
+    """실제 HWP 파싱 결과가 JSON Schema validation 을 통과.
+
+    v0.3.1 AC-10 도 본 테스트가 동시 검증 — inline 컨트롤 마커의
+    ``Provenance.char_start/char_end`` 가 v0.3.1 부터 non-null 정수로 채워지지만
+    schema 의 ``anyOf [integer, null]`` 정의와 호환되어 validator 통과.
+    """
     schema = export_schema()
     validator = Draft202012Validator(schema)
     doc = parsed_hwp.to_ir()

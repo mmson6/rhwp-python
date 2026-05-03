@@ -252,6 +252,7 @@ def _build_table_block(raw_para: RawParagraph, raw_table: RawTable) -> TableBloc
     cells = [_build_table_cell(c, cols) for c in raw_table["cells"]]
     raw_caption_block = raw_table["caption_block"]
     caption_block = _build_caption_block(raw_caption_block) if raw_caption_block else None
+    char_offset = raw_table["char_offset"]
     return TableBlock(
         rows=raw_table["rows"],
         cols=cols,
@@ -263,8 +264,8 @@ def _build_table_block(raw_para: RawParagraph, raw_table: RawTable) -> TableBloc
         prov=Provenance(
             section_idx=raw_para["section_idx"],
             para_idx=raw_para["para_idx"],
-            char_start=None,
-            char_end=None,
+            char_start=char_offset,
+            char_end=char_offset,
         ),
     )
 
@@ -321,6 +322,7 @@ def _build_picture_block(raw_pic: RawPicture) -> PictureBlock:
         )
     raw_cap = raw_pic["caption"]
     caption = _build_caption_block(raw_cap) if raw_cap is not None else None
+    char_offset = raw_pic["char_offset"]
     return PictureBlock(
         image=image,
         caption=caption,
@@ -328,8 +330,8 @@ def _build_picture_block(raw_pic: RawPicture) -> PictureBlock:
         prov=Provenance(
             section_idx=raw_pic["section_idx"],
             para_idx=raw_pic["para_idx"],
-            char_start=None,
-            char_end=None,
+            char_start=char_offset,
+            char_end=char_offset,
         ),
     )
 
@@ -341,30 +343,35 @@ def _build_formula_block(raw_eq: RawFormula) -> FormulaBlock:
     여부는 상류 ``Equation.common.inline_object`` 등에서 추론할 수 있지만 현 시점
     1차 사용처 (RAG) 에서 차이 의미 없음 — 모두 False 출고.
     """
+    char_offset = raw_eq["char_offset"]
     return FormulaBlock(
         script=raw_eq["script"],
         text_alt=raw_eq["text_alt"],
         prov=Provenance(
             section_idx=raw_eq["section_idx"],
             para_idx=raw_eq["para_idx"],
-            char_start=None,
-            char_end=None,
+            char_start=char_offset,
+            char_end=char_offset,
         ),
     )
 
 
 def _build_footnote_block(raw_fn: RawFootnote) -> FootnoteBlock:
-    """RawFootnote → FootnoteBlock. blocks 는 각주 본문 paragraph 들을 평탄화."""
+    """RawFootnote → FootnoteBlock. blocks 는 각주 본문 paragraph 들을 평탄화.
+
+    ``marker_char_offset`` (v0.3.1) 은 zero-width point — char_start/char_end
+    양쪽에 동일 값 복제 (spec § 결정사항 6). 부모 paragraph 의 char_offsets 가
+    빈 경우 None.
+    """
     inner_blocks: list[Block] = []
     for inner in raw_fn["blocks"]:
         inner_blocks.extend(_flatten_paragraph(inner))
-    # ^ char_start/char_end 는 None — 본문 마커 character 정확 위치는 상류 field_ranges
-    #   매핑 필요로 v0.4.0+ 검토. nodes.FootnoteBlock docstring §marker precision 참조.
+    marker_char_offset = raw_fn["marker_char_offset"]
     marker = Provenance(
         section_idx=raw_fn["marker_section_idx"],
         para_idx=raw_fn["marker_para_idx"],
-        char_start=None,
-        char_end=None,
+        char_start=marker_char_offset,
+        char_end=marker_char_offset,
     )
     return FootnoteBlock(
         number=raw_fn["number"],
@@ -375,15 +382,16 @@ def _build_footnote_block(raw_fn: RawFootnote) -> FootnoteBlock:
 
 
 def _build_endnote_block(raw_en: RawEndnote) -> EndnoteBlock:
-    """RawEndnote → EndnoteBlock — Footnote 와 동일 패턴 (marker precision 동일 deferral)."""
+    """RawEndnote → EndnoteBlock — Footnote 와 동일 패턴."""
     inner_blocks: list[Block] = []
     for inner in raw_en["blocks"]:
         inner_blocks.extend(_flatten_paragraph(inner))
+    marker_char_offset = raw_en["marker_char_offset"]
     marker = Provenance(
         section_idx=raw_en["marker_section_idx"],
         para_idx=raw_en["marker_para_idx"],
-        char_start=None,
-        char_end=None,
+        char_start=marker_char_offset,
+        char_end=marker_char_offset,
     )
     return EndnoteBlock(
         number=raw_en["number"],
@@ -424,13 +432,14 @@ def _build_toc_block(raw_toc: RawToc) -> TocBlock:
     필요. spec § 6 결정 사항 7 참조.
     """
     entries = [_build_toc_entry_block(e, raw_toc) for e in raw_toc["entries"]]
+    char_offset = raw_toc["char_offset"]
     return TocBlock(
         entries=entries,
         prov=Provenance(
             section_idx=raw_toc["section_idx"],
             para_idx=raw_toc["para_idx"],
-            char_start=None,
-            char_end=None,
+            char_start=char_offset,
+            char_end=char_offset,
         ),
     )
 
@@ -463,6 +472,7 @@ def _build_field_block(raw_field: RawField) -> FieldBlock:
     """
     raw_kind = raw_field["field_kind"]
     field_kind: FieldKind = raw_kind if raw_kind in _VALID_FIELD_KINDS else "unknown"  # type: ignore[assignment]
+    char_offset = raw_field["char_offset"]
     return FieldBlock(
         field_kind=field_kind,
         cached_value=raw_field["cached_value"],
@@ -471,8 +481,8 @@ def _build_field_block(raw_field: RawField) -> FieldBlock:
         prov=Provenance(
             section_idx=raw_field["section_idx"],
             para_idx=raw_field["para_idx"],
-            char_start=None,
-            char_end=None,
+            char_start=char_offset,
+            char_end=char_offset,
         ),
     )
 

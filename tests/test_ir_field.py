@@ -37,6 +37,7 @@ def _raw_field(
     field_type_code: int | None = None,
     section_idx: int = 0,
     para_idx: int = 0,
+    char_offset: int | None = None,
 ) -> RawField:
     return RawField(
         section_idx=section_idx,
@@ -45,6 +46,7 @@ def _raw_field(
         cached_value=cached_value,
         raw_instruction=raw_instruction,
         field_type_code=field_type_code,
+        char_offset=char_offset,
     )
 
 

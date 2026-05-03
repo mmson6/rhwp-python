@@ -118,12 +118,14 @@ def _raw_formula(
     para_idx: int = 0,
     script: str = "1 over 2",
     text_alt: str | None = None,
+    char_offset: int | None = None,
 ) -> RawFormula:
     return RawFormula(
         section_idx=section_idx,
         para_idx=para_idx,
         script=script,
         text_alt=text_alt,
+        char_offset=char_offset,
     )
 
 
@@ -173,6 +175,7 @@ def test_formula_inside_table_cell_is_flattened():
                 "para_idx": 0,
                 "script": "x^2",
                 "text_alt": None,
+                "char_offset": None,
             }
         ],
         "tocs": [],
@@ -190,6 +193,7 @@ def test_formula_inside_table_cell_is_flattened():
                 "cols": 1,
                 "caption": None,
                 "caption_block": None,
+                "char_offset": None,
                 "cells": [
                     {
                         "row": 0,
@@ -243,6 +247,7 @@ def test_formula_inside_footnote_body_is_flattened():
                 "para_idx": 0,
                 "script": "1 over 2",
                 "text_alt": "1 / 2",
+                "char_offset": None,
             }
         ],
         "tocs": [],
@@ -259,6 +264,7 @@ def test_formula_inside_footnote_body_is_flattened():
             RawFootnote(
                 marker_section_idx=0,
                 marker_para_idx=5,
+                marker_char_offset=None,
                 number=1,
                 blocks=[raw_inner_para],
             )

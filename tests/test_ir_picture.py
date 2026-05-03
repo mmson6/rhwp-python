@@ -148,6 +148,7 @@ def _raw_picture(
     has_content: bool = True,
     description: str | None = None,
     image: bool = True,
+    char_offset: int | None = None,
 ) -> RawPicture:
     img: RawImageRef | None = None
     if image:
@@ -158,6 +159,7 @@ def _raw_picture(
         image=img,
         description=description,
         caption=None,
+        char_offset=char_offset,
     )
 
 

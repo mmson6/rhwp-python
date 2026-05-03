@@ -9,6 +9,7 @@ ir-expansion.md §S1 + §8 Furniture 채움 + §iter_blocks 순서 계약 검증
 - 실제 샘플 (aift.hwp) 에 머리글/꼬리말이 있으면 ParagraphBlock 으로 노출
 """
 
+import pytest
 import rhwp
 from pydantic import ValidationError
 from rhwp.ir._mapper import build_hwp_document
@@ -22,7 +23,6 @@ from rhwp.ir.nodes import (
     TableCell,
 )
 
-import pytest
 pytestmark = pytest.mark.spec("v0.3.0/ir-expansion")
 # ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
 
@@ -156,6 +156,7 @@ def test_build_hwp_document_header_with_table_flattens_to_furniture():
                 "cols": 1,
                 "caption": None,
                 "caption_block": None,
+                "char_offset": None,
                 "cells": [
                     {
                         "row": 0,

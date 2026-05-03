@@ -2,7 +2,7 @@
 
 자동 생성 — `scripts/generate_spec_trace.py`. Living.
 
-spec-system-overhaul (2026-04-29) 이후 신규 작성 spec + retrofit 적용된 Draft 의 인수조건 ↔ 테스트 매핑. v0.1.0 ~ v0.3.0 Frozen spec 은 본문 변경 금지로 AC ID 부여 안 함 (CONVENTIONS § Trace report).
+v0.4.0+ 신규 spec 의 인수조건 ↔ 테스트 매핑. 기존 v0.1.0 ~ v0.3.0 Frozen spec 은 AC ID 부여 안 함 (CONVENTIONS § Trace report).
 
 | Spec | AC | Tests |
 |---|---|---|
@@ -390,3 +390,47 @@ spec-system-overhaul (2026-04-29) 이후 신규 작성 spec + retrofit 적용된
 | v0.3.0/ir-expansion | — | `tests/test_ir_toc.py::test_toc_entry_block_full_fields` |
 | v0.3.0/ir-expansion | — | `tests/test_ir_toc.py::test_toc_entry_block_is_not_in_block_union` |
 | v0.3.0/ir-expansion | — | `tests/test_ir_toc.py::test_toc_entry_block_minimal_roundtrip` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_changelog_records_pin_bump` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_char_offsets_empty_falls_back_to_none` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_endnote_marker_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_field_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_footnote_marker_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_formula_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_no_synthetic_fixture_directory` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_picture_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_field_marker_populates_or_falls_back` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_footnote_marker_populates_or_falls_back` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_has_none_fallback_paragraphs` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_ir_json_roundtrip` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_ir_passes_jsonschema_validation` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_picture_marker_populates_or_falls_back` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_table_marker_populates_or_falls_back` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_zero_width_invariant` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_rust_uses_assert_eq_not_debug_assert` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_schema_provenance_char_start_anyof_integer_or_null` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_schema_version_remains_1_1` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_table_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_toc_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | — | `tests/test_v0_3_1_marker_char_offset.py::test_zero_width_invariant_holds_across_distinct_offsets` |
+| v0.3.1/ir-marker-char-offset | AC-1 | `tests/test_v0_3_1_marker_char_offset.py::test_footnote_marker_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | AC-1 | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_footnote_marker_populates_or_falls_back` |
+| v0.3.1/ir-marker-char-offset | AC-10 | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_ir_json_roundtrip` |
+| v0.3.1/ir-marker-char-offset | AC-10 | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_ir_passes_jsonschema_validation` |
+| v0.3.1/ir-marker-char-offset | AC-11 | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_zero_width_invariant` |
+| v0.3.1/ir-marker-char-offset | AC-11 | `tests/test_v0_3_1_marker_char_offset.py::test_zero_width_invariant_holds_across_distinct_offsets` |
+| v0.3.1/ir-marker-char-offset | AC-12 | `tests/test_v0_3_1_marker_char_offset.py::test_rust_uses_assert_eq_not_debug_assert` |
+| v0.3.1/ir-marker-char-offset | AC-13 | `tests/test_v0_3_1_marker_char_offset.py::test_changelog_records_pin_bump` |
+| v0.3.1/ir-marker-char-offset | AC-14 | `tests/test_v0_3_1_marker_char_offset.py::test_no_synthetic_fixture_directory` |
+| v0.3.1/ir-marker-char-offset | AC-2 | `tests/test_v0_3_1_marker_char_offset.py::test_endnote_marker_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | AC-3 | `tests/test_v0_3_1_marker_char_offset.py::test_picture_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | AC-3 | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_picture_marker_populates_or_falls_back` |
+| v0.3.1/ir-marker-char-offset | AC-4 | `tests/test_v0_3_1_marker_char_offset.py::test_formula_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | AC-5 | `tests/test_v0_3_1_marker_char_offset.py::test_field_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | AC-5 | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_field_marker_populates_or_falls_back` |
+| v0.3.1/ir-marker-char-offset | AC-6 | `tests/test_v0_3_1_marker_char_offset.py::test_toc_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | AC-7 | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_table_marker_populates_or_falls_back` |
+| v0.3.1/ir-marker-char-offset | AC-7 | `tests/test_v0_3_1_marker_char_offset.py::test_table_char_offset_populated_zero_width` |
+| v0.3.1/ir-marker-char-offset | AC-8 | `tests/test_v0_3_1_marker_char_offset.py::test_char_offsets_empty_falls_back_to_none` |
+| v0.3.1/ir-marker-char-offset | AC-8 | `tests/test_v0_3_1_marker_char_offset.py::test_real_sample_has_none_fallback_paragraphs` |
+| v0.3.1/ir-marker-char-offset | AC-9 | `tests/test_v0_3_1_marker_char_offset.py::test_schema_provenance_char_start_anyof_integer_or_null` |
+| v0.3.1/ir-marker-char-offset | AC-9 | `tests/test_v0_3_1_marker_char_offset.py::test_schema_version_remains_1_1` |

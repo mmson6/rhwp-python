@@ -170,6 +170,7 @@ def test_build_footnote_block_preserves_number_and_marker():
     raw = RawFootnote(
         marker_section_idx=2,
         marker_para_idx=15,
+        marker_char_offset=None,
         number=3,
         blocks=[_empty_raw_para(text="본문")],
     )
@@ -187,6 +188,7 @@ def test_build_footnote_block_flattens_inner_paragraphs():
     raw = RawFootnote(
         marker_section_idx=0,
         marker_para_idx=5,
+        marker_char_offset=None,
         number=1,
         blocks=[_empty_raw_para(text="첫 줄"), _empty_raw_para(text="둘째 줄")],
     )
@@ -200,6 +202,7 @@ def test_build_endnote_block_mirrors_footnote_pattern():
     raw = RawEndnote(
         marker_section_idx=1,
         marker_para_idx=8,
+        marker_char_offset=None,
         number=42,
         blocks=[_empty_raw_para(text="미주 텍스트")],
     )
@@ -218,6 +221,7 @@ def test_build_hwp_document_routes_footnotes_to_furniture():
             RawFootnote(
                 marker_section_idx=0,
                 marker_para_idx=2,
+                marker_char_offset=None,
                 number=1,
                 blocks=[_empty_raw_para(text="footnote body")],
             )
@@ -237,6 +241,7 @@ def test_build_hwp_document_routes_endnotes_to_furniture():
             RawEndnote(
                 marker_section_idx=0,
                 marker_para_idx=10,
+                marker_char_offset=None,
                 number=5,
                 blocks=[_empty_raw_para(text="endnote body")],
             )
@@ -300,6 +305,7 @@ def test_footnotes_endnotes_never_appear_in_body():
             RawFootnote(
                 marker_section_idx=0,
                 marker_para_idx=0,
+                marker_char_offset=None,
                 number=1,
                 blocks=[_empty_raw_para(text="x")],
             )
@@ -308,6 +314,7 @@ def test_footnotes_endnotes_never_appear_in_body():
             RawEndnote(
                 marker_section_idx=0,
                 marker_para_idx=0,
+                marker_char_offset=None,
                 number=1,
                 blocks=[_empty_raw_para(text="y")],
             )

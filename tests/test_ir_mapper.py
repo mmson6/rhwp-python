@@ -10,6 +10,7 @@ raw payload 는 ``rhwp.ir._raw_types`` 의 TypedDict 로 타입이 고정되어 
 테스트 fixture 도 모든 필드를 채운 완전한 dict 여야 pyright 가 통과한다.
 """
 
+import pytest
 from rhwp.ir._mapper import (
     _build_inline_runs,
     _cell_role,
@@ -18,7 +19,6 @@ from rhwp.ir._mapper import (
 )
 from rhwp.ir._raw_types import RawCell, RawCharRun, RawParagraph, RawTable
 
-import pytest
 pytestmark = pytest.mark.spec("v0.2.0/ir")
 # ^ soft retrofit — file-level spec mapping; v0.4.0+ specs add #AC-N to specific tests (CONVENTIONS § Trace report)
 
@@ -177,7 +177,14 @@ def test_build_inline_runs_preserves_prefix_when_rest_zero_width():
 
 
 def _table(cells: list[RawCell]) -> RawTable:
-    return RawTable(rows=1, cols=1, caption=None, caption_block=None, cells=cells)
+    return RawTable(
+        rows=1,
+        cols=1,
+        caption=None,
+        caption_block=None,
+        cells=cells,
+        char_offset=None,
+    )
 
 
 def test_table_to_html_rowspan_before_colspan():
