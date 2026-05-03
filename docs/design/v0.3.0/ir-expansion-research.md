@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.3.0 IR 확장 ADR — 8 결정 (PictureBlock 임베딩 / FormulaBlock 변환 / Footnote 분리 / FieldKind 어휘 등) 업계 선례·소스"
 ga: v0.3.0
 last_updated: 2026-04-28
 ---

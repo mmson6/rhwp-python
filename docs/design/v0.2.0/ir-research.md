@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.2.0 IR ADR — 8 미결 결정 (Block 유니온 / HTML 위치 / char 단위 / schema_version / iter API / to_ir 캐싱 / $id 호스팅) 의 14 에이전트 병렬 조사"
 ga: v0.2.0
 last_updated: 2026-04-25
 ---

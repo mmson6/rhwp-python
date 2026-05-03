@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "Spec system overhaul PR 의 historical record — 14 결정 / 9 commit 단계 / a/b/c 옵션 비교 / 22 spec 파일 마이그 invariant"
 last_updated: 2026-04-29
 ---
 

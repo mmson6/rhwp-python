@@ -21,6 +21,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 부수 정리: 상류 `edwardkim/rhwp#390` (find_control_text_positions) 옵션 A 채택 → cherry-pick 머지 → 본 spec in-place Frozen 전환 + RESOLVED notice. design 파일 `<topic>-design-research.md` → `<topic>-research.md` 명명 통일 (v0.2.0/ir, v0.3.0/cli rename + 24 cross-link 일괄 정정).
 - 본 PR 의 a/b/c 결정 비교 + 14개 결정 historical record 는 [docs/implementation/spec-system-overhaul.md](docs/implementation/spec-system-overhaul.md) (Frozen) 가 보유.
 
+## [0.3.1] — 2026-05-02
+
+PATCH release. v0.3.0 의 IR 출고에서 inline 컨트롤 마커의 `Provenance.char_start` / `char_end` 가 항상 null 이던 문제를 정정. 상류 v0.7.8 의 `Paragraph::control_text_positions()` ([PR #405](https://github.com/edwardkim/rhwp/pull/405) / [Task #390](https://github.com/edwardkim/rhwp/issues/390)) 노출을 활용해 7 종 블록 (각주·미주 마커, 그림, 수식, 필드, TOC, 표) 의 zero-width character 위치를 채운다. SchemaVersion 변경 없음 (`"1.1"` 유지) — 기존에 nullable 슬롯에 정의된 `int | None` 에 non-null 값을 출고할 뿐, schema 호환 100%.
+
+### Fixed
+
+- inline 컨트롤 마커 (각주/미주/그림/수식/필드/TOC/표) 의 `Provenance.char_start` / `char_end` 가 v0.3.0 까지 항상 null 이던 문제 정정. 부모 paragraph 안 zero-width character 위치 (`char_start == char_end == position`) 로 채운다.
+- 상류 `Paragraph::control_text_positions()` (v0.7.8 GA, PR #405 / Task #390) 의 결과를 paragraph 당 1회 호출로 공유하여 `controls.len() == positions.len()` 길이 invariant 를 release/debug 모두에서 `assert_eq!` 로 가드 — 상류 contract 위반의 silent regression 차단.
+- 부모 paragraph 의 `char_offsets` 가 빈 경우 (보통 layout-only 컨트롤만 있는 paragraph) `None` 폴백 — 상류 fallback 분기의 의미 손실 position 을 그대로 흘리지 않음 (fail-fast).
+
+### Build
+
+- `external/rhwp` submodule pin `033617e` (v0.7.7) → `0fb3e67` (post-v0.7.8). 본 v0.3.1 의 enabling change 는 v0.7.8 의 PR #405 (`pub fn Paragraph::control_text_positions`). 후속 commit 들은 직교 영역 (Task #484 `utf16_pos_to_char_idx` 등) 으로 본 PATCH 동작에 영향 없음.
+
+### Known limitations
+
+- 중첩 표 안 inline 컨트롤의 `Provenance.char_start/end` 와 `(section_idx, para_idx)` 가 다른 paragraph 를 가리켜 `text[char_start:char_end]` 슬라이싱이 잘못된 결과를 낸다. v0.3.0 부터 있던 Provenance 모델 한계 — v0.3.1 은 새 마커 채움이 동일 모델을 재사용. v0.4.0+ Provenance 정정 spec 에서 다룬다 (spec § 영구 비목표 마지막 항목).
+
 ## [0.3.0] — 2026-04-28
 
 ### Changed — async API 의존성 정리
@@ -225,7 +243,8 @@ The `rhwp` Rust core is consumed via git submodule pinned to upstream commit `16
 - Local `maturin build --release` wheel (3.0 MB) verified end-to-end in a clean venv: install → import → `rhwp.parse` → `HwpLoader` load. (Note: the v0.1.0 sdist exceeded PyPI's 100 MB limit and did not upload; fixed in [0.1.1](#011--2026-04-23).)
 - GitHub Actions workflow (`publish.yml`) builds Linux (x86_64 + aarch64) / macOS (x86_64 + aarch64) / Windows wheels + sdist on release publish, then uploads via PyPI Trusted Publisher (OIDC).
 
-[Unreleased]: https://github.com/DanMeon/rhwp-python/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/DanMeon/rhwp-python/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.3.1
 [0.3.0]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.3.0
 [0.2.0]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.2.0
 [0.1.1]: https://github.com/DanMeon/rhwp-python/releases/tag/v0.1.1

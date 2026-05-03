@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.2.0 S1 작업 로그 — Pydantic IR 모델 초안 (10 모델 + Block tagged union + 35 테스트 케이스)"
 ga: v0.2.0
 last_updated: 2026-04-24
 ---

@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.3.0 S1 작업 로그 — PictureBlock + Furniture page_headers/footers 채움 + SchemaVersion 1.0 → 1.1"
 ga: v0.3.0
 last_updated: 2026-04-26
 ---

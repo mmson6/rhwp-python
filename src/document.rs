@@ -205,12 +205,21 @@ impl PyDocument {
     /// ``bin://`` 스킴을 파싱한 결과를 본 메서드에 위임한다. 상류 BinData 가
     /// Embedding 타입이 아니거나 (Link/Storage) `bin_data_content` 에 누락된
     /// 경우 None — Python wrapper 가 ValueError 로 변환.
+    ///
+    /// 혼합 (Link + Embedding) 문서에서는 상류 `bin_data_content` 가 Embedding
+    /// 만 추려 더 짧으므로 잘못된 entry 를 반환할 수 있다 — 상류 renderer 도
+    /// 같은 가정을 공유하므로 SVG/PDF 렌더링과 동일한 lookup 결과 (상류 패리티).
     fn bytes_for_image_id<'py>(
         &self,
         py: Python<'py>,
         bin_data_id: u16,
     ) -> PyResult<Option<Bound<'py, PyBytes>>> {
-        Ok(ir::lookup_bin_data_bytes(self.inner.document(), bin_data_id)
+        if bin_data_id == 0 {
+            return Ok(None);
+        }
+        Ok(self
+            .inner
+            .get_bin_data((bin_data_id - 1) as usize)
             .map(|bytes| PyBytes::new(py, bytes)))
     }
 

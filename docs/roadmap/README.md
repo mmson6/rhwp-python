@@ -4,11 +4,12 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 
 본 문서는 Living — 자유 갱신.
 
-## 현재 상태 (2026-04-28)
+## 현재 상태 (2026-05-03)
 
 - **v0.1.0 / v0.1.1** — Frozen, PyPI 배포 완료
 - **v0.2.0** — Frozen, Document IR v1 GA (2026-04-25)
 - **v0.3.0** — Frozen, Phase 2 (IR 확장 + `rhwp-py` CLI) GA (2026-04-28)
+- **v0.3.1** — Frozen, inline 컨트롤 마커 char offset 출고 GA (2026-05-03)
 - **v0.4.0+** — 미착수, Phase 3 이후
 
 ## 활성 spec 인덱스
@@ -21,6 +22,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 | v0.2.0 | Frozen | [v0.2.0/ir.md](v0.2.0/ir.md) | [design/v0.2.0/ir-research.md](../design/v0.2.0/ir-research.md) |
 | v0.3.0 (IR 확장) | Frozen | [v0.3.0/ir-expansion.md](v0.3.0/ir-expansion.md) | [design/v0.3.0/ir-expansion-research.md](../design/v0.3.0/ir-expansion-research.md) |
 | v0.3.0 (CLI) | Frozen | [v0.3.0/cli.md](v0.3.0/cli.md) | [design/v0.3.0/cli-research.md](../design/v0.3.0/cli-research.md) |
+| v0.3.1 (IR marker char offset) | Frozen | [v0.3.1/ir-marker-char-offset.md](v0.3.1/ir-marker-char-offset.md) | [design/v0.3.1/ir-marker-char-offset-research.md](../design/v0.3.1/ir-marker-char-offset-research.md) |
 | v0.7.0 (MCP server) | Draft | [v0.7.0/mcp.md](v0.7.0/mcp.md) | [design/v0.7.0/mcp-research.md](../design/v0.7.0/mcp-research.md) |
 
 ## 미착수 작업 계획
@@ -115,6 +117,7 @@ SemVer 0.x.y 단계에서 minor 는 단조 증가 — v0.9 다음은 v0.10 (v1.0
 | v0.1.0 | [implementation/v0.1.0/migration.md](../implementation/v0.1.0/migration.md) | [verification/v0.1.0/spinoff-review.md](../verification/v0.1.0/spinoff-review.md) |
 | v0.2.0 | [implementation/v0.2.0/stages/](../implementation/v0.2.0/stages/) (S1~S5) | — |
 | v0.3.0 | [implementation/v0.3.0/stages/](../implementation/v0.3.0/stages/) (S1~S4) + [aparse-cleanup.md](../implementation/v0.3.0/aparse-cleanup.md) | — |
+| v0.3.1 | [implementation/v0.3.1/migration.md](../implementation/v0.3.1/migration.md) | — |
 
 ## 원칙
 

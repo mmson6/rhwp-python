@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.3.0 — 'rhwp-py' 얇은 CLI 재도입. 업스트림 'rhwp' 바이너리와 overlap=0 + Python 고유 가치 (IR / 청크) 집중"
 ga: v0.3.0
 last_updated: 2026-04-28
 ---

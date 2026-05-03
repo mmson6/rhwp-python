@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.3.0 cleanup 로그 — 'rhwp.aparse' 의 'aiofiles' 우회를 stdlib 'asyncio.to_thread' 로 정리. extras 의존성 제거"
 ga: v0.3.0
 last_updated: 2026-04-28
 ---

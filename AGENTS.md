@@ -57,8 +57,7 @@ Authoritative policy is `docs/CONVENTIONS.md` — read it before any docs work. 
 Hard rules (auto-applied without further instruction):
 - Every per-version spec / ADR / impl-log / verification report carries a YAML frontmatter block as the first lines: `status: <Active | Draft | Frozen | Superseded>` + `ga: vX.Y.Z` *or* `target: vX.Y.Z` + `last_updated: YYYY-MM-DD`. Living docs (README, CHANGELOG, AGENTS.md, CLAUDE.md, CONVENTIONS itself) skip the frontmatter.
 - **Frozen spec body is immutable** — typo / broken-link fixes only. Decision changes go to a *new* spec; the old one's frontmatter flips to `status: Superseded`, `superseded_by: <new spec>` (single-block edit). Exception: Living-policy schema migration (see CONVENTIONS § Frozen 면제 조항).
-- **Spec ↔ spec direct cross-links are forbidden** even within the same `vX.Y.Z/` directory. Use `phase-N.md` § two-axis-integration sections (or `roadmap/README.md`) as the bridge. **Exception**: pair files `<topic>.md` ↔ `<topic>-research.md` (the spec ↔ ADR pair) link directly.
-- **`phase-N.md` carries no concrete decisions / open issues** — those belong in `vX.Y.Z/*.md`. Phase docs hold intent, scope, and two-axis integration only.
+- **Spec ↔ spec direct cross-links are forbidden** even within the same `vX.Y.Z/` directory. Use `roadmap/README.md` as the bridge. **Exception**: pair files `<topic>.md` ↔ `<topic>-research.md` (the spec ↔ ADR pair) link directly.
 - New version `vX.Y.Z`: invoke `/new-spec <version> <topic>` Claude Code skill (auto-scaffolds spec + paired ADR + README index row). Manual: create `docs/roadmap/vX.Y.Z/<topic>.md` + `docs/design/vX.Y.Z/<topic>-research.md` (frontmatter `status: Draft`, `target: vX.Y.Z`), then add a row to the active-spec index in `roadmap/README.md`. On GA: flip `status: Draft → Frozen`, swap `target` → `ga`, write `implementation/vX.Y.Z/...` (Frozen on creation), refresh README index.
 
 ### CI / secrets

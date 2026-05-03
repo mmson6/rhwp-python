@@ -75,6 +75,11 @@ pub(crate) struct RawTable {
     pub caption: Option<String>,
     // ^ v0.3.0 S3 신규 — 구조화 캡션. caption (str) 은 v0.2.0 호환 평문 fallback.
     pub caption_block: Option<RawCaption>,
+    // ^ v0.3.1 신규 — 부모 paragraph 안 inline 컨트롤의 zero-width character 위치
+    //   (상류 Paragraph::control_text_positions(), v0.7.8). 부모 char_offsets 가
+    //   비었거나 paragraph 가 master_page 등 char index 의미 없는 위치이면 None.
+    //   mapper 가 Provenance.char_start/char_end 양쪽에 동일 값을 복제 (zero-width point).
+    pub char_offset: Option<usize>,
 }
 
 #[derive(IntoPyObject)]
@@ -102,6 +107,8 @@ pub(crate) struct RawPicture {
     pub description: Option<String>,
     // ^ v0.3.0 S3 신규 — 구조화 캡션. Picture.caption 이 None 이면 None.
     pub caption: Option<RawCaption>,
+    // ^ v0.3.1 신규 — 부모 paragraph 안 zero-width character 위치 (TAC/floating 무관).
+    pub char_offset: Option<usize>,
 }
 
 #[derive(IntoPyObject)]
@@ -112,15 +119,20 @@ pub(crate) struct RawFormula {
     // ^ HWP equation script 는 항상 "hwp_eq" — LaTeX/MathML 변환은 Python 사용자
     //   책임 (spec § 비목표). text_alt 는 raw script 의 단순 정규화 결과.
     pub text_alt: Option<String>,
+    // ^ v0.3.1 신규 — 부모 paragraph 안 zero-width character 위치.
+    pub char_offset: Option<usize>,
 }
 
 #[derive(IntoPyObject)]
 pub(crate) struct RawFootnote {
     // ^ 본문 인용 마커 위치 (parent paragraph 의 section_idx, para_idx).
     //   각주 본문은 같은 paragraph 에서 파생되므로 prov 도 동일 위치를 공유한다.
-    //   정확한 char_offset 은 상류 field_ranges 매핑 필요 — v0.4.0+ 검토.
     pub marker_section_idx: usize,
     pub marker_para_idx: usize,
+    // ^ v0.3.1 신규 — 본문 인용 마커의 zero-width character 위치 (상류
+    //   Paragraph::control_text_positions, v0.7.8). 부모 paragraph 의
+    //   char_offsets 가 비었으면 None.
+    pub marker_char_offset: Option<usize>,
     pub number: u16,
     pub blocks: Vec<RawParagraph>,
     // ^ 각주 본문의 내부 paragraph — Python mapper 가 _flatten_paragraph 로
@@ -131,6 +143,8 @@ pub(crate) struct RawFootnote {
 pub(crate) struct RawEndnote {
     pub marker_section_idx: usize,
     pub marker_para_idx: usize,
+    // ^ v0.3.1 신규 — 본문 인용 마커의 zero-width character 위치.
+    pub marker_char_offset: Option<usize>,
     pub number: u16,
     pub blocks: Vec<RawParagraph>,
 }
@@ -152,6 +166,8 @@ pub(crate) struct RawToc {
     pub section_idx: usize,
     pub para_idx: usize,
     pub entries: Vec<RawTocEntry>,
+    // ^ v0.3.1 신규 — 부모 paragraph 안 zero-width character 위치.
+    pub char_offset: Option<usize>,
 }
 
 #[derive(IntoPyObject)]
@@ -170,6 +186,8 @@ pub(crate) struct RawField {
     // ^ 미지의 raw 코드 — 상류 FieldType 추가 시 forward-compat. v0.3.0 은 모든
     //   variant 가 알려져 있으므로 항상 None.
     pub field_type_code: Option<u32>,
+    // ^ v0.3.1 신규 — 부모 paragraph 안 zero-width character 위치.
+    pub char_offset: Option<usize>,
 }
 
 #[derive(IntoPyObject)]
@@ -215,8 +233,25 @@ pub(crate) fn build_raw_document(doc: &Document, source_uri: Option<&str>) -> Ra
     let mut acc = FurnitureAcc::default();
     for (section_idx, section) in doc.sections.iter().enumerate() {
         for (para_idx, para) in section.paragraphs.iter().enumerate() {
-            paragraphs.push(build_raw_paragraph(section_idx, para_idx, para, doc));
-            collect_furniture_from_paragraph(section_idx, para_idx, para, doc, &mut acc);
+            // ^ 상류 control_text_positions() 는 paragraph 당 1회만 호출하고
+            //   build_raw_paragraph + collect_furniture 양쪽이 결과를 공유한다
+            //   (spec § 결정사항 9). 같은 controls 배열을 두 함수가 독립 iterate.
+            let positions = paragraph_positions(para);
+            paragraphs.push(build_raw_paragraph(
+                section_idx,
+                para_idx,
+                para,
+                doc,
+                positions.as_deref(),
+            ));
+            collect_furniture_from_paragraph(
+                section_idx,
+                para_idx,
+                para,
+                doc,
+                &mut acc,
+                positions.as_deref(),
+            );
         }
         // ^ 바탕쪽 안의 Header/Footer 컨트롤도 furniture 로 라우팅 (spec § 8 매퍼 정책).
         //   바탕쪽 paragraph 자체는 furniture 에 넣지 않는다 — 페이지 배경 템플릿이지
@@ -230,7 +265,15 @@ pub(crate) fn build_raw_document(doc: &Document, source_uri: Option<&str>) -> Ra
             .flat_map(|mp| mp.paragraphs.iter())
             .enumerate()
         {
-            collect_furniture_from_paragraph(section_idx, mp_flat_idx, mp_para, doc, &mut acc);
+            let mp_positions = paragraph_positions(mp_para);
+            collect_furniture_from_paragraph(
+                section_idx,
+                mp_flat_idx,
+                mp_para,
+                doc,
+                &mut acc,
+                mp_positions.as_deref(),
+            );
         }
     }
     RawDocument {
@@ -244,11 +287,43 @@ pub(crate) fn build_raw_document(doc: &Document, source_uri: Option<&str>) -> Ra
     }
 }
 
+/// 상류 `Paragraph::control_text_positions()` (v0.7.8) 호출 + 컨트롤 길이 동기화 보증.
+///
+/// 반환값은 `controls.len() == positions.len()` 검증 후의 positions. `char_offsets`
+/// 가 비어있으면 (= text 가 없는 paragraph) 폴백 분기의 의미 없는 position 을 사용
+/// 하지 않고 `None` 을 반환 — spec § 결정사항 3 의 fail-fast 폴백 정책.
+///
+/// `controls.len() != positions.len()` 시 release/debug 무관 panic — spec § 결정사항 8
+/// (silent regression 차단 가드, AC-12 invariant).
+fn paragraph_positions(para: &Paragraph) -> Option<Vec<usize>> {
+    let positions = para.control_text_positions();
+    assert_position_invariant(para.controls.len(), positions.len());
+    if para.char_offsets.is_empty() {
+        None
+    } else {
+        Some(positions)
+    }
+}
+
+/// 상류 contract `controls.len() == positions.len()` 위반 시 release/debug 무관 panic.
+///
+/// `assert_eq!` (not `debug_assert_eq!`) — release 빌드에서도 활성. 별도 helper 로
+/// 분리하여 단위 테스트 (#[should_panic]) 로 invariant 자체를 검증 가능하게 한다.
+#[inline]
+fn assert_position_invariant(controls_len: usize, positions_len: usize) {
+    assert_eq!(
+        controls_len, positions_len,
+        "upstream control_text_positions() length mismatch: \
+         controls.len()={controls_len}, positions.len()={positions_len}",
+    );
+}
+
 fn build_raw_paragraph(
     section_idx: usize,
     para_idx: usize,
     para: &Paragraph,
     doc: &Document,
+    positions: Option<&[usize]>,
 ) -> RawParagraph {
     let char_runs = build_char_runs(para, &doc.doc_info);
     // ^ 문단의 controls 중 Table / Picture / Equation / Field 만 추출 — 내부
@@ -260,22 +335,23 @@ fn build_raw_paragraph(
     let mut formulas = Vec::new();
     let mut tocs = Vec::new();
     let mut fields = Vec::new();
-    for ctrl in &para.controls {
+    for (i, ctrl) in para.controls.iter().enumerate() {
+        let char_offset = positions.map(|p| p[i]);
         match ctrl {
             Control::Table(t) => {
-                tables.push(build_raw_table(t, section_idx, para_idx, doc));
+                tables.push(build_raw_table(t, section_idx, para_idx, doc, char_offset));
             }
             Control::Picture(p) => {
-                pictures.push(build_raw_picture(p, section_idx, para_idx, doc));
+                pictures.push(build_raw_picture(p, section_idx, para_idx, doc, char_offset));
             }
             Control::Equation(e) => {
-                formulas.push(build_raw_formula(e, section_idx, para_idx));
+                formulas.push(build_raw_formula(e, section_idx, para_idx, char_offset));
             }
             Control::Field(f) => {
                 if f.field_type == FieldType::TableOfContents {
-                    tocs.push(build_raw_toc(f, section_idx, para_idx));
+                    tocs.push(build_raw_toc(f, section_idx, para_idx, char_offset));
                 } else {
-                    fields.push(build_raw_field(f, section_idx, para_idx));
+                    fields.push(build_raw_field(f, section_idx, para_idx, char_offset));
                 }
             }
             _ => {}
@@ -364,6 +440,7 @@ fn build_raw_table(
     outer_section: usize,
     outer_para: usize,
     doc: &Document,
+    char_offset: Option<usize>,
 ) -> RawTable {
     let cells = table
         .cells
@@ -381,6 +458,7 @@ fn build_raw_table(
         cells,
         caption,
         caption_block,
+        char_offset,
     }
 }
 
@@ -388,7 +466,10 @@ fn build_raw_cell(cell: &Cell, outer_section: usize, outer_para: usize, doc: &Do
     let paragraphs = cell
         .paragraphs
         .iter()
-        .map(|p| build_raw_paragraph(outer_section, outer_para, p, doc))
+        .map(|p| {
+            let pos = paragraph_positions(p);
+            build_raw_paragraph(outer_section, outer_para, p, doc, pos.as_deref())
+        })
         .collect();
     RawCell {
         row: cell.row as usize,
@@ -410,6 +491,7 @@ fn build_raw_picture(
     section_idx: usize,
     para_idx: usize,
     doc: &Document,
+    char_offset: Option<usize>,
 ) -> RawPicture {
     let bin_data_id = pic.image_attr.bin_data_id;
     let image = if bin_data_id == 0 {
@@ -443,6 +525,7 @@ fn build_raw_picture(
         image,
         description,
         caption,
+        char_offset,
     }
 }
 
@@ -460,34 +543,53 @@ struct FurnitureAcc {
 /// 각 furniture 컨트롤이 가지는 자체 paragraphs 들을 외부 (section_idx, para_idx) 와
 /// 공유한 RawParagraph 로 변환한다. 본 paragraphs 는 furniture 가 어디서
 /// "선언" 됐는지 (Provenance) 만 보존하면 충분 — 페이지별 반복 출현은 렌더 단계.
+///
+/// `positions` 는 부모 paragraph 의 control_text_positions 결과 (build_raw_document
+/// 에서 paragraph 당 1회 호출, build_raw_paragraph 와 공유 — spec § 결정사항 9).
+/// Footnote/Endnote 마커의 char_offset 추출에 사용. None 이면 char_offsets 가
+/// 비어있는 paragraph (또는 master_page) — marker_char_offset 도 None 으로 출고.
 fn collect_furniture_from_paragraph(
     section_idx: usize,
     para_idx: usize,
     para: &Paragraph,
     doc: &Document,
     acc: &mut FurnitureAcc,
+    positions: Option<&[usize]>,
 ) {
-    for ctrl in &para.controls {
+    for (i, ctrl) in para.controls.iter().enumerate() {
+        let char_offset = positions.map(|p| p[i]);
         match ctrl {
             Control::Header(h) => {
                 for hp in &h.paragraphs {
-                    acc.headers
-                        .push(build_raw_paragraph(section_idx, para_idx, hp, doc));
+                    let hp_positions = paragraph_positions(hp);
+                    acc.headers.push(build_raw_paragraph(
+                        section_idx,
+                        para_idx,
+                        hp,
+                        doc,
+                        hp_positions.as_deref(),
+                    ));
                 }
             }
             Control::Footer(f) => {
                 for fp in &f.paragraphs {
-                    acc.footers
-                        .push(build_raw_paragraph(section_idx, para_idx, fp, doc));
+                    let fp_positions = paragraph_positions(fp);
+                    acc.footers.push(build_raw_paragraph(
+                        section_idx,
+                        para_idx,
+                        fp,
+                        doc,
+                        fp_positions.as_deref(),
+                    ));
                 }
             }
             Control::Footnote(fn_) => {
                 acc.footnotes
-                    .push(build_raw_footnote(fn_, section_idx, para_idx, doc));
+                    .push(build_raw_footnote(fn_, section_idx, para_idx, doc, char_offset));
             }
             Control::Endnote(en) => {
                 acc.endnotes
-                    .push(build_raw_endnote(en, section_idx, para_idx, doc));
+                    .push(build_raw_endnote(en, section_idx, para_idx, doc, char_offset));
             }
             _ => {}
         }
@@ -496,7 +598,12 @@ fn collect_furniture_from_paragraph(
 
 /// Equation 컨트롤 → RawFormula. text_alt 는 raw script 의 단순 정규화 결과 —
 /// 정상 변환 대신 RAG 폴백용으로만 충분. 실패하면 None (mapper 가 그대로 보존).
-fn build_raw_formula(eq: &Equation, section_idx: usize, para_idx: usize) -> RawFormula {
+fn build_raw_formula(
+    eq: &Equation,
+    section_idx: usize,
+    para_idx: usize,
+    char_offset: Option<usize>,
+) -> RawFormula {
     let script = eq.script.clone();
     let text_alt = simple_eq_text_alt(&script);
     RawFormula {
@@ -504,6 +611,7 @@ fn build_raw_formula(eq: &Equation, section_idx: usize, para_idx: usize) -> RawF
         para_idx,
         script,
         text_alt,
+        char_offset,
     }
 }
 
@@ -565,20 +673,28 @@ fn is_ident_continue(c: char) -> bool {
 
 /// Footnote → RawFootnote. 본문 인용 마커 위치 (parent paragraph) 를 보존하고
 /// 각주 본문의 paragraph 들을 평탄화한다.
+///
+/// `marker_char_offset` 은 부모 paragraph 안 zero-width character 위치 (v0.3.1) —
+/// 부모의 char_offsets 가 비었으면 None.
 fn build_raw_footnote(
     fn_: &Footnote,
     marker_section_idx: usize,
     marker_para_idx: usize,
     doc: &Document,
+    marker_char_offset: Option<usize>,
 ) -> RawFootnote {
     let blocks = fn_
         .paragraphs
         .iter()
-        .map(|p| build_raw_paragraph(marker_section_idx, marker_para_idx, p, doc))
+        .map(|p| {
+            let pos = paragraph_positions(p);
+            build_raw_paragraph(marker_section_idx, marker_para_idx, p, doc, pos.as_deref())
+        })
         .collect();
     RawFootnote {
         marker_section_idx,
         marker_para_idx,
+        marker_char_offset,
         number: fn_.number,
         blocks,
     }
@@ -589,15 +705,20 @@ fn build_raw_endnote(
     marker_section_idx: usize,
     marker_para_idx: usize,
     doc: &Document,
+    marker_char_offset: Option<usize>,
 ) -> RawEndnote {
     let blocks = en
         .paragraphs
         .iter()
-        .map(|p| build_raw_paragraph(marker_section_idx, marker_para_idx, p, doc))
+        .map(|p| {
+            let pos = paragraph_positions(p);
+            build_raw_paragraph(marker_section_idx, marker_para_idx, p, doc, pos.as_deref())
+        })
         .collect();
     RawEndnote {
         marker_section_idx,
         marker_para_idx,
+        marker_char_offset,
         number: en.number,
         blocks,
     }
@@ -617,7 +738,10 @@ fn build_raw_caption(
     let paragraphs = cap
         .paragraphs
         .iter()
-        .map(|p| build_raw_paragraph(section_idx, para_idx, p, doc))
+        .map(|p| {
+            let pos = paragraph_positions(p);
+            build_raw_paragraph(section_idx, para_idx, p, doc, pos.as_deref())
+        })
         .collect();
     RawCaption {
         direction: caption_direction_to_str(cap.direction).to_string(),
@@ -673,7 +797,12 @@ fn build_raw_list_info(para: &Paragraph, doc_info: &DocInfo) -> Option<RawListIn
 }
 
 /// FieldType (TableOfContents 제외) → RawField. cached_value 는 v0.3.0 미추출.
-fn build_raw_field(field: &Field, section_idx: usize, para_idx: usize) -> RawField {
+fn build_raw_field(
+    field: &Field,
+    section_idx: usize,
+    para_idx: usize,
+    char_offset: Option<usize>,
+) -> RawField {
     RawField {
         section_idx,
         para_idx,
@@ -687,16 +816,23 @@ fn build_raw_field(field: &Field, section_idx: usize, para_idx: usize) -> RawFie
         // ^ v0.3.0 은 모든 FieldType variant 가 알려져 있으므로 None — 상류가
         //   새 variant 추가 시 mapper 가 raw u32 채워야 한다 (v0.4.0+).
         field_type_code: None,
+        char_offset,
     }
 }
 
 /// FieldType::TableOfContents → RawToc. v0.3.0 은 entries 빈 Vec —
 /// 실제 TOC 항목 추출은 v0.4.0+ (bookmark resolver 필요, spec § 6 결정).
-fn build_raw_toc(_field: &Field, section_idx: usize, para_idx: usize) -> RawToc {
+fn build_raw_toc(
+    _field: &Field,
+    section_idx: usize,
+    para_idx: usize,
+    char_offset: Option<usize>,
+) -> RawToc {
     RawToc {
         section_idx,
         para_idx,
         entries: Vec::new(),
+        char_offset,
     }
 }
 
@@ -733,26 +869,6 @@ fn field_type_to_str(ft: FieldType) -> &'static str {
     }
 }
 
-/// `bin_data_id` (1-based) 에 해당하는 raw bytes 를 반환.
-///
-/// 상류 `renderer/layout/utils.rs::find_bin_data` 와 동일한 lookup —
-/// `bin_data_content` 는 Embedding 타입만 채워져 있고 인덱스는 1-based.
-/// Embedding 이 아니거나 (`Link` / `Storage`) 누락 시 None.
-///
-/// **인덱스 정합성 가정**: `bin_data_content` 와 `bin_data_list` 는 같은 순서로
-/// 같은 길이여야 한다 — 즉 모든 BinData entry 가 Embedding 타입이어야 정확.
-/// 혼합 (Link + Embedding) 문서에서는 상류 `bin_data_content` 가 Embedding 만
-/// 추려 더 짧으므로 잘못된 entry 를 반환할 수 있다 — 상류 renderer 도 같은
-/// 가정을 공유하므로 SVG/PDF 렌더링도 같은 잘못된 lookup 을 한다 (상류 패리티).
-pub(crate) fn lookup_bin_data_bytes(doc: &Document, bin_data_id: u16) -> Option<&[u8]> {
-    if bin_data_id == 0 {
-        return None;
-    }
-    doc.bin_data_content
-        .get((bin_data_id as usize) - 1)
-        .map(|bdc| bdc.data.as_slice())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -771,12 +887,6 @@ mod tests {
         assert_eq!(utf16_to_cp(&offsets, 2, 4), 2); // offset 2 는 char_offsets 에 없음 → 다음 >=2 인 3을 가진 인덱스 2
         assert_eq!(utf16_to_cp(&offsets, 3, 4), 2);
         assert_eq!(utf16_to_cp(&offsets, 5, 4), 4); // fallback
-    }
-
-    #[test]
-    fn lookup_bin_data_zero_id_returns_none() {
-        let doc = Document::default();
-        assert!(lookup_bin_data_bytes(&doc, 0).is_none());
     }
 
     // * simple_eq_text_alt — 토큰 경계 인식 검증
@@ -867,5 +977,19 @@ mod tests {
         assert_eq!(caption_direction_to_str(CaptionDirection::Bottom), "bottom");
         assert_eq!(caption_direction_to_str(CaptionDirection::Left), "left");
         assert_eq!(caption_direction_to_str(CaptionDirection::Right), "right");
+    }
+
+    // * v0.3.1 AC-12 — controls / positions 길이 mismatch 는 release/debug 무관 panic
+
+    #[test]
+    fn assert_position_invariant_passes_on_match() {
+        assert_position_invariant(0, 0);
+        assert_position_invariant(3, 3);
+    }
+
+    #[test]
+    #[should_panic(expected = "upstream control_text_positions() length mismatch")]
+    fn assert_position_invariant_panics_on_mismatch() {
+        assert_position_invariant(3, 2);
     }
 }

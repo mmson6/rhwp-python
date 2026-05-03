@@ -1,7 +1,8 @@
 ---
 status: Draft
+description: "v0.7.0 MCP ADR — SDK 채택 (FastMCP) / transport (stdio + streamable-http) / handler 동시성 (sync 전용) / 도구 분할 (7 개) 결정 근거"
 target: v0.7.0
-last_updated: 2026-04-28
+last_updated: 2026-04-30
 ---
 
 # v0.7.0 MCP server — 설계 의사결정 리서치 요약

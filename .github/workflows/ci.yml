@@ -119,6 +119,7 @@ jobs:
             tests/test_ir_formula.py tests/test_ir_footnote.py \
             tests/test_ir_list.py tests/test_ir_caption.py \
             tests/test_ir_toc.py tests/test_ir_field.py \
+            tests/test_v0_3_1_marker_char_offset.py \
             tests/test_cli.py \
             tests/conftest.py tests/type_check_samples.py
       - name: Run pyright (intentional errors — expect 4)

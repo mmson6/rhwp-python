@@ -63,6 +63,10 @@ class RawTable(TypedDict):
 
     ``caption`` (S1) 은 평문 fallback (호환). ``caption_block`` (S3 신규) 은 구조화
     캡션 — 둘 다 source 가 같은 HWP Table.caption 이지만 표현 형태만 다름.
+
+    ``char_offset`` (v0.3.1) 은 부모 paragraph 안 zero-width character 위치 — mapper 가
+    Provenance.char_start/char_end 양쪽에 동일 값 복제. None 은 부모의 char_offsets 가
+    빈 paragraph (정확 character index 의미 없음).
     """
 
     rows: int
@@ -70,6 +74,7 @@ class RawTable(TypedDict):
     cells: list[RawCell]
     caption: str | None
     caption_block: RawCaption | None
+    char_offset: int | None
 
 
 class RawImageRef(TypedDict):
@@ -85,6 +90,9 @@ class RawPicture(TypedDict):
 
     ``description`` (S1) 은 caption 평문 fallback 호환. ``caption`` (S3 신규) 은
     구조화 캡션 — Picture 가 caption 을 가지면 둘 다 채워진다.
+
+    ``char_offset`` (v0.3.1) 은 부모 paragraph 안 zero-width character 위치 (TAC /
+    floating 무관). None 은 부모의 char_offsets 가 빈 paragraph.
     """
 
     section_idx: int
@@ -92,15 +100,20 @@ class RawPicture(TypedDict):
     image: RawImageRef | None
     description: str | None
     caption: RawCaption | None
+    char_offset: int | None
 
 
 class RawFormula(TypedDict):
-    """``src/ir.rs::RawFormula``. ``text_alt`` 는 raw script 의 단순 정규화 결과 (S2 신규)."""
+    """``src/ir.rs::RawFormula``. ``text_alt`` 는 raw script 의 단순 정규화 결과 (S2 신규).
+
+    ``char_offset`` (v0.3.1) 은 부모 paragraph 안 zero-width character 위치.
+    """
 
     section_idx: int
     para_idx: int
     script: str
     text_alt: str | None
+    char_offset: int | None
 
 
 class RawFootnote(TypedDict):
@@ -108,10 +121,15 @@ class RawFootnote(TypedDict):
 
     ``marker_section_idx`` / ``marker_para_idx`` 는 본문 인용 마커가 등장한 parent
     paragraph 위치 — RAG 가 각주 → 본문 역추적 시 사용.
+
+    ``marker_char_offset`` (v0.3.1) 은 본문 인용 마커의 zero-width character 위치
+    (상류 ``Paragraph::control_text_positions`` v0.7.8 활용). 부모 paragraph 의
+    ``char_offsets`` 가 빈 경우 None.
     """
 
     marker_section_idx: int
     marker_para_idx: int
+    marker_char_offset: int | None
     number: int
     blocks: list["RawParagraph"]
 
@@ -121,6 +139,7 @@ class RawEndnote(TypedDict):
 
     marker_section_idx: int
     marker_para_idx: int
+    marker_char_offset: int | None
     number: int
     blocks: list["RawParagraph"]
 
@@ -156,11 +175,15 @@ class RawTocEntry(TypedDict):
 
 
 class RawToc(TypedDict):
-    """``src/ir.rs::RawToc`` (S3 신규). ``FieldType::TableOfContents`` 검출 시 emit."""
+    """``src/ir.rs::RawToc`` (S3 신규). ``FieldType::TableOfContents`` 검출 시 emit.
+
+    ``char_offset`` (v0.3.1) 은 부모 paragraph 안 zero-width character 위치.
+    """
 
     section_idx: int
     para_idx: int
     entries: list[RawTocEntry]
+    char_offset: int | None
 
 
 class RawField(TypedDict):
@@ -169,6 +192,8 @@ class RawField(TypedDict):
     ``field_kind`` 는 Rust 에서 lowercase string 으로 직렬화된 ``FieldType`` —
     Python 측 ``FieldKind`` Literal 과 정확히 같은 어휘여야 한다 (mapper 가
     Literal 검증). 미지의 FieldType 은 ``"unknown"`` + ``field_type_code`` 채움.
+
+    ``char_offset`` (v0.3.1) 은 부모 paragraph 안 zero-width character 위치.
     """
 
     section_idx: int
@@ -177,6 +202,7 @@ class RawField(TypedDict):
     cached_value: str | None
     raw_instruction: str | None
     field_type_code: int | None
+    char_offset: int | None
 
 
 class RawParagraph(TypedDict):

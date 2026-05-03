@@ -220,6 +220,7 @@ def test_build_picture_block_with_caption_field():
         image=RawImageRef(bin_data_id=1, extension="png", has_content=True),
         description="alt-text",
         caption=_raw_caption(direction="bottom", texts=("<그림 1> 회로도",)),
+        char_offset=None,
     )
     pic = _build_picture_block(raw_pic)
     assert pic.caption is not None
@@ -237,6 +238,7 @@ def test_build_picture_block_caption_none_when_raw_caption_none():
         image=None,
         description=None,
         caption=None,
+        char_offset=None,
     )
     pic = _build_picture_block(raw_pic)
     assert pic.caption is None
@@ -250,6 +252,7 @@ def test_build_picture_preserves_description_alongside_caption():
         image=None,
         description="caption text fallback",
         caption=_raw_caption(direction="bottom", texts=("caption text fallback",)),
+        char_offset=None,
     )
     pic = _build_picture_block(raw_pic)
     assert pic.description == "caption text fallback"
@@ -266,6 +269,7 @@ def test_build_hwp_document_table_with_caption_block_routed():
         cells=[],
         caption="단순 캡션",
         caption_block=_raw_caption(direction="top", texts=("단순 캡션",)),
+        char_offset=None,
     )
     raw_para = RawParagraph(
         section_idx=0,

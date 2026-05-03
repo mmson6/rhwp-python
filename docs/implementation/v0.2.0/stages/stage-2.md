@@ -1,5 +1,6 @@
 ---
 status: Frozen
+description: "v0.2.0 S2 작업 로그 — Rust → dict 매퍼 + 'Document.to_ir()' 바인딩 + Rust OnceCell lazy 캐시"
 ga: v0.2.0
 last_updated: 2026-04-24
 ---
