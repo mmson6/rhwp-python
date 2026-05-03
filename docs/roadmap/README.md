@@ -25,6 +25,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 | v0.3.0 (CLI) | Frozen | [v0.3.0/cli.md](v0.3.0/cli.md) | [design/v0.3.0/cli-research.md](../design/v0.3.0/cli-research.md) |
 | v0.3.1 (IR marker char offset) | Frozen | [v0.3.1/ir-marker-char-offset.md](v0.3.1/ir-marker-char-offset.md) | [design/v0.3.1/ir-marker-char-offset-research.md](../design/v0.3.1/ir-marker-char-offset-research.md) |
 | v0.3.2 (IR upstream UTF-16 helper) | Frozen | [v0.3.2/ir-upstream-utf16-helper.md](v0.3.2/ir-upstream-utf16-helper.md) | [design/v0.3.2/ir-upstream-utf16-helper-research.md](../design/v0.3.2/ir-upstream-utf16-helper-research.md) |
+| v0.4.0 (view 렌더러) | Draft | [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md) | [design/v0.4.0/view-renderer-research.md](../design/v0.4.0/view-renderer-research.md) |
 | v0.7.0 (MCP server) | Draft | [v0.7.0/mcp.md](v0.7.0/mcp.md) | [design/v0.7.0/mcp-research.md](../design/v0.7.0/mcp-research.md) |
 
 ## 미착수 작업 계획
