@@ -34,6 +34,7 @@ PATCH release. v0.3.0 의 IR 출고에서 inline 컨트롤 마커의 `Provenance
 ### Build
 
 - `external/rhwp` submodule pin `033617e` (v0.7.7) → `0fb3e67` (post-v0.7.8). 본 v0.3.1 의 enabling change 는 v0.7.8 의 PR #405 (`pub fn Paragraph::control_text_positions`). 후속 commit 들은 직교 영역 (Task #484 `utf16_pos_to_char_idx` 등) 으로 본 PATCH 동작에 영향 없음.
+- PyO3 `extension-module` feature 를 default features 에서 분리 ([PR #13](https://github.com/DanMeon/rhwp-python/pull/13), [PyO3 FAQ](https://pyo3.rs/main/faq#i-cant-run-cargo-test) 권장 패턴) — `cargo test` 가 libpython 링크 시도 없이 정상 작동, `src/ir.rs` 의 Rust unit test 13개 (`assert_position_invariant_panics_on_mismatch` 의 `#[should_panic]` 포함) 가 CI 에서 검증됨. wheel 빌드 동작 동일 — `[tool.maturin] features = ["extension-module"]` 가 명시적 활성화. AC-12 invariant 가 source-grep 외에 진짜 panic 검증으로도 보호됨.
 
 ### Known limitations
 
