@@ -34,8 +34,15 @@ include = [
 name = "_rhwp"
 crate-type = ["cdylib", "rlib"]
 
+# * extension-module 을 default features 에서 분리한다 — wheel 빌드 시에만 활성화
+#   cargo test 는 default 로 비활성 → libpython 링크 시도 회피 → Rust unit test 실행 가능
+#   ([PyO3 FAQ](https://pyo3.rs/main/faq#i-cant-run-cargo-test) 권장 패턴).
+#   maturin 은 [tool.maturin] features 에서 명시적으로 ["extension-module"] 활성화하므로 wheel 영향 0.
+[features]
+extension-module = ["pyo3/extension-module"]
+
 [dependencies]
-pyo3 = { version = "0.28", features = ["extension-module", "abi3-py310"] }
+pyo3 = { version = "0.28", features = ["abi3-py310"] }
 rhwp = { path = "external/rhwp" }
 
 [profile.release]
