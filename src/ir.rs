@@ -393,8 +393,8 @@ fn build_char_runs(para: &Paragraph, doc_info: &DocInfo) -> Vec<RawCharRun> {
             u32::MAX
         };
 
-        let start_cp = utf16_to_cp(&para.char_offsets, start_utf16, total_cp);
-        let end_cp = utf16_to_cp(&para.char_offsets, end_utf16, total_cp);
+        let start_cp = para.utf16_pos_to_char_idx(start_utf16);
+        let end_cp = para.utf16_pos_to_char_idx(end_utf16);
 
         if start_cp >= end_cp {
             continue;
@@ -416,23 +416,6 @@ fn build_char_runs(para: &Paragraph, doc_info: &DocInfo) -> Vec<RawCharRun> {
     }
 
     runs
-}
-
-/// UTF-16 offset → codepoint index 변환.
-///
-/// `char_offsets[i]` 는 `text.chars().nth(i)` 에 해당하는 UTF-16 시작 위치.
-/// 입력 `utf16` 이상인 첫 번째 codepoint 인덱스를 반환한다. 해당 offset 이
-/// 텍스트 끝을 넘어가면 `fallback_end` 를 반환 (텍스트 codepoint 총 길이).
-fn utf16_to_cp(char_offsets: &[u32], utf16: u32, fallback_end: usize) -> usize {
-    if utf16 == u32::MAX {
-        return fallback_end;
-    }
-    for (i, &off) in char_offsets.iter().enumerate() {
-        if off >= utf16 {
-            return i;
-        }
-    }
-    fallback_end
 }
 
 fn build_raw_table(
@@ -872,22 +855,6 @@ fn field_type_to_str(ft: FieldType) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn utf16_to_cp_sentinel_returns_fallback() {
-        let offsets = vec![0u32, 1, 2];
-        assert_eq!(utf16_to_cp(&offsets, u32::MAX, 3), 3);
-    }
-
-    #[test]
-    fn utf16_to_cp_matches_first_ge() {
-        let offsets = vec![0u32, 1, 3, 4]; // ^ 2번째 codepoint 는 SMP 라 2 code units
-        assert_eq!(utf16_to_cp(&offsets, 0, 4), 0);
-        assert_eq!(utf16_to_cp(&offsets, 1, 4), 1);
-        assert_eq!(utf16_to_cp(&offsets, 2, 4), 2); // offset 2 는 char_offsets 에 없음 → 다음 >=2 인 3을 가진 인덱스 2
-        assert_eq!(utf16_to_cp(&offsets, 3, 4), 2);
-        assert_eq!(utf16_to_cp(&offsets, 5, 4), 4); // fallback
-    }
 
     // * simple_eq_text_alt — 토큰 경계 인식 검증
 
