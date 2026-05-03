@@ -100,7 +100,9 @@ all = [
 python-source = "python"
 module-name = "rhwp._rhwp"
 bindings = "pyo3"
-features = ["pyo3/extension-module"]
+# ^ wheel 빌드 시 자기 crate 의 extension-module feature 를 켠다 (Cargo.toml [features] 정의).
+#   Cargo.toml 의 default features 에서는 extension-module 이 빠져 있어 cargo test 가 정상 작동.
+features = ["extension-module"]
 include = [
     { path = "python/rhwp/py.typed", format = "wheel" },
     { path = "python/rhwp/**/*.pyi", format = "wheel" },
