@@ -2,7 +2,7 @@
 status: Draft
 description: "v0.4.0 view-renderer ADR — API placement / Markdown 방언 / 표 병합 폴백 / 이미지 처리 범위 / furniture 처리 5 결정의 근거"
 target: v0.4.0
-last_updated: 2026-05-03
+last_updated: 2026-05-04
 ---
 
 # v0.4.0 view-renderer — 설계 의사결정 리서치 요약
@@ -16,7 +16,7 @@ last_updated: 2026-05-03
 | 1 | API placement | A: free function `rhwp.view.markdown(doc)` / B: `HwpDocument` 인스턴스 메서드 / C: `Document` wrapper 메서드 | **B** | IR 모델 자기-기술 + Pydantic / Docling 동등 패턴 일치 |
 | 2 | Markdown 방언 | A: CommonMark / B: GFM / C: Pandoc Markdown / D: MyST | **B** | 표·각주·코드펜스로 IR 핵심 블록 모두 표현 + 가장 넓은 클라이언트 호환 분모 |
 | 3 | 표 셀 병합 표현 | A: GFM 표만 (병합 시 lossy) / B: HTML `<table>` 인라인 폴백 / C: Markdown extension (`{rowspan=2}` 등) | **B** | GFM spec 자체가 raw HTML inline 허용. `TableBlock.html` 재사용으로 본 binding 내 단일 source |
-| 4 | 이미지 처리 범위 | A: placeholder 만 / B: placeholder + embedded / C: 3 모드 모두 (placeholder + embedded + external) | **A** | embedded / external 은 raw bytes resolution → `Document.bytes_for_image()` 의존, IR 메서드 위치 결정 (§1) 과 충돌 |
+| 4 | 이미지 처리 | A: placeholder 만 / B: placeholder + embedded / C: 3 모드 모두 (placeholder + embedded + external) | **A** | embedded / external 은 raw bytes resolution → `Document.bytes_for_image()` 의존, IR 메서드 위치 결정 (§1) 과 충돌 |
 | 5 | furniture 처리 | A: 모두 비포함 / B: 각주/미주만 footnote 형식 / C: 헤더/푸터까지 모두 포함 | **B** | 각주/미주는 `marker_prov` 로 본문 1:1 / 헤더/푸터는 페이지 단위 → 페이지 무관 view 에서 1:N 매핑 모호 |
 
 ## 1. API placement — IR 메서드 vs free function vs Document 메서드
@@ -81,7 +81,7 @@ last_updated: 2026-05-03
 
 - "Pandoc 이 가장 표현력 높은데 왜 안 채택?" → Pandoc 은 `pandoc` CLI 환경 의존 + 그 toolchain 외에서 lossy. 본 spec 의 1차 사용처 (RAG / MCP / GitHub 표시) 는 GFM 호환 환경 — Pandoc-only markup 은 RAG 호환 분모를 좁힘. GFM 출력을 사용자가 `pandoc -f gfm -t myst` 등으로 변환 가능 (downstream)
 - "MyST 는 Sphinx / Jupyter 환경에 특화된 가치 있지 않나?" → 본 spec 의 1차 사용처는 RAG (LLM 입력) 이라 Sphinx / Jupyter 비호환 markup 불필요. MyST directive (`{note}`, `{admonition}`) 는 LLM 학습 분포 희박 — 가독성 저하 위험
-- "GFM 의 math 확장이 표준 spec 에 없는데 KaTeX `$$` 사용?" → GFM spec 자체는 math 미포함이지만 GitHub (2022 deploy) / Slack / Discord 등 주류 클라이언트가 `$$` KaTeX 로 렌더 — de-facto 표준. Pandoc / MyST 와도 syntax 호환 (`$$`) — 미래 방언 추가 시 기본 호환
+- "GFM 의 math 확장이 표준 spec 에 없는데 `$$` 사용?" → GFM spec 자체는 math 미포함이지만 GitHub (2022 deploy, MathJax 백엔드) / Slack / Discord 등 주류 클라이언트가 `$$` 수식 syntax 를 렌더 (KaTeX / MathJax 양쪽 호환) — de-facto 표준. Pandoc / MyST 와도 syntax 호환 (`$$`) — 미래 방언 추가 시 기본 호환
 - "CommonMark + GFM 표/각주 확장만 픽 vs full GFM?" → GFM 자체가 CommonMark superset + 확장 정의 — 픽업 범위 모호하면 spec 표현 일관성 흔들림. full GFM 채택이 표준 호환
 
 ### 최종 결정
@@ -134,7 +134,7 @@ last_updated: 2026-05-03
 - Pandoc grid tables: <https://pandoc.org/MANUAL.html#extension-grid_tables>
 - Docling table export: <https://github.com/docling-project/docling-core>
 
-## 4. 이미지 처리 범위 — placeholder only for v0.4.0
+## 4. 이미지 처리 — placeholder only for v0.4.0
 
 ### 팩트
 

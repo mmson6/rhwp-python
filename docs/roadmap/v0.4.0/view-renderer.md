@@ -2,7 +2,7 @@
 status: Draft
 description: "v0.4.0 — Document IR → Markdown / HTML view 렌더러. 'HwpDocument.to_markdown()' / 'to_html()' 인스턴스 메서드 추가, schema 유지"
 target: v0.4.0
-last_updated: 2026-05-03
+last_updated: 2026-05-04
 ---
 
 # v0.4.0 — IR view 렌더러 (Markdown / HTML)
@@ -23,7 +23,7 @@ API 는 `HwpDocument` 인스턴스 메서드로 추가 — `doc.to_markdown()` /
 | 4 — CSS 동봉 | `include_css: bool = False`, `True` 일 때 `<head>` 에 embedded `<style>` 1개 | RAG 임베딩 / 텍스트 추출이 1차 사용처 — CSS 불필요. 브라우저 표시용은 opt-in. 외부 `<link rel="stylesheet">` / 외부 파일 분리는 영구 비목표 (extras 미도입 정책 일관) |
 | 5 — 표 셀 병합 (rowspan/colspan) | 모든 셀 span=1 → GFM 표. `row_span` 또는 `col_span > 1` → IR `TableBlock.html` 그대로 inline (재합성 안 함) | GFM spec 자체가 raw HTML inline 허용. lossy 회피 + 단순 표 가독성 양립. `TableBlock.html` 재사용으로 본 binding 내 단일 source. 자세한 비교는 ADR §3 |
 | 6 — 이미지 처리 | placeholder 만 — `picture.image.uri` (`bin://<id>`) pass-through, alt-text 는 `description` | embedded / external 모드는 raw bytes resolution → `Document.bytes_for_image()` 의존 → IR 메서드 의존 방향 역전. v0.4.0 IR 메서드 범위 밖 — 영구 비목표. 자세한 비교는 ADR §4 |
-| 7 — 수식 표현 | `script_kind="latex"`: `inline=False` → `$$...$$` (Markdown) / `<div class="math">$$...$$</div>` (HTML), `inline=True` → `$...$`. `script_kind="hwp_eq"`: ` ```hwp-eq ``` ` fenced block (raw 보존, 자동 변환 없음) | KaTeX 사실상 호환 (GitHub / Slack / Discord 등). HWP eq → LaTeX 자동 변환은 v0.3.0 영구 비목표 그대로 — 사용자가 `model_copy(update={"script": tex, "script_kind": "latex"})` 로 재구성 |
+| 7 — 수식 표현 | `script_kind="latex"`: `inline=False` → `$$...$$` (Markdown) / `<div class="math">$$...$$</div>` (HTML), `inline=True` → `$...$`. `script_kind="hwp_eq"`: ` ```hwp-eq ``` ` fenced block (raw 보존, 자동 변환 없음) | `$$` 수식 syntax 사실상 호환 (GitHub / Slack / Discord 등 — MathJax / KaTeX 양쪽). HWP eq → LaTeX 자동 변환은 v0.3.0 영구 비목표 그대로 — 사용자가 `model_copy(update={"script": tex, "script_kind": "latex"})` 로 재구성 |
 | 8 — furniture 처리 | 각주 (`FootnoteBlock`) / 미주 (`EndnoteBlock`) 만 footnote 형식 — Markdown `[^N]` ref + 끝 정의, HTML `<sup>` ref + `<aside id="fn-N">` 정의. 머리글 / 꼬리말은 출력 미포함 | 각주/미주는 본문 의미 + `marker_prov` 로 본문 위치 1:1. 머리글/꼬리말은 페이지 단위 장식 — 페이지 무관 단일 string view 에서 의미 약함. 자세한 비교는 ADR §5 |
 | 9 — 외부 영향 | 기존 IR schema / 파싱 API / `Document` wrapper / extras 모두 변경 없음 (additive only) | `HwpDocument` 에 메서드 추가는 schema 영향 없음 (Pydantic JSON serialization 무관). 순수 stdlib 구현 — 신규 dependency 0 |
 
