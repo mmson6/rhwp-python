@@ -22,6 +22,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 본 PR 의 a/b/c 결정 비교 + 14개 결정 historical record 는 [docs/implementation/spec-system-overhaul.md](docs/implementation/spec-system-overhaul.md) (Frozen) 가 보유.
 - spec body 구조 SSOT 정착 — `/new-spec` skill 안 `templates/spec.md` + `templates/adr.md` 신설 (skeleton + 섹션별 룰 보유, body 구조 SSOT). `docs/CONVENTIONS.md` 에 § Spec / ADR 본문 구조 (짧은 pointer) + § 섹션 역할 분리 — 정보 배치 룩업 (spec ↔ ADR ↔ CHANGELOG ↔ implementation log 의 cross-cutting 표) 신설. SKILL.md step 2/4/5 가 두 template 파일을 markdown 링크로 자연 참조 (공식 Claude Code skill 패턴 — 명령형). multi-template `templates/` sub-dir 은 Anthropic 공식 docs 의 `examples/` / `scripts/` 카테고리 sub-dir 패턴 + GitHub ISSUE_TEMPLATE 선례 follow.
 
+## [0.4.0] — 2026-05-05
+
+MINOR release. Document IR (`HwpDocument`) → Markdown / HTML view 변환 표면을 추가한다. v0.7.0 MCP server (`to_markdown` / `to_html` 도구) + 후속 RAG 프레임워크 통합 (v0.5 LlamaIndex / v0.6 Haystack) 의 *문자열 출력* 1차 인터페이스로 사용. Pure-stdlib 구현 — 신규 의존성 0, schema (`"1.1"`) / 파싱 경로 / `Document` wrapper / extras 모두 변경 없음 (additive only).
+
+### Added
+
+- `HwpDocument.to_markdown() -> str` — IR → GFM (GitHub Flavored Markdown). 표는 모든 셀 `span == 1` 일 때 GFM `|...|` 표, 병합 셀 (rowspan/colspan > 1) 이 있으면 `TableBlock.html` 인라인 폴백 (lossy 회피). 이미지는 placeholder 모드 (`picture.image.uri` pass-through, alt 의 `[`/`]` 는 backslash escape), 수식은 `script_kind`/`inline` 분기 (`latex` display → `$$..$$`, inline → `$..$`, `hwp_eq` → ` ```hwp-eq ` fenced, `mathml` → ` ```mathml ` fenced), 각주/미주는 본문 paragraph 끝 `[^N]` reference + 출력 끝 `[^N]: text` 정의 (미주는 `[^enN]` 별도 number 공간). 머리글/꼬리말은 출력 미포함 (페이지 단위 장식, 결정 8). `ListItemBlock.level` 은 `"  " * level` 들여쓰기로 보존.
+- `HwpDocument.to_html(*, include_css: bool = False) -> str` — IR → 완전 HTML5 문서 (`<!DOCTYPE html>` + `<html>` + `<head>` + `<body>`). 표는 IR `TableBlock.html` 그대로 inline (재합성 없음, rowspan/colspan 보존), 이미지는 `<img alt="<description>" src="<picture.image.uri>">`, 수식 디스플레이는 `<div class="math">$$..$$</div>` (KaTeX/MathJax 호환), 인라인은 `<span class="math">$..$</span>`, `hwp_eq`/`mathml` 은 `<pre><code class="language-...">`. 각주/미주는 본문 직후 `<aside id="fn-N|en-N" class="footnote|endnote">` 정의 + 본문 안 `<sup><a href="#...">[N]</a></sup>` 인용 마커. `ListItemBlock.level > 0` 은 `<li data-level="N">` 속성으로 보존. `include_css=True` 일 때 `<head>` 안 embedded `<style>` 1회 동봉 (외부 stylesheet 도입 없음).
+- spec / ADR / 구현 로그: [docs/roadmap/v0.4.0/view-renderer.md](docs/roadmap/v0.4.0/view-renderer.md) / [docs/design/v0.4.0/view-renderer-research.md](docs/design/v0.4.0/view-renderer-research.md) / [docs/implementation/v0.4.0/migration.md](docs/implementation/v0.4.0/migration.md). HtmlRAG ([arXiv:2411.02959](https://arxiv.org/abs/2411.02959), WWW 2025) 등 최근 연구가 보고하는 *구조 보존이 RAG 체감 성능과 직결* 동기.
+
+### Build
+
+- `external/rhwp` submodule pin `0fb3e67` 유지 — 본 MINOR 는 pure Python view layer, 상류 변경 0.
+
+### Notes
+
+- 회귀 가드: [tests/test_view_baseline.py](tests/test_view_baseline.py) — `aift.hwp` / `table-vpos-01.hwpx` 의 `Document.to_ir().model_dump_json(indent=2, exclude={"source"})` 가 v0.3.2 GA baseline ([tests/baselines/v0_3_2_*_ir.json](tests/baselines/)) 과 byte-equal. 향후 schema / 파싱 변경 시 baseline 도 함께 갱신.
+
 ## [0.3.2] — 2026-05-03
 
 PATCH release. v0.2.0 IR 매핑이 보유해 온 자체 UTF-16 → codepoint 변환 복사본 (`src/ir.rs::utf16_to_cp`) 을 상류 `Paragraph::utf16_pos_to_char_idx` ([PR #494](https://github.com/edwardkim/rhwp/pull/494) / [Task #484](https://github.com/edwardkim/rhwp/issues/484), v0.7.9 GA) 로 치환해 SSOT 를 단일화한다. 알고리즘 동등 — IR 출력 byte-equal, 공개 API 변경 없음, SchemaVersion `"1.1"` 유지.
