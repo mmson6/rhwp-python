@@ -1,8 +1,8 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.4.0 — Document IR → Markdown / HTML view 렌더러. 'HwpDocument.to_markdown()' / 'to_html()' 인스턴스 메서드 추가, schema 유지"
-target: v0.4.0
-last_updated: 2026-05-04
+ga: v0.4.0
+last_updated: 2026-05-05
 ---
 
 # v0.4.0 — IR view 렌더러 (Markdown / HTML)

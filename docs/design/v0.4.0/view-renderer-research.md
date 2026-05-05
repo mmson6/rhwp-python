@@ -1,8 +1,8 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.4.0 view-renderer ADR — API placement / Markdown 방언 / 표 병합 폴백 / 이미지 처리 범위 / furniture 처리 5 결정의 근거"
-target: v0.4.0
-last_updated: 2026-05-04
+ga: v0.4.0
+last_updated: 2026-05-05
 ---
 
 # v0.4.0 view-renderer — 설계 의사결정 리서치 요약
