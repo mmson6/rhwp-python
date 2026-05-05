@@ -1,0 +1,4548 @@
+{
+  "schema_name": "HwpDocument",
+  "schema_version": "1.1",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "creation_time": null,
+    "modification_time": null
+  },
+  "sections": [
+    {
+      "section_idx": 0
+    }
+  ],
+  "body": [
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 0,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "table",
+      "rows": 1,
+      "cols": 3,
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 0,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 0,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "picture",
+              "image": {
+                "uri": "bin://1",
+                "mime_type": "image/jpeg",
+                "width": null,
+                "height": null,
+                "dpi": null
+              },
+              "caption": null,
+              "description": null,
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 0,
+                "char_start": null,
+                "char_end": null,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 0,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 1,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "보도자료",
+              "inlines": [
+                {
+                  "text": "보도자료",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 20
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 0,
+                "char_start": 0,
+                "char_end": 4,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 2,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 0,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "picture",
+              "image": {
+                "uri": "bin://2",
+                "mime_type": "image/jpeg",
+                "width": null,
+                "height": null,
+                "dpi": null
+              },
+              "caption": null,
+              "description": null,
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 0,
+                "char_start": null,
+                "char_end": null,
+                "page_range": null
+              }
+            }
+          ]
+        }
+      ],
+      "html": "<table><tr><td></td><td>보도자료</td><td></td></tr></table>",
+      "text": "\t보도자료\t",
+      "caption": null,
+      "caption_block": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 0,
+        "char_start": null,
+        "char_end": null,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 1,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "table",
+      "rows": 2,
+      "cols": 2,
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "row_span": 2,
+          "col_span": 1,
+          "grid_index": 0,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "보도시점",
+              "inlines": [
+                {
+                  "text": "보도시점",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 45
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 1,
+                "char_start": 0,
+                "char_end": 4,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 1,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "(온라인) 2025. 12. 2.(화) 16:00",
+              "inlines": [
+                {
+                  "text": "(온라인) ",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 46
+                },
+                {
+                  "text": "2025. 12. 2.(화) ",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 47
+                },
+                {
+                  "text": "16:00",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 48
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 1,
+                "char_start": 0,
+                "char_end": 27,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "col": 1,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 3,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "(지  면) 2025. 12. 3.(수) 조간",
+              "inlines": [
+                {
+                  "text": "(지  면) ",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 46
+                },
+                {
+                  "text": "2025. 12. 3.(수) 조간",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 47
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 1,
+                "char_start": 0,
+                "char_end": 25,
+                "page_range": null
+              }
+            }
+          ]
+        }
+      ],
+      "html": "<table><tr><td rowspan=\"2\">보도시점</td><td>(온라인) 2025. 12. 2.(화) 16:00</td></tr><tr><td>(지  면) 2025. 12. 3.(수) 조간</td></tr></table>",
+      "text": "보도시점\t(온라인) 2025. 12. 2.(화) 16:00\n(지  면) 2025. 12. 3.(수) 조간",
+      "caption": null,
+      "caption_block": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 1,
+        "char_start": null,
+        "char_end": null,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 2,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "table",
+      "rows": 2,
+      "cols": 1,
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 0,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "‘국민주권시대, AI와 함께 열다’",
+              "inlines": [
+                {
+                  "text": "‘국민주권시대, AI와 함께 열다’",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 44
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 2,
+                "char_start": 0,
+                "char_end": 19,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "paragraph",
+              "text": "국민주권정부의 정부혁신 청사진 공개",
+              "inlines": [
+                {
+                  "text": "국민주권정부의 정부혁신 청사진 공개",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 44
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 2,
+                "char_start": 0,
+                "char_end": 19,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 1,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": " - ‘국민이 주도하고 AI가 뒷받침하는 국민주권정부’ 구현을 위한 국민주권정부 정부혁신 추진전략 발표 ",
+              "inlines": [
+                {
+                  "text": " -",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 20
+                },
+                {
+                  "text": " ",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 49
+                },
+                {
+                  "text": "‘국민이 주도하고 AI가 뒷받침하는 국민주권정부’ 구현을 위한 국민주권",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 73
+                },
+                {
+                  "text": "정부 정부혁신 추진전략 발표",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 49
+                },
+                {
+                  "text": " ",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 20
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 2,
+                "char_start": 0,
+                "char_end": 58,
+                "page_range": null
+              }
+            }
+          ]
+        }
+      ],
+      "html": "<table><tr><td>‘국민주권시대, AI와 함께 열다’ 국민주권정부의 정부혁신 청사진 공개</td></tr><tr><td> - ‘국민이 주도하고 AI가 뒷받침하는 국민주권정부’ 구현을 위한 국민주권정부 정부혁신 추진전략 발표 </td></tr></table>",
+      "text": "‘국민주권시대, AI와 함께 열다’ 국민주권정부의 정부혁신 청사진 공개\n - ‘국민이 주도하고 AI가 뒷받침하는 국민주권정부’ 구현을 위한 국민주권정부 정부혁신 추진전략 발표 ",
+      "caption": null,
+      "caption_block": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 2,
+        "char_start": null,
+        "char_end": null,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 3,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "table",
+      "rows": 3,
+      "cols": 3,
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 0,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 3,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "row_span": 2,
+          "col_span": 1,
+          "grid_index": 1,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "〈 정부혁신으로 달라지는 모습 〉",
+              "inlines": [
+                {
+                  "text": "〈 정부혁신으로 달라지는 모습 〉",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 32
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 3,
+                "char_start": 0,
+                "char_end": 18,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 2,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 3,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 3,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 3,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "col": 2,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 5,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 3,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 3,
+          "grid_index": 6,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": " • 범정부 국민 참여 플랫폼이 구축되어 국민이 ‘정책 공동 설계자’로서 참여하게 되고, 국민·기업이 필요한 행정정보를 선제적으로 제공하여 정부 투명성과 신뢰도가 상승한다.",
+              "inlines": [
+                {
+                  "text": " • ",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 28
+                },
+                {
+                  "text": "범정부 국민 참여 플랫폼이 구축되어 국민이 ‘정책 공동 ",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 25
+                },
+                {
+                  "text": "설계자’",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 34
+                },
+                {
+                  "text": "로서 참여하게 되고",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 33
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 29
+                },
+                {
+                  "text": "국민·기업이 필요한 행정정보를 선제적으로",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 35
+                },
+                {
+                  "text": " 제공하여 정부 투명성과",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 34
+                },
+                {
+                  "text": " 신뢰도가 상승한다.",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 36
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 3,
+                "char_start": 0,
+                "char_end": 96,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "paragraph",
+              "text": " • 기본사회 실현으로 소득·지역·세대와 관계없이 기본적 삶의 질이 보장되고, 사회연대경제 및 지역공동체 회복으로 지속가능한 성장의 기틀을 마련한다.",
+              "inlines": [
+                {
+                  "text": " • 기본사회 실현으로 소득·지역·세대와 관계없이 기본적 삶의 질이 보장되고, 사회연대경제 및 지역공동체 회복으로 지속가능한 성장의 기틀을 마련한다.",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 28
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 3,
+                "char_start": 0,
+                "char_end": 83,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "paragraph",
+              "text": " • 적극행정 면책강화, 특별성과 포상금 등을 통해 신상필벌의 공직문화를 확산하고, 공직 업무 전반에 AI 활용이 일상화됨으로써 행정 생산성이 획기적으로 향상된다.",
+              "inlines": [
+                {
+                  "text": " • ",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 28
+                },
+                {
+                  "text": "적극행정 면책강화, 특별성과 포상금 등을 통해 신상필벌의 공직문화를",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 33
+                },
+                {
+                  "text": " 확산하고",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 18
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 28
+                },
+                {
+                  "text": "공직 업무 전반에 AI 활용이 일상화됨으로써 행정 생산성이 획기적으로 향상된다.",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 33
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 3,
+                "char_start": 0,
+                "char_end": 91,
+                "page_range": null
+              }
+            }
+          ]
+        }
+      ],
+      "html": "<table><tr><td></td><td rowspan=\"2\">〈 정부혁신으로 달라지는 모습 〉</td><td></td></tr><tr><td></td><td></td></tr><tr><td colspan=\"3\"> • 범정부 국민 참여 플랫폼이 구축되어 국민이 ‘정책 공동 설계자’로서 참여하게 되고, 국민·기업이 필요한 행정정보를 선제적으로 제공하여 정부 투명성과 신뢰도가 상승한다.  • 기본사회 실현으로 소득·지역·세대와 관계없이 기본적 삶의 질이 보장되고, 사회연대경제 및 지역공동체 회복으로 지속가능한 성장의 기틀을 마련한다.  • 적극행정 면책강화, 특별성과 포상금 등을 통해 신상필벌의 공직문화를 확산하고, 공직 업무 전반에 AI 활용이 일상화됨으로써 행정 생산성이 획기적으로 향상된다.</td></tr></table>",
+      "text": "\t〈 정부혁신으로 달라지는 모습 〉\t\n\t\n • 범정부 국민 참여 플랫폼이 구축되어 국민이 ‘정책 공동 설계자’로서 참여하게 되고, 국민·기업이 필요한 행정정보를 선제적으로 제공하여 정부 투명성과 신뢰도가 상승한다.  • 기본사회 실현으로 소득·지역·세대와 관계없이 기본적 삶의 질이 보장되고, 사회연대경제 및 지역공동체 회복으로 지속가능한 성장의 기틀을 마련한다.  • 적극행정 면책강화, 특별성과 포상금 등을 통해 신상필벌의 공직문화를 확산하고, 공직 업무 전반에 AI 활용이 일상화됨으로써 행정 생산성이 획기적으로 향상된다.",
+      "caption": null,
+      "caption_block": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 3,
+        "char_start": null,
+        "char_end": null,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "□ 행정안전부(장관 윤호중)는 시민의식 향상에 따른 정책 참여 요구 증가와 인공지능(AI) 기술 발전에 따른 행정에 대한 국민의 높은 기대 수준에 발맞춰, 관계부처 합동으로 마련한 국민주권정부 정부혁신 추진전략을 12월 2일(화) 국무회의에 보고하고 발표했다.",
+      "inlines": [
+        {
+          "text": "□ ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 52
+        },
+        {
+          "text": "행정안전부(장관 윤호중)는 시민의식 향상에 따른 정책 참여 요구 증가와",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 53
+        },
+        {
+          "text": " 인공지능(AI) 기술 발전에 따른 행정에 대한 국민의 높은 기대 수준에 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 52
+        },
+        {
+          "text": "발맞춰, 관계부처 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 61
+        },
+        {
+          "text": "합동으로 마련한 국민주권정부 정부혁신 추진전략을",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 60
+        },
+        {
+          "text": " 12월 2일(화)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 55
+        },
+        {
+          "text": " 국무회의에 보고하고 발표했다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 52
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 4,
+        "char_start": 0,
+        "char_end": 145,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "field",
+      "field_kind": "clickhere",
+      "cached_value": null,
+      "raw_instruction": "Clickhere:set:66:Direction:wstring:23:이곳을 마우스로 누르고 내용을 입력하세요. HelpState:wstring:0:  ",
+      "field_type_code": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 4,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "□ 새로운 정부혁신 추진전략은 인공지능(AI) 도입과 함께 업무 프로세스, 공직문화 전반의 혁신을 통해 ‘국민이 주도하고 AI가 뒷받침하는 국민주권정부’를 구현하는 것이 목표다.",
+      "inlines": [
+        {
+          "text": "□ ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 54
+        },
+        {
+          "text": "새로운 정부혁신 추진전략은 인공지능(AI) 도입과 함께 업무 프로세스",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 75
+        },
+        {
+          "text": ", ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 54
+        },
+        {
+          "text": "공직문화 전반의 혁신을 통해 ‘국민이 주도하고 AI가 뒷받침하는 국민",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 75
+        },
+        {
+          "text": "주권정부’를 구현하는 것이 목표다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 54
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 5,
+        "char_start": 0,
+        "char_end": 99,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ ▲국민 주도 참여·소통 거버넌스 구현, ▲포용과 균형의 기본사회 구현, ▲성과로 신뢰받는 일 잘하는 정부 구현, ▲공공부문 인공지능 대전환 등 4대 핵심 전략과 12개 세부 추진과제로 구성됐다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "▲국민 주도 참여·소통 거버넌스 구현, ▲포용과 균형의 기본사회 구현,",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 38
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "▲성과로 신뢰받는 일 잘하는 정부 구현, ▲공공부문 인공지능 대전환 등",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 19
+        },
+        {
+          "text": " 4대 핵심 전략과 12개 세부 추진과제로 구성됐다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 6,
+        "char_start": 0,
+        "char_end": 111,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "□ 4대 핵심 전략 및 주요 과제는 다음과 같다.",
+      "inlines": [
+        {
+          "text": "□ 4대 핵심 전략 및 주요 과제는 다음과 같다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 52
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 7,
+        "char_start": 0,
+        "char_end": 27,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "□ 첫 번째, 국민 주도 참여·소통 거버넌스 구현이다. ",
+      "inlines": [
+        {
+          "text": "□ 첫 번째, 국민 주도 참여·소통 거버넌스 구현이다. ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 52
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 8,
+        "char_start": 0,
+        "char_end": 31,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 대국민 소통 일상화로 국민의 의견을 정책으로 전환한다. 기관별로 분산된 참여 플랫폼 등을 범정부 국민 참여 플랫폼으로 확대 개편해 국민과 직접 소통하고, ｢가칭시민참여기본법｣ 제정, 주민자치회 법제화 등을 통해 참여를 제도화한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "대국민 소통 일상화로 국민의 의견을 정책으로 전환한다. ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 62
+        },
+        {
+          "text": "기관별로 분산된",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 63
+        },
+        {
+          "text": " 참여 플랫폼 등을 범정부 국민 참여 플랫폼으로 확대 개편해 국민과 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "직접 소통하고, ｢",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        },
+        {
+          "text": "가칭",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 64
+        },
+        {
+          "text": "시민참여기본법｣ 제정, 주민자치회 법제화 등을 통해",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        },
+        {
+          "text": " 참여를 제도화한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 9,
+        "char_start": 0,
+        "char_end": 131,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 국민의 알권리 보장을 통해 정부 투명성을 강화한다. 국세심사청구 정보, 환경영향평가 정보 등 국민 접근성이 낮았던 정보를 적극 공개해 국민의 알권리를 보장하고 해외 법령·규제정보 등 기업이 원하는 행정정보를 사전에 맞춤형으로 제공하여 산업 경쟁력을 강화한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "국민의 알권리 보장을 통해 정부 투명성을 강화한다. 국세심사청구 정보,",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 19
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "환경영향평가 정보 등 국민 접근성이 낮았던 정보를 적극 공개해",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 57
+        },
+        {
+          "text": " 국민의 알권리를 보장하고 해외 법령·규제정보 등 기업이 원하는 행정정보를 사전에 맞춤형으로 제공하여 산업 경쟁력을 강화한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 10,
+        "char_start": 0,
+        "char_end": 147,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 국민의 목소리를 경청해 생활 속 문제를 해결한다. 실질적 민원 ‘해결’을 위해 원스톱 민원처리 법제화, 평가·보상체계 개선 등 민원 제도를 정비하고, 민‧관협의체 또는 현장자문단을 구성하여 현장중심 정책을 추진한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "국민의 목소리를 경청해 생활 속 문제를 해결한다. 실질적 민원 ‘해결’을",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "위해 원스톱 민원처리 법제화, 평가·보상체계 개선 등 민원 제도를 정비하고,",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 22
+        },
+        {
+          "text": " 민‧관협의체 또는 현장자문단을 구성하여 현장중심 정책을 추진한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 11,
+        "char_start": 0,
+        "char_end": 123,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "□ 두 번째, 포용과 균형의 기본사회 구현이다.",
+      "inlines": [
+        {
+          "text": "□ 두 번째, 포용과 균형의 기본사회 구현이다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 52
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 12,
+        "char_start": 0,
+        "char_end": 26,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 사각지대 없는 포용적 공공서비스 체계를 구축한다. ‘농촌 왕진버스’, ‘찾아가는 민원실’ 등 방문이 어려운 국민을 위한 찾아가는 서비스를 추진하고, 장애인·사회적 고립가구 등 사회적 약자와 국내체류 외국인·동포, 재외국민 등을 위한 서비스를 강화해 소외 없는 공공서비스를 구현한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "사각지대 없는 포용적 공공서비스 체계를 구축한다. ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": "‘농촌 왕진버스’, ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "‘찾아가는 민원실’ 등 방문이 어려운 국민을 위한 찾아가는 서비스를 추진",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 9
+        },
+        {
+          "text": "하고, 장애인·사회적 고립가구 등 사회적 약자와 국내체류 외국인·동포,",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 17
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "재외국민 등을 위한 서비스를 강화해 소외 없는 공공서비스를 구현한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 13,
+        "char_start": 0,
+        "char_end": 160,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 모두가 기본적 삶을 보장받는 사회 안전망을 구축한다. ｢가칭기본사회기본법｣ 제정 및 인공지능(AI) 기본사회 중장기 프로젝트 실시 등 기본사회 추진체계를 마련하고, 일상생활 어려움이 있는 노인·장애인 등에게 의료·요양·돌봄 서비스를 통합 연계해 제공하는 등 취약계층의 기본생활을 보장한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "모두가 기본적 삶을 보장받는 사회 안전망을 구축한다. ｢",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 59
+        },
+        {
+          "text": "가칭",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 58
+        },
+        {
+          "text": "기본사회기본법｣",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 59
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": "제정 및 인공지능(AI) 기본사회 중장기 프로젝트 실시 등 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 43
+        },
+        {
+          "text": "기본사회 추진체계를",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 12
+        },
+        {
+          "text": " 마련하고, 일상생활 어려움이 있는 노인·장애인 등에게 의료·요양·돌봄 서비스를 통합 연계해 제공하는 등 취약계층의 기본생활을 보장한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 14,
+        "char_start": 0,
+        "char_end": 164,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 또한, 통신·교통 기본서비스 확충, 청년·고령자 특성에 맞는 맞춤형 주거 안정지원 등을 통해 국민의 생활 부담을 낮춘다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "또한, ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 37
+        },
+        {
+          "text": "통신·교통 기본서비스 확충, 청년·고령자 특성에 맞는 맞춤형 주거",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        },
+        {
+          "text": " 안정지원 등을 통해 국민의 생활 부담을 낮춘다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 15,
+        "char_start": 0,
+        "char_end": 70,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 자율과 혁신을 통한 지역균형성장 체계를 구축한다. 중앙부처와 지방정부가 협력해 사회연대경제 생태계를 조성하고, 국고보조사업 혁신 등 지방정부 자율성 증진 및 상권르네상스 2.0 추진 등 지역경제 활력 제고를 통해 지역 주도 균형성장을 지원한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "자율과 혁신을 통한 지역균형성장 체계를 구축한다. ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": "중앙부처와 지방정부가 협력해 사회연대경제 생태계를 조성하고, 국고보조사업 혁신 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "등 지방정부 자율성 증진 및 상권르네상스 2.0",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 17
+        },
+        {
+          "text": " 추진 등 지역경제 활력 제고를 통해 지역 주도 균형성장을 지원한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 16,
+        "char_start": 0,
+        "char_end": 139,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "□ 세 번째, 성과로 신뢰받는 일 잘하는 정부 구현이다.",
+      "inlines": [
+        {
+          "text": "□ 세 번째, 성과로 신뢰받는 일 잘하는 정부 구현이다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 52
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 17,
+        "char_start": 0,
+        "char_end": 31,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 국민 누구에게나 쉽고 편리한 서비스 환경을 조성한다. 인공지능(AI)을 행정 전반에 도입해 필요한 혜택과 정보를 사전에 안내하는 개인 맞춤형 알림서비스를 제공하고, 행정정보 공동이용, 공공 마이데이터 확대를 통해 구비서류 없이 공공서비스를 신청하는 환경을 구축한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "국민 누구에게나 쉽고 편리한 서비스 환경을 조성한다. 인공지능(AI)을",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 38
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "행정 전반에 도입해 필요한 혜택과 정보를 사전에 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 17
+        },
+        {
+          "text": "안내하는 개인 맞춤",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 51
+        },
+        {
+          "text": "형 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 11
+        },
+        {
+          "text": "알림서비스를 제공하고, 행정정보 공동이용,",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 51
+        },
+        {
+          "text": " 공공 마이데이터 확대를 통해",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 17
+        },
+        {
+          "text": " 구비서류 없이 공공서비스를 신청하는 환경을 구축한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 18,
+        "char_start": 0,
+        "char_end": 151,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 가짜 노동 없는 성과 중심의 조직을 운영한다. 불필요한 문서 생산, 비생산적 회의‧행사 등 실질적 성과를 창출하지 못하는 업무를 발굴‧개선하고, ‘특별성과 포상금 제도’ 신설 및 재난·민원 대응 공무원 처우·근무 여건 개선 등 노력 및 성과에 대한 실질적 보상을 강화한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "가짜 노동 없는 성과 중심의 조직을 운영한다. 불필요한 문서 생산, 비생산적 회의‧행사 등 실질적 성과를 창출하지 못하는 업무를 발굴‧",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "개선하고, ‘특별성과 포상금 제도’ 신설 및 재난·민원 대응 공무원 처우·",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        },
+        {
+          "text": "근무 여건 개선 등 노력 및 성과에 대한 실질적 보상을 강화한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 19,
+        "char_start": 0,
+        "char_end": 155,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 열정이 넘치고 일 잘하는 공직사회를 조성한다. 현장에서 느끼는 비효율적이고 불합리한 관행·제도를 공무원들이 직접 발굴·제안·해결하는 문화를 조성하고, 성실·복종의무 규정 정비 등을 통해 공무원이 법령을 준수하고 소신껏 직무를 수행할 수 있는 환경을 마련한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "열정이 넘치고 일 잘하는 공직사회를 조성한다. 현장에서 느끼는 비효율적",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 9
+        },
+        {
+          "text": "이고 불합리한 관행·제도를 공무원들이 직접 발굴·제안·해결하는 문화를",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 17
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "조성하고, 성실·복종의무 규정 정비 등을 통해 공무원이 법령을 준수하고",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 19
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "소신껏 직무를 수행할 수 있는 환경을 마련한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 38
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 20,
+        "char_start": 0,
+        "char_end": 147,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "□ 네 번째, 공공부문 인공지능 대전환이다. ",
+      "inlines": [
+        {
+          "text": "□ 네 번째, 공공부문 인공지능 대전환이다. ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 52
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 21,
+        "char_start": 0,
+        "char_end": 25,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 공공부문 인공지능 대전환을 위한 인프라를 구축한다. 범정부 인공지능 인프라 구축 및 기관별 특화 인공지능 기반 마련을 통해 공직 업무 전반에 인공지능 활용이 일상화되는 환경을 구축하고, 고가치 데이터의 전략적 개방 및 가명정보 적극 활용 환경 마련 등 적극적 데이터 개방으로 인공지능 시대 경쟁력를 확보한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "공공부문 인공지능 대전환을 위한 인프라를 구축한다. 범정부",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 57
+        },
+        {
+          "text": " 인공",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "지능 인프라 구축 및 기관별 특화 인공지능 기반 마련을 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        },
+        {
+          "text": "통해 공직 업무",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 22
+        },
+        {
+          "text": " 전반에 인공지능 활용이 일상화되는 환경을 구축하고,",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 9
+        },
+        {
+          "text": " 고가치 데이터의 전략적 개방 및 가명정보 적극 활용 환경 마련 등 적극적 데이터 개방으로 인공지능 시대 경쟁력를 확보한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 22,
+        "char_start": 0,
+        "char_end": 175,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 공공 인공지능 리터러시를 강화하고 관련 인재를 양성한다. 인공지능 교과목 개선 및 인공지능 관련 교육 이수 의무화 등을 통해 공직사회 전반의 인공지능 리터러시를 제고하고, 내부 인공지능 전문가(‘AI 챔피언’) 2만 명 양성 및 민간 인공지능 우수 인재 영입(‘AI 전문관’) 등을 통해 공공분야 인공지능 내부 역량을 강화한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "공공 인공지능 리터러시를 강화하고 관련 인재를 양성한다. 인공지능",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 9
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "교과목 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 21
+        },
+        {
+          "text": "개선 및 인공지능 관련 교육 이수 의무화 등을 통해 공직사회",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 65
+        },
+        {
+          "text": "전반의 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 17
+        },
+        {
+          "text": "인",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 19
+        },
+        {
+          "text": "공지능 리터러시를 제고하고, 내부 인공지능 전문가(‘AI",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 9
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 17
+        },
+        {
+          "text": "챔피언’) 2만 명",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 66
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 12
+        },
+        {
+          "text": "양성 및 민간 인공지능 우수 인재 영입(‘AI 전문관’) 등을",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 22
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 65
+        },
+        {
+          "text": "통해 공공분야 인",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 38
+        },
+        {
+          "text": "공지능 내부 역량을 강화한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 23,
+        "char_start": 0,
+        "char_end": 186,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ 공공 인공지능 윤리 및 신뢰성을 확보한다. 공공 특성과 글로벌 인공지능 윤리 추세에 맞는 ‘공공 AI 윤리 가이드라인’을 마련하고, 공공부문 인공지능 도입에 따른 개인 기본권 침해 가능성, 인공지능 판단 책임소재 명확성 등을 사전에 검증하는 ‘공공 AI 영향평가제’를 신설한다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "공공 인공지능 윤리 및 신뢰성을 확보한다. 공공 특성과 글로벌 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "인공",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 17
+        },
+        {
+          "text": "지능 윤리 추세에 맞는 ‘공공 AI 윤리 가이드라인’을 마련하고,",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 19
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 17
+        },
+        {
+          "text": "공공부문",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 51
+        },
+        {
+          "text": " 인공지능 도입에 따른 개인 기본권 침해 가능성, 인공지능",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 11
+        },
+        {
+          "text": " 판단 책임소재 명확성 등을 사전에 검증하는 ‘공공 AI 영향평가제’를 신설한다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 24,
+        "char_start": 0,
+        "char_end": 158,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "□ 한편, 행정안전부는 범정부 혁신 추진동력 확보를 통한 성공적인 정부혁신 이행을 위해 관계부처 및 지방정부가 참여하는 ‘정부혁신추진협의회’ 및 학계·현장 전문가가 함께하는 ‘정부혁신전략위원회’를 운영할 계획이다.",
+      "inlines": [
+        {
+          "text": "□ ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "한편, 행정안전부는 범정부 혁신 추진동력 확보를 통한 성공적인 정부혁신",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 19
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "이행을 위해 관계부처 및 지방정부가 참여하는 ‘정부혁신추진협의회’ 및",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 38
+        },
+        {
+          "text": " 학계·현장 전문가가 함께하는 ‘정부혁신전략위원회’를 운영할 계획이다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 25,
+        "char_start": 0,
+        "char_end": 119,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "□ 윤호중 장관은 “이번에 발표한 ‘국민주권정부의 정부혁신 추진전략’은 행정 효율성 제고를 넘어, 국민 모두가 정책 결정의 주역이 되고, AI가 제공하는 미래 행정의 혜택을 온전히 누리도록 하는 데 그 목적이 있다”라며,",
+      "inlines": [
+        {
+          "text": "□ ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "윤호중 장관은 “이번에 발표한 ‘국민주권정부의 정부혁신 추진전략’은",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 21
+        },
+        {
+          "text": " 행정",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 24
+        },
+        {
+          "text": " 효율성 제고를 넘어, 국민 모두가 정책 결정의 주역이 되고, AI가 ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        },
+        {
+          "text": "제공하는 미래 행정의 혜택을 온전히 누리도록 하는 데 그 목적이 있다”라며,",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 9
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 26,
+        "char_start": 0,
+        "char_end": 123,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": " ○ “앞으로도 국민과의 소통을 최우선 가치로 삼고, AI 대전환 시대에 걸맞은 국민주권정부를 실현하여 국민이 행복한 대한민국을 만드는 데 모든 역량을 집중하겠다”고 밝혔다.",
+      "inlines": [
+        {
+          "text": " ○",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 50
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 56
+        },
+        {
+          "text": "“앞으로도 국민과의 소통을 최우선 가치로 삼고, AI 대전환 시대에 걸맞은",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 9
+        },
+        {
+          "text": " 국민주권정부를 실현하여 국민이 행복한 대한민국을 만드는 데 모든 역량을 집중하겠다”고 밝혔다.",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "href": null,
+          "ruby": null,
+          "raw_style_id": 27
+        }
+      ],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 27,
+        "char_start": 0,
+        "char_end": 97,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 28,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "table",
+      "rows": 4,
+      "cols": 6,
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 0,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "담당 부서",
+              "inlines": [
+                {
+                  "text": "담당 부서",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 5,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "row_span": 2,
+          "col_span": 1,
+          "grid_index": 1,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "참여혁신국",
+              "inlines": [
+                {
+                  "text": "참여혁신국",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 5,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 2,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "책임자",
+              "inlines": [
+                {
+                  "text": "책임자",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 3,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 3,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "과  장 ",
+              "inlines": [
+                {
+                  "text": "과  장 ",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 5,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 4,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 4,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "장은영",
+              "inlines": [
+                {
+                  "text": "장은영",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 3,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 5,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 5,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "(044-205-2201)",
+              "inlines": [
+                {
+                  "text": "(044-205-2201)",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 14,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "col": 0,
+          "row_span": 2,
+          "col_span": 1,
+          "grid_index": 6,
+          "role": "layout",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "col": 2,
+          "row_span": 3,
+          "col_span": 1,
+          "grid_index": 8,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "담당자",
+              "inlines": [
+                {
+                  "text": "담당자",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 3,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "col": 3,
+          "row_span": 2,
+          "col_span": 1,
+          "grid_index": 9,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "서기관",
+              "inlines": [
+                {
+                  "text": "서기관",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 3,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "col": 4,
+          "row_span": 2,
+          "col_span": 1,
+          "grid_index": 10,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "신화영",
+              "inlines": [
+                {
+                  "text": "신화영",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 3,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "col": 5,
+          "row_span": 2,
+          "col_span": 1,
+          "grid_index": 11,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "(044-205-2213)",
+              "inlines": [
+                {
+                  "text": "(044-205-2213)",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 14,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "col": 1,
+          "row_span": 2,
+          "col_span": 1,
+          "grid_index": 13,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "혁신기획과",
+              "inlines": [
+                {
+                  "text": "혁신기획과",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 5,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 18,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "col": 3,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 21,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "사무관",
+              "inlines": [
+                {
+                  "text": "사무관",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 3,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "col": 4,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 22,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "신새리",
+              "inlines": [
+                {
+                  "text": "신새리",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 3,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "col": 5,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 23,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "(044-205-2222)",
+              "inlines": [
+                {
+                  "text": "(044-205-2222)",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 8
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 28,
+                "char_start": 0,
+                "char_end": 14,
+                "page_range": null
+              }
+            }
+          ]
+        }
+      ],
+      "html": "<table><tr><td>담당 부서</td><td rowspan=\"2\">참여혁신국</td><td>책임자</td><td>과  장 </td><td>장은영</td><td>(044-205-2201)</td></tr><tr><td rowspan=\"2\"></td><td rowspan=\"3\">담당자</td><td rowspan=\"2\">서기관</td><td rowspan=\"2\">신화영</td><td rowspan=\"2\">(044-205-2213)</td></tr><tr><td rowspan=\"2\">혁신기획과</td></tr><tr><td></td><td>사무관</td><td>신새리</td><td>(044-205-2222)</td></tr></table>",
+      "text": "담당 부서\t참여혁신국\t책임자\t과  장 \t장은영\t(044-205-2201)\n\t담당자\t서기관\t신화영\t(044-205-2213)\n혁신기획과\n\t사무관\t신새리\t(044-205-2222)",
+      "caption": null,
+      "caption_block": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 28,
+        "char_start": null,
+        "char_end": null,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 29,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "table",
+      "rows": 1,
+      "cols": 3,
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 0,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 29,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "picture",
+              "image": {
+                "uri": "bin://3",
+                "mime_type": "image/jpeg",
+                "width": null,
+                "height": null,
+                "dpi": null
+              },
+              "caption": null,
+              "description": null,
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 29,
+                "char_start": null,
+                "char_end": null,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 1,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": " ",
+              "inlines": [
+                {
+                  "text": " ",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 13
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 29,
+                "char_start": 0,
+                "char_end": 1,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 2,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 29,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "picture",
+              "image": {
+                "uri": "bin://4",
+                "mime_type": "image/jpeg",
+                "width": null,
+                "height": null,
+                "dpi": null
+              },
+              "caption": null,
+              "description": null,
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 29,
+                "char_start": null,
+                "char_end": null,
+                "page_range": null
+              }
+            }
+          ]
+        }
+      ],
+      "html": "<table><tr><td></td><td> </td><td></td></tr></table>",
+      "text": "\t \t",
+      "caption": null,
+      "caption_block": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 29,
+        "char_start": null,
+        "char_end": null,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 30,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "table",
+      "rows": 1,
+      "cols": 2,
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 0,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "참고",
+              "inlines": [
+                {
+                  "text": "참고",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 40
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 30,
+                "char_start": 0,
+                "char_end": 2,
+                "page_range": null
+              }
+            }
+          ]
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 1,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": " 정부혁신 비전 및 추진전략",
+              "inlines": [
+                {
+                  "text": " 정부혁신 비전 및 추진전략",
+                  "bold": true,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 41
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 30,
+                "char_start": 0,
+                "char_end": 15,
+                "page_range": null
+              }
+            }
+          ]
+        }
+      ],
+      "html": "<table><tr><td>참고</td><td> 정부혁신 비전 및 추진전략</td></tr></table>",
+      "text": "참고\t 정부혁신 비전 및 추진전략",
+      "caption": null,
+      "caption_block": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 30,
+        "char_start": null,
+        "char_end": null,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 31,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 32,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "table",
+      "rows": 1,
+      "cols": 1,
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 0,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "국민이 주도하고 AI가 뒷받침하는 국민주권정부",
+              "inlines": [
+                {
+                  "text": "국민이 주도하고 AI가 뒷받침하는 국민주권정부",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikethrough": false,
+                  "href": null,
+                  "ruby": null,
+                  "raw_style_id": 76
+                }
+              ],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 32,
+                "char_start": 0,
+                "char_end": 25,
+                "page_range": null
+              }
+            }
+          ]
+        }
+      ],
+      "html": "<table><tr><td>국민이 주도하고 AI가 뒷받침하는 국민주권정부</td></tr></table>",
+      "text": "국민이 주도하고 AI가 뒷받침하는 국민주권정부",
+      "caption": null,
+      "caption_block": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 32,
+        "char_start": null,
+        "char_end": null,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 33,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "paragraph",
+      "text": "",
+      "inlines": [],
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 34,
+        "char_start": 0,
+        "char_end": 0,
+        "page_range": null
+      }
+    },
+    {
+      "kind": "table",
+      "rows": 1,
+      "cols": 1,
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "row_span": 1,
+          "col_span": 1,
+          "grid_index": 0,
+          "role": "data",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 34,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "table",
+              "rows": 1,
+              "cols": 1,
+              "cells": [
+                {
+                  "row": 0,
+                  "col": 0,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 0,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "정부혁신 4대 추진전략, 12대 추진과제",
+                      "inlines": [
+                        {
+                          "text": "정부혁신 4대 추진전략, 12대 추진과제",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 78
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 22,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                }
+              ],
+              "html": "<table><tr><td>정부혁신 4대 추진전략, 12대 추진과제</td></tr></table>",
+              "text": "정부혁신 4대 추진전략, 12대 추진과제",
+              "caption": null,
+              "caption_block": null,
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 34,
+                "char_start": null,
+                "char_end": null,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "paragraph",
+              "text": "",
+              "inlines": [],
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 34,
+                "char_start": 0,
+                "char_end": 0,
+                "page_range": null
+              }
+            },
+            {
+              "kind": "table",
+              "rows": 11,
+              "cols": 3,
+              "cells": [
+                {
+                  "row": 0,
+                  "col": 0,
+                  "row_span": 2,
+                  "col_span": 1,
+                  "grid_index": 0,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "1",
+                      "inlines": [
+                        {
+                          "text": "1",
+                          "bold": true,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 79
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 1,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "참여소통",
+                      "inlines": [
+                        {
+                          "text": "참여소통",
+                          "bold": true,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 80
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 4,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 0,
+                  "col": 1,
+                  "row_span": 2,
+                  "col_span": 1,
+                  "grid_index": 1,
+                  "role": "layout",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 2,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "국민 주도 참여‧소통 거버넌스 구현",
+                      "inlines": [
+                        {
+                          "text": "국민 주도 참여‧소통 거버넌스 구현",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 82
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 19,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 5,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "󰊱 대국민 소통 일상화로 국민의 의견을 정책으로 전환",
+                      "inlines": [
+                        {
+                          "text": "󰊱 ",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        },
+                        {
+                          "text": "대국민 소통 일상화로 국민의 의견을 정책으로 전환",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 69
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 29,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "󰊲 국민의 알권리 보장을 통해 정부 투명성 강화",
+                      "inlines": [
+                        {
+                          "text": "󰊲 국민의 알권리 보장을 통해 정부 투명성 강화",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 26,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "󰊳 국민의 목소리를 경청하여 생활 속 문제해결",
+                      "inlines": [
+                        {
+                          "text": "󰊳 국민의 목소리를 경청하여 생활 속 문제해결",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 25,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 2,
+                  "col": 0,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 6,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 7,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 8,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 3,
+                  "col": 0,
+                  "row_span": 2,
+                  "col_span": 1,
+                  "grid_index": 9,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "2",
+                      "inlines": [
+                        {
+                          "text": "2",
+                          "bold": true,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 79
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 1,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "기본사회",
+                      "inlines": [
+                        {
+                          "text": "기본사회",
+                          "bold": true,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 80
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 4,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "row_span": 2,
+                  "col_span": 1,
+                  "grid_index": 10,
+                  "role": "layout",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 11,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "포용과 균형의 기본사회 구현",
+                      "inlines": [
+                        {
+                          "text": "포용과 균형의 기본사회 구현",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 82
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 15,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 14,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "󰊴 사각지대 없는 포용적 공공서비스 체계 구축",
+                      "inlines": [
+                        {
+                          "text": "󰊴 사각지대 없는 포용적 공공서비스 체계 구축",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 25,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "󰊵 모두가 기본적 삶을 보장받는 사회 안전망 구축",
+                      "inlines": [
+                        {
+                          "text": "󰊵 모두가 기본적 삶을 보장받는 사회 안전망 구축",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 27,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "󰊶 자율과 혁신을 통한 지역균형성장 체계 구축",
+                      "inlines": [
+                        {
+                          "text": "󰊶 자율과 혁신을 통한 지역균형성장 체계 구축",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 25,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 5,
+                  "col": 0,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 15,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 16,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 5,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 17,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 6,
+                  "col": 0,
+                  "row_span": 2,
+                  "col_span": 1,
+                  "grid_index": 18,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "3",
+                      "inlines": [
+                        {
+                          "text": "3",
+                          "bold": true,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 79
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 1,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "공직혁신",
+                      "inlines": [
+                        {
+                          "text": "공직혁신",
+                          "bold": true,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 85
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 4,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 6,
+                  "col": 1,
+                  "row_span": 2,
+                  "col_span": 1,
+                  "grid_index": 19,
+                  "role": "layout",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 6,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 20,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "성과로 신뢰받는 일 잘하는 정부 구현",
+                      "inlines": [
+                        {
+                          "text": "성과로 신뢰받는 일 잘하는 정부 구현",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 82
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 20,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 7,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 23,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "󰊷 국민 누구에게나 쉽고 편리한 서비스 환경 조성",
+                      "inlines": [
+                        {
+                          "text": "󰊷 ",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        },
+                        {
+                          "text": "국민 누구에게나 쉽고 편리한 서비스 환경 조성",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 69
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 27,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "󰊸 가짜 노동 없는 성과 중심의 조직 운영",
+                      "inlines": [
+                        {
+                          "text": "󰊸 가짜 노동 없는 성과 중심의 조직 운영",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 23,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "󰊹 열정이 넘치고 일 잘하는 공직사회 조성",
+                      "inlines": [
+                        {
+                          "text": "󰊹 열정이 넘치고 일 잘하는 공직사회 조성",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 23,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 8,
+                  "col": 0,
+                  "row_span": 1,
+                  "col_span": 3,
+                  "grid_index": 24,
+                  "role": "layout",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 9,
+                  "col": 0,
+                  "row_span": 2,
+                  "col_span": 1,
+                  "grid_index": 27,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "4",
+                      "inlines": [
+                        {
+                          "text": "4",
+                          "bold": true,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 79
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 1,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": "공공 AX",
+                      "inlines": [
+                        {
+                          "text": "공공 ",
+                          "bold": true,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 80
+                        },
+                        {
+                          "text": "AX",
+                          "bold": true,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 85
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 5,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 9,
+                  "col": 1,
+                  "row_span": 2,
+                  "col_span": 1,
+                  "grid_index": 28,
+                  "role": "layout",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "",
+                      "inlines": [],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 0,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 9,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 29,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": "공공부문 인공지능 대전환 ",
+                      "inlines": [
+                        {
+                          "text": "공공부문 인공지능 대전환 ",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 86
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 14,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                },
+                {
+                  "row": 10,
+                  "col": 2,
+                  "row_span": 1,
+                  "col_span": 1,
+                  "grid_index": 32,
+                  "role": "data",
+                  "blocks": [
+                    {
+                      "kind": "paragraph",
+                      "text": " 공공부문 AI 대전환을 위한 인프라 구축 ",
+                      "inlines": [
+                        {
+                          "text": " 공공부문 AI 대전환을 위한 인프라 구축 ",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 24,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": " 공공 AI 리터러시 강화 및 인재 양성 ",
+                      "inlines": [
+                        {
+                          "text": " 공공 AI 리터러시 강화 및 인재 양성 ",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 23,
+                        "page_range": null
+                      }
+                    },
+                    {
+                      "kind": "paragraph",
+                      "text": " 공공 AI 윤리 및 신뢰성 확보",
+                      "inlines": [
+                        {
+                          "text": " 공공 AI 윤리 및 신뢰성 확보",
+                          "bold": false,
+                          "italic": false,
+                          "underline": false,
+                          "strikethrough": false,
+                          "href": null,
+                          "ruby": null,
+                          "raw_style_id": 68
+                        }
+                      ],
+                      "prov": {
+                        "section_idx": 0,
+                        "para_idx": 34,
+                        "char_start": 0,
+                        "char_end": 18,
+                        "page_range": null
+                      }
+                    }
+                  ]
+                }
+              ],
+              "html": "<table><tr><td rowspan=\"2\">1 참여소통</td><td rowspan=\"2\"></td><td>국민 주도 참여‧소통 거버넌스 구현</td></tr><tr><td>󰊱 대국민 소통 일상화로 국민의 의견을 정책으로 전환 󰊲 국민의 알권리 보장을 통해 정부 투명성 강화 󰊳 국민의 목소리를 경청하여 생활 속 문제해결</td></tr><tr><td></td><td></td><td></td></tr><tr><td rowspan=\"2\">2 기본사회</td><td rowspan=\"2\"></td><td>포용과 균형의 기본사회 구현</td></tr><tr><td>󰊴 사각지대 없는 포용적 공공서비스 체계 구축 󰊵 모두가 기본적 삶을 보장받는 사회 안전망 구축 󰊶 자율과 혁신을 통한 지역균형성장 체계 구축</td></tr><tr><td></td><td></td><td></td></tr><tr><td rowspan=\"2\">3 공직혁신</td><td rowspan=\"2\"></td><td>성과로 신뢰받는 일 잘하는 정부 구현</td></tr><tr><td>󰊷 국민 누구에게나 쉽고 편리한 서비스 환경 조성 󰊸 가짜 노동 없는 성과 중심의 조직 운영 󰊹 열정이 넘치고 일 잘하는 공직사회 조성</td></tr><tr><td colspan=\"3\"></td></tr><tr><td rowspan=\"2\">4 공공 AX</td><td rowspan=\"2\"></td><td>공공부문 인공지능 대전환 </td></tr><tr><td> 공공부문 AI 대전환을 위한 인프라 구축   공공 AI 리터러시 강화 및 인재 양성   공공 AI 윤리 및 신뢰성 확보</td></tr></table>",
+              "text": "1 참여소통\t\t국민 주도 참여‧소통 거버넌스 구현\n󰊱 대국민 소통 일상화로 국민의 의견을 정책으로 전환 󰊲 국민의 알권리 보장을 통해 정부 투명성 강화 󰊳 국민의 목소리를 경청하여 생활 속 문제해결\n\t\t\n2 기본사회\t\t포용과 균형의 기본사회 구현\n󰊴 사각지대 없는 포용적 공공서비스 체계 구축 󰊵 모두가 기본적 삶을 보장받는 사회 안전망 구축 󰊶 자율과 혁신을 통한 지역균형성장 체계 구축\n\t\t\n3 공직혁신\t\t성과로 신뢰받는 일 잘하는 정부 구현\n󰊷 국민 누구에게나 쉽고 편리한 서비스 환경 조성 󰊸 가짜 노동 없는 성과 중심의 조직 운영 󰊹 열정이 넘치고 일 잘하는 공직사회 조성\n\n4 공공 AX\t\t공공부문 인공지능 대전환 \n 공공부문 AI 대전환을 위한 인프라 구축   공공 AI 리터러시 강화 및 인재 양성   공공 AI 윤리 및 신뢰성 확보",
+              "caption": null,
+              "caption_block": null,
+              "prov": {
+                "section_idx": 0,
+                "para_idx": 34,
+                "char_start": null,
+                "char_end": null,
+                "page_range": null
+              }
+            }
+          ]
+        }
+      ],
+      "html": "<table><tr><td></td></tr></table>",
+      "text": "",
+      "caption": null,
+      "caption_block": null,
+      "prov": {
+        "section_idx": 0,
+        "para_idx": 34,
+        "char_start": null,
+        "char_end": null,
+        "page_range": null
+      }
+    }
+  ],
+  "furniture": {
+    "page_headers": [
+      {
+        "kind": "paragraph",
+        "text": "",
+        "inlines": [],
+        "prov": {
+          "section_idx": 0,
+          "para_idx": 0,
+          "char_start": 0,
+          "char_end": 0,
+          "page_range": null
+        }
+      }
+    ],
+    "page_footers": [],
+    "footnotes": [],
+    "endnotes": []
+  }
+}

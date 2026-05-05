@@ -715,6 +715,41 @@ class HwpDocument(BaseModel):
             yield from _walk_blocks(self.furniture.footnotes, recurse)
             yield from _walk_blocks(self.furniture.endnotes, recurse)
 
+    def to_markdown(self) -> str:
+        """IR → GFM (GitHub Flavored Markdown) 문자열.
+
+        결정 사항: ``docs/roadmap/v0.4.0/view-renderer.md`` §결정 사항 (1, 2, 5, 6,
+        7, 8). 표는 모든 셀 ``span == 1`` 일 때 GFM ``|...|`` 표, 병합 셀이 있으면
+        ``TableBlock.html`` 인라인 폴백. 이미지는 placeholder (``picture.image.uri``
+        pass-through), 수식은 ``script_kind`` / ``inline`` 분기, 각주/미주는 본문
+        끝 정의 + 본문 paragraph 안 ``[^N]`` reference. 머리글/꼬리말은 출력 미포함.
+
+        호출이 IR 인스턴스를 변경하지 않아 ``frozen=True`` 와 정합 — 동일 IR 에
+        대한 두 번 호출은 byte-equal (idempotency).
+        """
+        from rhwp.ir._view import render_markdown
+
+        return render_markdown(self)
+
+    def to_html(self, *, include_css: bool = False) -> str:
+        """IR → 완전 HTML5 문서 (``<!DOCTYPE html>`` + ``<html>`` + ``<head>`` + ``<body>``).
+
+        결정 사항: ``docs/roadmap/v0.4.0/view-renderer.md`` §결정 사항 (1, 3, 4, 5,
+        6, 7, 8). 표는 ``TableBlock.html`` 그대로 inline (재합성 안 함, rowspan/
+        colspan 보존). 이미지는 ``picture.image.uri`` pass-through, 수식 디스플레이
+        는 ``<div class="math">``, 각주/미주는 본문 직후 ``<aside id="...">`` 정의
+        블록 + 본문 안 ``<sup><a href="#...">[N]</a></sup>`` 인용 마커. 머리글/
+        꼬리말은 출력 미포함.
+
+        Args:
+            include_css: True 면 ``<head>`` 안 embedded ``<style>`` 1 회 동봉
+                (브라우저 표시용). 기본 False — RAG 임베딩 / 텍스트 추출 사용처용.
+                외부 ``<link rel="stylesheet">`` 는 영구 비목표 (extras 정책 일관).
+        """
+        from rhwp.ir._view import render_html
+
+        return render_html(self, include_css=include_css)
+
 
 def _walk_blocks(blocks: Sequence["Block"], recurse: bool) -> Iterator["Block"]:
     """블록 리스트 DFS 순회 — recurse=True 면 컨테이너 블록 내부까지 진입.
