@@ -126,6 +126,24 @@ docs = HwpLoader("report.hwp", mode="ir-blocks").load()
 **JSON Schema** — `rhwp.ir.schema.export_schema()` / `load_schema()`. 공개 `$id`:
 `https://danmeon.github.io/rhwp-python/schema/hwp_ir/v1/schema.json` (불변 경로).
 
+**View 변환 (v0.4.0+)** — `HwpDocument.to_markdown()` / `to_html(include_css=False)`
+인스턴스 메서드로 IR 을 외부 view 포맷으로 직접 변환:
+
+```python
+ir = rhwp.parse("report.hwp").to_ir()
+
+md = ir.to_markdown()                 # GFM (표 / 각주 / 수식 / 이미지 placeholder)
+html = ir.to_html(include_css=True)   # 완전 HTML5 문서, <head> 안 단일 <style> 동봉
+```
+
+표는 모든 셀 `span == 1` 일 때 GFM `|...|`, 병합 셀 (rowspan/colspan > 1) 은
+`TableBlock.html` 그대로 inline. 각주/미주는 본문 paragraph 안 `[^N]` reference +
+끝 정의 (Markdown) / `<aside id="fn-N">` 정의 (HTML). 이미지는 `picture.image.uri`
+(`bin://N`) pass-through — raw bytes 가 필요하면 `Document.bytes_for_image(picture)`
+를 별도 호출 (embedded 모드 미지원). 머리글/꼬리말은 출력 미포함 (페이지 단위 장식).
+
+호출은 IR 인스턴스를 변경하지 않아 (`frozen=True`) 동일 IR 에 대한 재호출은 byte-equal.
+
 ## rhwp-py CLI
 
 ```bash

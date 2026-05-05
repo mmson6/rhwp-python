@@ -33,30 +33,11 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 
 본 섹션은 결정 미정 narrative — `vX.Y.Z` 디렉토리가 아직 없는 minor 들의 의도/스코프. 작업 시점이 가까워지면 `/new-spec <version> <topic>` 으로 정식 spec 으로 promote.
 
-### v0.4.0 ~ v0.6.0 — view 렌더러 + RAG 프레임워크 통합
+### v0.5.0 ~ v0.6.0 — RAG 프레임워크 통합
 
-선행 조건: v0.3.0 IR 확장 안정.
+선행 조건: v0.4.0 view 렌더러 GA. v0.2.0/v0.3.0 IR + v0.4.0 view 표면 이 안정화된 후 LangChain 외 RAG 프레임워크 (LlamaIndex / Haystack) 와 통합한다.
 
-v0.2.0/v0.3.0 에서 확정된 IR 을 다른 포맷으로 렌더링 (view) 하고, LangChain 외의 RAG 프레임워크와 통합한다. HtmlRAG (WWW 2025, arXiv:2411.02959) 등 최근 연구는 LLM 에 문서를 제공할 때 **구조를 보존하는 HTML** 이 평문화 대비 우수함을 보고하므로, view 변환 품질이 RAG 체감 성능과 직결된다.
-
-**v0.4.0 — view 렌더러**
-
-- `HwpDocument.to_markdown()` — IR → CommonMark + GFM 확장
-  - 표는 GFM `|a|b|` 형태. `rowspan`/`colspan` 이 있는 셀은 GFM 으로 표현 불가 → HTML 인라인으로 폴백
-  - 머리글·꼬리말은 YAML frontmatter (선택) 또는 주석 블록
-  - 각주/미주는 CommonMark footnote 확장
-  - 수식은 `$$ ... $$` (KaTeX 호환) — `FormulaBlock.tex` 가 있을 때만
-- `HwpDocument.to_html()` — IR → HTML5
-  - `<article>`, `<section>`, `<table>` 등 시맨틱 태그
-  - 접근성: `<caption>`, `<th scope>`, `aria-*` 기본 포함
-  - CSS 는 기본 미동봉, 별도 `to_html(include_css=True)` 옵션
-  - 이미지 처리: `Picture.ref_mode` 를 따름 (`placeholder` → `<img alt>`, `embedded` → base64 `src=`, `external` → 외부 파일 + 경로 반환)
-
-HTML 은 `TableBlock.html` 과 별개 — TableBlock 수준 HTML 은 표 하나의 HTML 조각 (RAG 주입용), 문서 전체 `to_html()` 은 완전한 HTML5 문서 (브라우저 표시용).
-
-미확정 이슈:
-- **Markdown 방언** — CommonMark / GFM / Pandoc Markdown / MyST. 기본값 GFM (표·각주 지원). Pandoc-compatible 플래그는 별도 옵션
-- **HTML 출력의 CSS 동봉 여부** — 기본 미동봉, `include_css: bool` 또는 별도 `style_bundle()` 함수
+> v0.4.0 view 렌더러 (Markdown / HTML) 은 GA 완료 — [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md) 가 SSOT. 본 섹션은 후속 minor 들의 미착수 narrative.
 
 **v0.5.0 — LlamaIndex 통합**
 
