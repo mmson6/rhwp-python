@@ -150,6 +150,7 @@ def chunks(
     mode: ChunksMode = "paragraph",
     size: int = 500,
     overlap: int = 50,
+    include_furniture: bool = False,
 ) -> list[dict[str, Any]]:
     """HWP/HWPX 를 RAG 청크 리스트로 변환 (LangChain ``RecursiveCharacterTextSplitter``).
 
@@ -165,10 +166,15 @@ def chunks(
 
             - ``"single"``: 전체 문서를 단일 Document
             - ``"paragraph"``: 문단 텍스트별 Document (기본)
-            - ``"ir-blocks"``: IR Block 단위 (표 구조 보존 + Provenance metadata,
-              본문만 — page_headers / footnotes / endnotes 제외)
+            - ``"ir-blocks"``: IR Block 단위 (표 구조 보존 + Provenance metadata)
         size: ``RecursiveCharacterTextSplitter`` 의 ``chunk_size`` (문자 수).
         overlap: 청크 간 오버랩 문자 수.
+        include_furniture: ``mode="ir-blocks"`` 에서만 의미. True 면 본문 청크
+            다음에 furniture (page_headers / page_footers / footnotes / endnotes)
+            도 chunked Document 로 yield 하며, 각 chunk 의 ``metadata`` 에
+            ``scope="furniture"`` 가 부여돼 RAG 가 body/furniture 를 분리 색인.
+            다른 mode 에서는 무시 (``HwpLoader`` 와 동일 의미). 기본 False —
+            RAG body 검색 오염 회피.
 
     Returns:
         ``[{"page_content": str, "metadata": dict}]`` — LangChain Document 의
@@ -186,7 +192,7 @@ def chunks(
     #   transitive 로 끌어오므로 위 try/except 이 통과하면 같이 import 가능.
     from rhwp.integrations.langchain import HwpLoader
 
-    loader = HwpLoader(path, mode=mode)
+    loader = HwpLoader(path, mode=mode, include_furniture=include_furniture)
     docs = loader.load()
     splitter = RecursiveCharacterTextSplitter(chunk_size=size, chunk_overlap=overlap)
     split_docs = splitter.split_documents(docs)

@@ -535,6 +535,8 @@ v0.4.0+ 신규 spec 의 인수조건 ↔ 테스트 매핑. 기존 v0.1.0 ~ v0.3.
 | v0.4.0/view-renderer | AC-9 | `tests/test_view_html.py::test_to_html_include_css_real_fixture_well_formed` |
 | v0.4.0/view-renderer | AC-9 | `tests/test_view_html.py::test_to_html_include_css_true_has_exactly_one_style_in_head` |
 | v0.5.0/mcp | — | `tests/test_mcp_server.py::TestChunks::test_default_paragraph_mode` |
+| v0.5.0/mcp | — | `tests/test_mcp_server.py::TestChunks::test_include_furniture_appends_furniture_chunks` |
+| v0.5.0/mcp | — | `tests/test_mcp_server.py::TestChunks::test_include_furniture_ignored_outside_ir_blocks` |
 | v0.5.0/mcp | — | `tests/test_mcp_server.py::TestChunks::test_missing_extras_does_not_break_other_tools` |
 | v0.5.0/mcp | — | `tests/test_mcp_server.py::TestChunks::test_missing_extras_raises_tool_error` |
 | v0.5.0/mcp | — | `tests/test_mcp_server.py::TestChunks::test_modes_all_supported` |

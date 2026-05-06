@@ -54,7 +54,7 @@ v0.5.0 시점이 sweet spot 인 이유:
 | `iter_blocks(path, kind, scope, limit)` | `path: str`, `kind: Literal["paragraph", "table", "picture", ...]`, `scope: Literal["body", "furniture", "all"]`, `limit: int \| None` | `list[dict]` | core |
 | `to_markdown(path)` | `path: str` | `str` | **v0.4.0 view 의존** |
 | `to_html(path, include_css: bool)` | `path: str`, `include_css: bool = False` | `str` | **v0.4.0 view 의존** |
-| `chunks(path, mode, size, overlap)` | `path: str`, `mode: Literal["single", "paragraph", "ir-blocks"]`, `size: int = 500`, `overlap: int = 50` | `list[{page_content, metadata}]` | langchain-text-splitters |
+| `chunks(path, mode, size, overlap, include_furniture)` | `path: str`, `mode: Literal["single", "paragraph", "ir-blocks"]`, `size: int = 500`, `overlap: int = 50`, `include_furniture: bool = False` (`mode="ir-blocks"` 에서만 의미 — page_headers / page_footers / footnotes / endnotes 도 chunked Document 로 yield, metadata `scope="furniture"`. 다른 mode 에서는 무시) | `list[{page_content, metadata}]` | langchain-text-splitters |
 
 **도구 명명 규칙**:
 

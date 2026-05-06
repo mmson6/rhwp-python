@@ -263,6 +263,36 @@ class TestChunks:
         # ^ 작은 청크 사이즈가 더 많은 청크를 생성 (또는 같음 — 짧은 문서 한계)
         assert len(small) >= len(large)
 
+    def test_include_furniture_appends_furniture_chunks(self, hwp_sample: Path) -> None:
+        """``mode="ir-blocks"`` + ``include_furniture=True`` 가 furniture chunked Document 추가."""
+        pytest.importorskip("langchain_text_splitters")
+        body_only = tools.chunks(str(hwp_sample), mode="ir-blocks", include_furniture=False)
+        with_furniture = tools.chunks(str(hwp_sample), mode="ir-blocks", include_furniture=True)
+        # ^ furniture 가 추가되므로 청크 수가 증가하거나 같음 (샘플에 furniture 가 없으면 같음)
+        assert len(with_furniture) >= len(body_only)
+        # ^ aift.hwp 샘플은 page_headers 를 보유 —
+        #   한 개 이상 추가 청크가 ``scope="furniture"`` 메타로 yield
+        furniture_chunks = [c for c in with_furniture if c["metadata"].get("scope") == "furniture"]
+        assert furniture_chunks, (
+            "aift.hwp 는 page_headers 를 보유 — include_furniture=True 가 "
+            "'scope=furniture' 메타로 청크를 yield 해야 함"
+        )
+
+    def test_include_furniture_ignored_outside_ir_blocks(self, hwp_sample: Path) -> None:
+        """``mode="single"`` / ``"paragraph"`` 에서 ``include_furniture`` 는 silently 무시."""
+        pytest.importorskip("langchain_text_splitters")
+        for mode in ("single", "paragraph"):
+            without = tools.chunks(str(hwp_sample), mode=mode)  # type: ignore[arg-type]
+            with_flag = tools.chunks(
+                str(hwp_sample),
+                mode=mode,
+                include_furniture=True,  # type: ignore[arg-type]
+            )
+            # ^ ir-blocks 외 모드에서는 HwpLoader 가 include_furniture 를 무시 — 결과 동일
+            assert len(without) == len(with_flag), (
+                f"mode={mode!r} should ignore include_furniture (HwpLoader 동일 의미)"
+            )
+
     @pytest.mark.spec("v0.5.0/mcp#AC-7")
     def test_missing_extras_raises_tool_error(
         self, hwp_sample: Path, monkeypatch: pytest.MonkeyPatch
