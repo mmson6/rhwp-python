@@ -15,14 +15,14 @@ from rhwp.mcp import tools
 
 
 def build_server() -> FastMCP:
-    """새 ``FastMCP`` 인스턴스를 만들고 도구 6 종을 등록해 반환.
+    """새 ``FastMCP`` 인스턴스를 만들고 도구 7 종을 등록해 반환.
 
     테스트가 ``mcp.list_tools()`` / ``mcp.call_tool(name, args)`` 를 in-process
     호출할 수 있도록 build 단계를 함수로 분리 — 모듈 import 부수 효과 없이
     fresh 인스턴스 획득.
     """
     server = FastMCP("rhwp-mcp")
-    # ^ S1 코어 4 + S2 view 2. S3 (chunks) 는 후속 stage 에서 추가.
+    # ^ S1 코어 4 + S2 view 2 + S3 chunks 1 = 7. mcp.md AC-2 의 GA 기준 도구 수.
     #   fastmcp v3 의 ``server.tool(fn)`` 은 데코레이터 호출 형태 — 동일 인스턴스에
     #   여러 도구를 program 적으로 등록할 때 같은 클로저 충돌 없이 안전.
     server.tool(tools.parse_hwp_summary)
@@ -31,6 +31,9 @@ def build_server() -> FastMCP:
     server.tool(tools.iter_blocks)
     server.tool(tools.to_markdown)
     server.tool(tools.to_html)
+    # ^ chunks 는 langchain-text-splitters 런타임 extras gate — 등록은 무조건,
+    #   호출 시점에 ImportError → fastmcp ToolError → MCP isError=True (AC-7).
+    server.tool(tools.chunks)
     return server
 
 

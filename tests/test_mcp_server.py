@@ -1,17 +1,22 @@
-"""rhwp.mcp fastmcp 서버 단위 테스트 (S1 + S2).
+"""rhwp.mcp fastmcp 서버 단위 테스트 (S1 + S2 + S3).
 
 ``fastmcp`` (``[mcp]`` extras) 미설치 환경에서는 file-level ``importorskip`` 로
 전체 skip — CI ``test-without-extras`` 잡이 카운트 검증 (AC-1).
 
+``chunks`` 도구의 smoke 테스트는 메서드 레벨 ``importorskip("langchain_text_splitters")``
+로 게이트 — 본 파일은 fastmcp 만 file-level gate, langchain 미설치 환경에서는
+chunks smoke 만 개별 skip (file-level skip 카운트 영향 없음).
+
 인수조건 매핑:
 
-- AC-2  (도구 6 개 노출 — S1 코어 4 + S2 view 2)   → ``TestToolRegistry``
-- AC-3  (잘못된 enum → isError=True)               → ``TestErrorHandling``
-- AC-4  (FileNotFound → isError=True)              → ``TestErrorHandling``
-- AC-5  (모든 handler sync 함수)                   → ``TestSyncHandler``
-- AC-6  (view 도구가 v0.4.0 view API thin wrapper) → ``TestToMarkdown`` / ``TestToHtml``
-- AC-9  (pyproject 등록)                           → ``TestPackagingSurface``
-- AC-10 (모듈 위치)                                → ``TestPackagingSurface``
+- AC-2  (도구 7 개 노출 — S1 코어 4 + S2 view 2 + S3 chunks 1) → ``TestToolRegistry``
+- AC-3  (잘못된 enum → isError=True)                          → ``TestErrorHandling``
+- AC-4  (FileNotFound → isError=True)                         → ``TestErrorHandling``
+- AC-5  (모든 handler sync 함수)                              → ``TestSyncHandler``
+- AC-6  (view 도구가 v0.4.0 view API thin wrapper)            → ``TestToMarkdown`` / ``TestToHtml``
+- AC-7  (chunks extras-gate 런타임 + 다른 도구 영향 없음)     → ``TestChunks``
+- AC-9  (pyproject 등록)                                      → ``TestPackagingSurface``
+- AC-10 (모듈 위치)                                           → ``TestPackagingSurface``
 """
 
 from pathlib import Path
@@ -37,10 +42,10 @@ pytestmark = pytest.mark.spec("v0.5.0/mcp")
 
 # ------------------------------------------------------------------ AC-2
 class TestToolRegistry:
-    """도구 등록 (S1 코어 4 + S2 view 2 = 6 개)."""
+    """도구 등록 (S1 코어 4 + S2 view 2 + S3 chunks 1 = 7 개, GA 기준)."""
 
     @pytest.mark.spec("v0.5.0/mcp#AC-2")
-    def test_lists_exactly_six_tools(self) -> None:
+    def test_lists_exactly_seven_tools(self) -> None:
         server = build_server()
         names = {t.name for t in asyncio.run(server.list_tools())}
         assert names == {
@@ -50,6 +55,7 @@ class TestToolRegistry:
             "iter_blocks",
             "to_markdown",
             "to_html",
+            "chunks",
         }
 
     def test_each_tool_has_description(self) -> None:
@@ -216,6 +222,76 @@ class TestIterBlocks:
         all_blocks = tools.iter_blocks(str(hwp_sample), scope="all")
         # ^ scope="all" = body + furniture, scope="body" 는 부분집합
         assert len(all_blocks) >= len(body_blocks)
+
+
+# ------------------------------------------------------------------ AC-7
+class TestChunks:
+    """RAG 청킹 도구 — 런타임 langchain-text-splitters extras gate.
+
+    AC-7: ``langchain-text-splitters`` 미설치 시 chunks 호출만 ``ToolError``
+    (= MCP isError=True), 다른 6 도구 / 서버 기동은 정상.
+
+    smoke 테스트는 langchain 이 설치된 환경에서만 실행 (메서드별 importorskip);
+    AC-7 의 missing-extras 동작은 ``sys.modules`` mocking 으로 검증해 langchain
+    설치 여부와 무관하게 실행.
+    """
+
+    def test_default_paragraph_mode(self, hwp_sample: Path) -> None:
+        pytest.importorskip("langchain_text_splitters")
+        result = tools.chunks(str(hwp_sample))
+        assert isinstance(result, list)
+        assert result, "chunks must yield at least one chunk for fixture"
+        for d in result:
+            assert isinstance(d, dict)
+            assert "page_content" in d
+            assert "metadata" in d
+            assert isinstance(d["page_content"], str)
+            assert isinstance(d["metadata"], dict)
+
+    def test_modes_all_supported(self, hwp_sample: Path) -> None:
+        pytest.importorskip("langchain_text_splitters")
+        for mode in ("single", "paragraph", "ir-blocks"):
+            result = tools.chunks(str(hwp_sample), mode=mode)  # type: ignore[arg-type]
+            assert isinstance(result, list)
+            assert result, f"mode={mode!r} produced empty list — fixture regression"
+
+    def test_size_overlap_pass_through(self, hwp_sample: Path) -> None:
+        """``size`` / ``overlap`` 이 RecursiveCharacterTextSplitter 로 정상 전달."""
+        pytest.importorskip("langchain_text_splitters")
+        small = tools.chunks(str(hwp_sample), size=100, overlap=10)
+        large = tools.chunks(str(hwp_sample), size=2000, overlap=100)
+        # ^ 작은 청크 사이즈가 더 많은 청크를 생성 (또는 같음 — 짧은 문서 한계)
+        assert len(small) >= len(large)
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-7")
+    def test_missing_extras_raises_tool_error(
+        self, hwp_sample: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """langchain-text-splitters 미설치 시 chunks 호출은 panic 아닌 ToolError."""
+        import sys
+
+        # ^ sys.modules 에 None 을 박으면 Python 이 ImportError 를 raise — 실제
+        #   미설치 환경 시뮬레이션. monkeypatch 가 테스트 종료 시 자동 복원.
+        monkeypatch.setitem(sys.modules, "langchain_text_splitters", None)
+        server = build_server()
+        with pytest.raises(ToolError):
+            asyncio.run(server.call_tool("chunks", {"path": str(hwp_sample)}))
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-7")
+    def test_missing_extras_does_not_break_other_tools(
+        self, hwp_sample: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """langchain-text-splitters 미설치여도 다른 6 도구 + 서버 기동은 정상."""
+        import sys
+
+        monkeypatch.setitem(sys.modules, "langchain_text_splitters", None)
+        server = build_server()
+        # ^ 서버 build 는 등록만 (lazy import 가 아직 안 일어남) — 정상
+        names = {t.name for t in asyncio.run(server.list_tools())}
+        assert len(names) == 7
+        # ^ 다른 도구 (extract_text) 호출이 langchain 의존성과 무관하게 동작
+        result = asyncio.run(server.call_tool("extract_text", {"path": str(hwp_sample)}))
+        assert result is not None
 
 
 # ------------------------------------------------------------------ AC-3 / AC-4

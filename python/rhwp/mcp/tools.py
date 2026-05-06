@@ -7,7 +7,7 @@
 
 - S1 — `parse_hwp_summary` / `extract_text` / `get_ir` / `iter_blocks` (코어 4)
 - S2 — `to_markdown` / `to_html` (v0.4.0 view API thin wrapper)
-- S3 — `chunks` (langchain-text-splitters extras gate, 후속 stage)
+- S3 — `chunks` (RAG 청킹 — langchain-text-splitters 런타임 extras gate)
 """
 
 from typing import Any, Literal
@@ -44,6 +44,10 @@ BlockKind = Literal[
 # ^ scope 의 "all" 은 sentinel 이 아니라 "body + furniture" 합집합을 뜻하는
 #   실제 의미 값 — IR ``HwpDocument.iter_blocks(scope=...)`` Literal 그대로.
 BlockScope = Literal["body", "furniture", "all"]
+
+# ^ HwpLoader.mode 어휘 그대로 — RAG 사용처가 CLI / MCP / 직접 SDK 사용 시
+#   같은 정신 모델 공유. spec § 노출 도구 row chunks 에 명시.
+ChunksMode = Literal["single", "paragraph", "ir-blocks"]
 
 
 def parse_hwp_summary(path: str) -> ParseSummary:
@@ -139,3 +143,51 @@ def iter_blocks(
         if limit is not None and len(out) >= limit:
             break
     return out
+
+
+def chunks(
+    path: str,
+    mode: ChunksMode = "paragraph",
+    size: int = 500,
+    overlap: int = 50,
+) -> list[dict[str, Any]]:
+    """HWP/HWPX 를 RAG 청크 리스트로 변환 (LangChain ``RecursiveCharacterTextSplitter``).
+
+    런타임에 ``langchain-text-splitters`` 를 lazy import — ``[mcp]`` extras 만
+    설치한 사용자에게도 서버 기동 / 다른 도구 호출은 정상 동작 (mcp.md AC-7).
+    chunks 도구만 호출 시점에 ImportError → fastmcp 가 ``ToolError`` 로 wrap
+    → MCP 응답 ``CallToolResult(isError=True)``.
+
+    Args:
+        path: HWP 또는 HWPX 파일 경로.
+        mode: LangChain Document 매핑 전략. CLI ``rhwp-py chunks --mode`` 와
+            동일 어휘:
+
+            - ``"single"``: 전체 문서를 단일 Document
+            - ``"paragraph"``: 문단 텍스트별 Document (기본)
+            - ``"ir-blocks"``: IR Block 단위 (표 구조 보존 + Provenance metadata,
+              본문만 — page_headers / footnotes / endnotes 제외)
+        size: ``RecursiveCharacterTextSplitter`` 의 ``chunk_size`` (문자 수).
+        overlap: 청크 간 오버랩 문자 수.
+
+    Returns:
+        ``[{"page_content": str, "metadata": dict}]`` — LangChain Document 의
+        직렬화 가능 형태.
+    """
+    try:
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+    except ImportError as e:
+        raise ImportError(
+            "rhwp-mcp `chunks` tool requires `langchain-text-splitters`. "
+            'Install with: pip install "rhwp-python[mcp-chunks]"'
+        ) from e
+
+    # ^ HwpLoader 는 langchain-core 도 요구 — text-splitters 가 langchain-core 를
+    #   transitive 로 끌어오므로 위 try/except 이 통과하면 같이 import 가능.
+    from rhwp.integrations.langchain import HwpLoader
+
+    loader = HwpLoader(path, mode=mode)
+    docs = loader.load()
+    splitter = RecursiveCharacterTextSplitter(chunk_size=size, chunk_overlap=overlap)
+    split_docs = splitter.split_documents(docs)
+    return [{"page_content": d.page_content, "metadata": d.metadata} for d in split_docs]
