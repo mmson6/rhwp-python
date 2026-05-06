@@ -52,8 +52,8 @@ last_updated: 2026-04-28
 |---|---|---|
 | `status` | enum: `Active` / `Draft` / `Frozen` / `Superseded` | 필수 |
 | `description` | non-empty string (50-150 자 권장) | 필수. 한 줄 요약 — 인덱스/검색/툴팁용 (MkDocs / Hugo / Astro 패턴) |
-| `ga` | `vX.Y.Z` SemVer | `status: Frozen` 또는 `Superseded` 일 때 필수 (예외: meta-level `docs/implementation/<topic>.md`, RESOLVED `docs/upstream/<topic>.md` — § Implementation log 구조 / § upstream/ 참조). `target` 과 mutex |
-| `target` | `vX.Y.Z` SemVer | `status: Draft` 일 때 필수. `ga` 와 mutex |
+| `ga` | `vX.Y.Z` SemVer | `status: Frozen` 또는 `Superseded` 일 때 필수 (예외: meta-level `docs/implementation/<topic>.md`, RESOLVED `docs/upstream/<topic>.md`, **pre-GA stage log** — § Implementation log 구조 / § upstream/ 참조). `target` 과 mutex (단, pre-GA stage 예외) |
+| `target` | `vX.Y.Z` SemVer | `status: Draft` 일 때 필수. `status: Frozen` + `target` 조합은 pre-GA stage log 에 한해 허용 (§ Implementation log 구조). `ga` 와 mutex |
 | `supersedes` | `<vX.Y.Z>/<topic>.md` 또는 생략 | 새 spec 이 무엇을 대체하는지 |
 | `superseded_by` | `<vX.Y.Z>/<topic>.md` | `status: Superseded` 일 때 필수 |
 | `last_updated` | `YYYY-MM-DD` | 필수. 의미 변경 commit 시 자동 갱신 ([D3 hook](#last_updated-자동-갱신)) |

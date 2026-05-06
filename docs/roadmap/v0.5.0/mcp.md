@@ -117,17 +117,20 @@ streamable-http 는 **optional** — 서버 컨테이너 배포 / 원격 LLM 에
 
 ```toml
 [project.optional-dependencies]
-mcp = ["mcp>=1.12"]
-# ^ FastMCP API + stdio/streamable-http transport. v1.12 부터 stateless_http 안정
+mcp = ["fastmcp>=3,<4"]
+# ^ standalone fastmcp v3 (jlowin) — MCP 서버의 약 70% 가 사용하는 현업 표준 (2026-05).
+#   공식 mcp SDK 안의 FastMCP v1 은 frozen 상태 — v2/v3 의 OAuth / OpenTelemetry /
+#   server composition / OpenAPI 통합 / streamable-http 우선 같은 프로덕션 기능은
+#   standalone 에만 존재. ADR § 1 참조.
 mcp-chunks = [
-    "mcp>=1.12",
+    "fastmcp>=3,<4",
     "langchain-core>=0.2",
     "langchain-text-splitters>=0.2",
 ]
-# ^ chunks 도구는 langchain-text-splitters 도 요구. cli-chunks 와 동일 패턴
+# ^ chunks 도구는 langchain-text-splitters 도 요구. cli-chunks 와 동일 패턴.
 ```
 
-`pip install "rhwp-python[mcp]"` 로 `rhwp-mcp` 활성화. `chunks` 도구 사용자는 `[mcp-chunks]` 또는 `[mcp,langchain]` 조합.
+`pip install "rhwp-python[mcp]"` 로 `rhwp-mcp` 활성화. `chunks` 도구 사용자는 `[mcp-chunks]` 또는 `[mcp,langchain]` 조합. extras 키 이름은 `mcp` (기능 표시) — 실제 의존성은 `fastmcp` standalone.
 
 ### Entry point
 
@@ -136,10 +139,10 @@ mcp-chunks = [
 rhwp-mcp = "rhwp.mcp:run"
 ```
 
-CLI 와 같은 lazy-import 패턴 — `mcp` 미설치 시 친절한 에러:
+CLI 와 같은 lazy-import 패턴 — `fastmcp` 미설치 시 친절한 에러:
 
 ```
-rhwp-mcp requires `mcp`. Install with:
+rhwp-mcp requires `fastmcp`. Install with:
     pip install "rhwp-python[mcp]"
 ```
 
@@ -188,17 +191,17 @@ python/rhwp/mcp/
 
 | # | 이슈 | 결정 | 근거 |
 |---|---|---|---|
-| 1 | SDK | 공식 `mcp` Python SDK (FastMCP) | 1st-party 유지·MCP spec 추종 보장. 직접 구현은 spec 변동 흡수 부담 — 상세: [mcp-research § 1](../../design/v0.5.0/mcp-research.md#1-sdk-선택) |
+| 1 | SDK | standalone `fastmcp` v3 (jlowin) | 2026-05 현업 표준 (MCP 서버 약 70% 사용) + v3 의 OAuth / OpenTelemetry / server composition / streamable-http 우선 기능. 공식 `mcp` SDK 안의 FastMCP v1 은 frozen — 상세: [mcp-research § 1](../../design/v0.5.0/mcp-research.md#1-sdk-선택) |
 | 2 | Transport 우선순위 | stdio 기본 + streamable-http 옵션 | Claude Desktop 호환 + ASGI 배포 시나리오 양쪽 커버. SSE 단독은 비범위 |
 | 3 | Handler sync/async | **sync 강제** | `unsendable` Document 의 thread-safety. async + to_thread 는 panic — 상세: [mcp-research § 3](../../design/v0.5.0/mcp-research.md#3-handler-동시성-모델) |
 | 4 | 도구 분할 | 작은 도구 7개 (단일 통합 도구 X) | LLM 이 의도별로 명확히 호출 가능. 단일 도구 + `operation` 파라미터는 schema 가 모호 — 상세: [mcp-research § 4](../../design/v0.5.0/mcp-research.md#4-도구-분할-vs-통합) |
 | 5 | 인증 / sandboxing | 미내장 (운영자 책임) | stdio = OS 권한 / streamable-http = reverse proxy. 라이브러리 레이어가 보안 책임지면 부분적 보호로 오해 유발 |
-| 6 | extras 명명 | `[mcp]` / `[mcp-chunks]` | CLI extras (`[cli]` / `[cli-chunks]`) 와 일관 패턴 |
+| 6 | extras 명명 | `[mcp]` / `[mcp-chunks]` (의존성은 `fastmcp`) | CLI extras (`[cli]` / `[cli-chunks]`) 와 일관 패턴. extras 키는 "MCP 서버 기능" 을 표시 — 의존성 패키지명 (`fastmcp`) 과 분리 |
 | 7 | 모듈 위치 | `python/rhwp/mcp/` (top-level) | entry point + lifecycle 보유 — `integrations/` (passive) 와 성격 다름. CLI 와 같은 위계 |
 
 ## 인수조건
 
-- **AC-1** — `mcp` extras 미설치 시 `rhwp-mcp` 호출이 친절 에러 + exit 2 (CLI extras gate 패턴 동일, 결정 6)
+- **AC-1** — `[mcp]` extras (= `fastmcp`) 미설치 시 `rhwp-mcp` 호출이 친절 에러 + exit 2 (CLI extras gate 패턴 동일, 결정 6)
 - **AC-2** — `rhwp-mcp` stdio 기동 후 MCP `tools/list` 응답이 7 개 도구 (`parse_hwp_summary` / `extract_text` / `get_ir` / `iter_blocks` / `to_markdown` / `to_html` / `chunks`) 정확히 노출 (§ 노출 도구, 결정 4)
 - **AC-3** — `iter_blocks(kind="invalid_value")` 호출 시 Pydantic validation error → MCP `CallToolResult.isError=True` 응답 (panic 아님, § 단위 테스트)
 - **AC-4** — `extract_text("nonexistent.hwp")` 호출 시 `FileNotFoundError` → MCP `isError=True` 응답 (§ 단위 테스트)
@@ -206,9 +209,9 @@ python/rhwp/mcp/
 - **AC-6** — `to_markdown(path)` / `to_html(path, include_css=False)` 도구가 v0.4.0 view API (`HwpDocument.to_markdown()` / `HwpDocument.to_html()`) 위 thin wrapper 로 동작 (S2)
 - **AC-7** — `chunks` 도구 호출 시 `langchain-text-splitters` 미설치면 MCP `isError=True` 응답 — 서버 기동은 정상 + 다른 6 도구는 사용 가능 (런타임 extras gate, S3)
 - **AC-8** — `rhwp-mcp --transport streamable-http --port N` 옵션이 uvicorn ASGI 로 기동, MCP `initialize` + `tools/list` round-trip 정상 (결정 2, S4 — endpoint path 는 SDK 기본값 추종)
-- **AC-9** — `pyproject.toml` 에 `[project.optional-dependencies]` `mcp = ["mcp>=1.12"]` + `mcp-chunks` extras 등록 + `[project.scripts]` `rhwp-mcp = "rhwp.mcp:run"` entry point 등록 (§ 의존성 / 배포)
+- **AC-9** — `pyproject.toml` 에 `[project.optional-dependencies]` `mcp = ["fastmcp>=3,<4"]` + `mcp-chunks` extras 등록 + `[project.scripts]` `rhwp-mcp = "rhwp.mcp:run"` entry point 등록 (§ 의존성 / 배포)
 - **AC-10** — `python/rhwp/mcp/` 모듈 위치 (top-level, `integrations/` 가 아님 — 결정 7). `__init__.py` 는 빈 파일 또는 docstring only (CLAUDE.md 규칙)
-- **AC-11** — CI `test-without-extras` job 의 expected skip count 가 4 → 5 로 증가 (`tests/test_mcp_server.py` 가 module-level `pytest.importorskip("mcp")` 로 1 skip 기여). `.github/workflows/ci.yml` + `AGENTS.md` § Tests 동시 갱신 (§ 다른 산출물의 파급)
+- **AC-11** — CI `test-without-extras` job 의 expected skip count 가 4 → 5 로 증가 (`tests/test_mcp_server.py` 가 module-level `pytest.importorskip("fastmcp")` 로 1 skip 기여). `.github/workflows/ci.yml` + `AGENTS.md` § Tests 동시 갱신 (§ 다른 산출물의 파급)
 
 ## 미확정 이슈
 
