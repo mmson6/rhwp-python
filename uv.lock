@@ -1568,6 +1568,7 @@ cli-chunks = [
     { name = "typer" },
 ]
 examples = [
+    { name = "fastmcp" },
     { name = "langchain-core" },
     { name = "langchain-text-splitters" },
     { name = "typer" },
@@ -1619,6 +1620,7 @@ testing = [
 
 [package.metadata]
 requires-dist = [
+    { name = "fastmcp", marker = "extra == 'examples'", specifier = ">=3,<4" },
     { name = "fastmcp", marker = "extra == 'mcp'", specifier = ">=3,<4" },
     { name = "fastmcp", marker = "extra == 'mcp-chunks'", specifier = ">=3,<4" },
     { name = "langchain-core", marker = "extra == 'cli-chunks'", specifier = ">=0.2" },

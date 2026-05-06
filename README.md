@@ -159,6 +159,71 @@ rhwp-py chunks report.hwp --size 1000 --format ndjson
 메타데이터 덤프는 상류 `rhwp` Rust 바이너리. 자세한 사용은 `rhwp-py --help`
 또는 [cli.md](docs/roadmap/v0.3.0/cli.md) 참조.
 
+## MCP server (`rhwp-mcp`)
+
+[Model Context Protocol](https://modelcontextprotocol.io/) 서버 — Claude Desktop /
+Cursor / Cline / Continue.dev / Goose 등 LLM 에이전트가 HWP/HWPX 파일을 직접
+파싱·요약·청크화할 수 있다. standalone [fastmcp v3](https://github.com/jlowin/fastmcp)
+기반 (2026-05 기준 MCP 서버 약 70% 시장 점유의 사실상 표준).
+
+```bash
+pip install "rhwp-python[mcp]"           # 도구 6 종 (parse / extract / IR / blocks / view×2)
+pip install "rhwp-python[mcp-chunks]"    # + chunks (RAG 청킹 — langchain-text-splitters)
+```
+
+### 노출 도구 (7 종)
+
+| 도구 | 입력 | 출력 |
+|---|---|---|
+| `parse_hwp_summary` | `path` | sections / paragraphs / pages 카운트 + rhwp-core 버전 |
+| `extract_text` | `path` | 단락별 평문 (LF 결합) |
+| `get_ir` | `path` | Document IR 전체 (JSON-serializable dict) |
+| `iter_blocks` | `path`, `kind?`, `scope`, `limit?` | IR 블록 dict 리스트 (kind / scope 필터링) |
+| `to_markdown` | `path` | GFM Markdown — v0.4.0 view API thin wrapper |
+| `to_html` | `path`, `include_css` | HTML5 문서 — v0.4.0 view API thin wrapper |
+| `chunks` | `path`, `mode`, `size`, `overlap`, `include_furniture` | LangChain `RecursiveCharacterTextSplitter` 적용 청크 — `[mcp-chunks]` extras 필요 |
+
+### Claude Desktop 등록
+
+`claude_desktop_config.json` 에 추가:
+
+```json
+{
+  "mcpServers": {
+    "rhwp": {
+      "command": "rhwp-mcp"
+    }
+  }
+}
+```
+
+(macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`. Windows:
+`%APPDATA%\Claude\claude_desktop_config.json`.) Claude Desktop 재시작 후 도구
+아이콘에 7 개 도구 노출.
+
+### 다른 클라이언트
+
+| 클라이언트 | stdio | streamable-http | 등록 방법 |
+|---|---|---|---|
+| Claude Desktop | ✅ | ❌ | `claude_desktop_config.json` (위 예시) |
+| Cline (VSCode) | ✅ | ✅ | VSCode 설정 → MCP servers |
+| Cursor | ✅ | ❌ | Settings → Features → Model Context Protocol |
+| Continue.dev | ✅ | ⚠️ (실험) | `~/.continue/config.json` |
+| Goose (Block) | ✅ | ✅ | `goose configure` |
+| 자체 에이전트 | ✅ | ✅ | Anthropic SDK 의 MCP client / fastmcp Client |
+
+### Streamable HTTP (서버 배포)
+
+서버 컨테이너 / 다중 클라이언트 시나리오는 streamable-http transport:
+
+```bash
+rhwp-mcp --transport streamable-http --port 8000
+# 외부 노출 (보안: reverse proxy + 인증 운영자 책임)
+rhwp-mcp --transport streamable-http --host 0.0.0.0 --port 8000
+```
+
+기본 `--host 127.0.0.1` — 외부 노출 회피. `rhwp-mcp` 는 인증 / TLS / sandboxing 미내장 — Caddy / Nginx 등 reverse proxy 가 책임. 자세한 사용은 `rhwp-mcp --help` 또는 [mcp.md](docs/roadmap/v0.5.0/mcp.md) 참조.
+
 ## 성능
 
 Apple M2 (8 코어) release 빌드. Parse = 파일 읽기 + 전체 파싱 + Document 생성.
