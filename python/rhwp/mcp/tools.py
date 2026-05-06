@@ -5,8 +5,9 @@
 을 강제하기 위해 모두 sync 함수로 정의 — Document 가 thread 경계를 절대 안
 넘는다. 자세한 배경은 ``docs/design/v0.5.0/mcp-research.md`` § 3.
 
-S1 — 4 개 도구 (`parse_hwp_summary` / `extract_text` / `get_ir` / `iter_blocks`).
-S2 (`to_markdown` / `to_html`), S3 (`chunks`) 는 후속 stage 에서 추가.
+- S1 — `parse_hwp_summary` / `extract_text` / `get_ir` / `iter_blocks` (코어 4)
+- S2 — `to_markdown` / `to_html` (v0.4.0 view API thin wrapper)
+- S3 — `chunks` (langchain-text-splitters extras gate, 후속 stage)
 """
 
 from typing import Any, Literal
@@ -75,6 +76,36 @@ def get_ir(path: str) -> dict[str, Any]:
     block 들이 모두 평탄화된 형태. RAG 인덱싱 또는 LLM 후처리에 그대로 입력 가능.
     """
     return rhwp.parse(path).to_ir().model_dump(mode="json")
+
+
+def to_markdown(path: str) -> str:
+    """HWP 또는 HWPX 파일을 GFM (GitHub Flavored Markdown) 문자열로 변환.
+
+    v0.4.0 view 렌더러 (``HwpDocument.to_markdown()``) 위 thin wrapper. 표는
+    모든 셀 ``span == 1`` 일 때 GFM ``|...|`` 표, 병합 셀은 ``TableBlock.html``
+    인라인 폴백. 이미지는 placeholder (``picture.image.uri`` pass-through),
+    각주/미주는 본문 끝 정의 + 본문 paragraph 안 ``[^N]`` reference. 머리글 /
+    꼬리말은 출력 미포함.
+    """
+    return rhwp.parse(path).to_ir().to_markdown()
+
+
+def to_html(path: str, *, include_css: bool = False) -> str:
+    """HWP 또는 HWPX 파일을 완전 HTML5 문서로 변환.
+
+    v0.4.0 view 렌더러 (``HwpDocument.to_html()``) 위 thin wrapper. 표는
+    ``TableBlock.html`` 그대로 inline (rowspan/colspan 보존). 이미지는
+    ``picture.image.uri`` pass-through, 수식 디스플레이는 ``<div class="math">``,
+    각주/미주는 본문 직후 ``<aside id="...">`` 정의 블록 + 본문 안 ``<sup>``
+    인용 마커. 머리글/꼬리말은 출력 미포함.
+
+    Args:
+        path: HWP 또는 HWPX 파일 경로.
+        include_css: True 면 ``<head>`` 안 embedded ``<style>`` 동봉 (브라우저
+            표시용). 기본 False — RAG 임베딩 / 텍스트 추출 사용처용. v0.4.0 view
+            API 와 동일하게 keyword-only — 호출 의미 명확화.
+    """
+    return rhwp.parse(path).to_ir().to_html(include_css=include_css)
 
 
 def iter_blocks(

@@ -1,16 +1,17 @@
-"""rhwp.mcp fastmcp 서버 단위 테스트 (S1).
+"""rhwp.mcp fastmcp 서버 단위 테스트 (S1 + S2).
 
 ``fastmcp`` (``[mcp]`` extras) 미설치 환경에서는 file-level ``importorskip`` 로
 전체 skip — CI ``test-without-extras`` 잡이 카운트 검증 (AC-1).
 
-S1 시점 인수조건 매핑:
+인수조건 매핑:
 
-- AC-2  (도구 4 개 노출)               → ``TestToolRegistry``
-- AC-3  (잘못된 enum → isError=True)   → ``TestErrorHandling::test_iter_blocks_invalid_kind``
-- AC-4  (FileNotFound → isError=True) → ``TestErrorHandling::test_extract_text_missing_file``
-- AC-5  (모든 handler sync 함수)        → ``TestSyncHandler``
-- AC-9  (pyproject 등록)                → ``TestPackagingSurface`` (entry point + extras 키 verify)
-- AC-10 (모듈 위치)                     → ``TestPackagingSurface``
+- AC-2  (도구 6 개 노출 — S1 코어 4 + S2 view 2)   → ``TestToolRegistry``
+- AC-3  (잘못된 enum → isError=True)               → ``TestErrorHandling``
+- AC-4  (FileNotFound → isError=True)              → ``TestErrorHandling``
+- AC-5  (모든 handler sync 함수)                   → ``TestSyncHandler``
+- AC-6  (view 도구가 v0.4.0 view API thin wrapper) → ``TestToMarkdown`` / ``TestToHtml``
+- AC-9  (pyproject 등록)                           → ``TestPackagingSurface``
+- AC-10 (모듈 위치)                                → ``TestPackagingSurface``
 """
 
 from pathlib import Path
@@ -36,13 +37,20 @@ pytestmark = pytest.mark.spec("v0.5.0/mcp")
 
 # ------------------------------------------------------------------ AC-2
 class TestToolRegistry:
-    """도구 등록 (S1: 4 개)."""
+    """도구 등록 (S1 코어 4 + S2 view 2 = 6 개)."""
 
     @pytest.mark.spec("v0.5.0/mcp#AC-2")
-    def test_lists_exactly_four_tools(self) -> None:
+    def test_lists_exactly_six_tools(self) -> None:
         server = build_server()
         names = {t.name for t in asyncio.run(server.list_tools())}
-        assert names == {"parse_hwp_summary", "extract_text", "get_ir", "iter_blocks"}
+        assert names == {
+            "parse_hwp_summary",
+            "extract_text",
+            "get_ir",
+            "iter_blocks",
+            "to_markdown",
+            "to_html",
+        }
 
     def test_each_tool_has_description(self) -> None:
         server = build_server()
@@ -145,6 +153,44 @@ class TestGetIr:
         assert result["schema_name"] == "HwpDocument"
         assert "schema_version" in result
         assert "body" in result
+
+
+class TestToMarkdown:
+    """AC-6 — to_markdown 가 v0.4.0 ``HwpDocument.to_markdown()`` 위 thin wrapper."""
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-6")
+    def test_matches_view_api(self, hwp_sample: Path) -> None:
+        """도구 출력이 ``HwpDocument.to_markdown()`` 직접 호출과 byte-equal."""
+        tool_output = tools.to_markdown(str(hwp_sample))
+        view_output = rhwp.parse(str(hwp_sample)).to_ir().to_markdown()
+        assert tool_output == view_output
+
+    def test_returns_non_empty_string(self, hwp_sample: Path) -> None:
+        result = tools.to_markdown(str(hwp_sample))
+        assert isinstance(result, str)
+        assert result.strip(), "to_markdown must yield non-empty markdown for fixture"
+
+
+class TestToHtml:
+    """AC-6 — to_html 가 v0.4.0 ``HwpDocument.to_html()`` 위 thin wrapper."""
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-6")
+    def test_matches_view_api_no_css(self, hwp_sample: Path) -> None:
+        """기본 ``include_css=False`` 가 ``HwpDocument.to_html()`` 와 byte-equal."""
+        tool_output = tools.to_html(str(hwp_sample))
+        view_output = rhwp.parse(str(hwp_sample)).to_ir().to_html(include_css=False)
+        assert tool_output == view_output
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-6")
+    def test_matches_view_api_with_css(self, hwp_sample: Path) -> None:
+        """``include_css=True`` 가 ``HwpDocument.to_html(include_css=True)`` 와 byte-equal."""
+        tool_output = tools.to_html(str(hwp_sample), include_css=True)
+        view_output = rhwp.parse(str(hwp_sample)).to_ir().to_html(include_css=True)
+        assert tool_output == view_output
+
+    def test_returns_html5_document(self, hwp_sample: Path) -> None:
+        result = tools.to_html(str(hwp_sample))
+        assert result.startswith("<!DOCTYPE html>") or result.lstrip().startswith("<!DOCTYPE")
 
 
 class TestIterBlocks:
