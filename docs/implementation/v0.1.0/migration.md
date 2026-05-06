@@ -2,7 +2,7 @@
 status: Frozen
 description: "v0.1.0 분사·이관 작업 로그 — 'rhwp-python-heuristic/rhwp-python/' → 'DanMeon/rhwp-python' 별도 리포 분사 + copier 템플릿 적용"
 ga: v0.1.0
-last_updated: 2026-04-23
+last_updated: 2026-05-06
 ---
 
 # 분사·이관 작업 로그
@@ -21,7 +21,7 @@ last_updated: 2026-04-23
 
 | 에이전트 | 대상 | 결과 |
 |---|---|---|
-| A | `~/Desktop/kevin/python-template` | copier 9.14.0 템플릿 구조, 변수, 조건부 파일 |
+| A | `~/path/to/python-template` | copier 9.14.0 템플릿 구조, 변수, 조건부 파일 |
 | B | `rhwp-python-heuristic/rhwp-python/` | 소스 인벤토리, Cargo/pyproject 요점, conftest 경로 |
 | C | rhwp 라이선스·저작권 | MIT, Edward Kim 원저작자, pyproject authors 병기 권장 |
 | D | 현재 `rhwp-python/` | 1 커밋 초기 상태, origin=DanMeon/rhwp-python |
@@ -29,7 +29,7 @@ last_updated: 2026-04-23
 ### 2. copier 초기화
 
 ```bash
-copier copy /Users/kevin/Desktop/kevin/python-template . \
+copier copy ~/path/to/python-template . \
   -d project_name=rhwp-python \
   -d project_description="PyO3 Python bindings for rhwp — zero-dependency HWP parser" \
   -d package_name=rhwp \

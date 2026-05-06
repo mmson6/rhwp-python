@@ -40,6 +40,9 @@ mutants/
 # * MCP
 .serena/
 
+# * Copier
+.copier-answers.yml
+
 # * Claude Code — settings.json 은 팀 공유 (hooks 등록), local override 만 ignore
 .claude/settings.local.json
 # ^ ScheduleWakeup / 백그라운드 task lock (런타임 PID/세션ID, 머신-로컬)

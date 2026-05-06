@@ -60,7 +60,7 @@ def _simple_table(para_idx: int = 1) -> TableBlock:
 
 def test_hwp_document_roundtrip():
     doc = HwpDocument(
-        metadata=DocumentMetadata(title="test", author="kevin"),
+        metadata=DocumentMetadata(title="test", author="DanMeon"),
         sections=[Section(section_idx=0), Section(section_idx=1)],
         body=[_paragraph("first"), _simple_table()],
     )
