@@ -1,4 +1,4 @@
-"""rhwp.mcp fastmcp 서버 단위 테스트 (S1 + S2 + S3).
+"""rhwp.mcp fastmcp 서버 단위 테스트 (S1 + S2 + S3 + S4).
 
 ``fastmcp`` (``[mcp]`` extras) 미설치 환경에서는 file-level ``importorskip`` 로
 전체 skip — CI ``test-without-extras`` 잡이 카운트 검증 (AC-1).
@@ -15,6 +15,7 @@ chunks smoke 만 개별 skip (file-level skip 카운트 영향 없음).
 - AC-5  (모든 handler sync 함수)                              → ``TestSyncHandler``
 - AC-6  (view 도구가 v0.4.0 view API thin wrapper)            → ``TestToMarkdown`` / ``TestToHtml``
 - AC-7  (chunks extras-gate 런타임 + 다른 도구 영향 없음)     → ``TestChunks``
+- AC-8  (--transport streamable-http --port N CLI 기동)       → ``TestTransportCli``
 - AC-9  (pyproject 등록)                                      → ``TestPackagingSurface``
 - AC-10 (모듈 위치)                                           → ``TestPackagingSurface``
 """
@@ -362,6 +363,215 @@ class TestErrorHandling:
         server = build_server()
         with pytest.raises(NotFoundError, match="(?i)unknown tool"):
             asyncio.run(server.call_tool("does_not_exist", {}))
+
+
+# ------------------------------------------------------------------ AC-8
+class TestTransportCli:
+    """``rhwp-mcp`` CLI 의 transport / host / port 옵션 — argparse + dispatch.
+
+    실제 stdio JSON-RPC 또는 uvicorn ASGI 기동은 blocking 이라 ``slow`` 마커가
+    필요한 별도 통합 smoke 테스트로 분리. 본 클래스는 argparse 와 ``server.run``
+    로의 dispatch 호출 인자를 mock 으로 검증해 빠르게 회귀 검출.
+    """
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_argparse_default_transport_stdio(self) -> None:
+        """인자 없으면 ``transport="stdio"`` 가 기본값."""
+        from rhwp.mcp.server import _build_arg_parser
+
+        args = _build_arg_parser().parse_args([])
+        assert args.transport == "stdio"
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_argparse_streamable_http_with_port(self) -> None:
+        from rhwp.mcp.server import _build_arg_parser
+
+        args = _build_arg_parser().parse_args(["--transport", "streamable-http", "--port", "9000"])
+        assert args.transport == "streamable-http"
+        assert args.port == 9000
+        assert args.host == "127.0.0.1", "기본 host 는 localhost (외부 노출 회피)"
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_argparse_custom_host(self) -> None:
+        from rhwp.mcp.server import _build_arg_parser
+
+        args = _build_arg_parser().parse_args(
+            ["--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8080"]
+        )
+        assert args.host == "0.0.0.0"
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_argparse_invalid_transport_exits(self) -> None:
+        """argparse choices 가 미허용 transport 를 SystemExit(2) 로 차단."""
+        from rhwp.mcp.server import _build_arg_parser
+
+        with pytest.raises(SystemExit):
+            _build_arg_parser().parse_args(["--transport", "websocket"])
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_argparse_port_out_of_range_exits(self) -> None:
+        """port 가 [1, 65535] 범위 밖이면 argparse 단계에서 차단 (fail-fast)."""
+        from rhwp.mcp.server import _build_arg_parser
+
+        for invalid in ["0", "65536", "99999", "-1", "abc"]:
+            with pytest.raises(SystemExit):
+                _build_arg_parser().parse_args(
+                    ["--transport", "streamable-http", "--port", invalid]
+                )
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_run_stdio_with_non_default_host_exits(self) -> None:
+        """stdio + 명시적 ``--host`` 는 사용자 의도 모호 — SystemExit (보안 사고 회피)."""
+        from rhwp.mcp import server as server_mod
+
+        with pytest.raises(SystemExit):
+            server_mod.run(["--host", "0.0.0.0"])
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_run_stdio_with_non_default_port_exits(self) -> None:
+        """stdio + 명시적 ``--port`` 도 SystemExit (silent ignore 회피)."""
+        from rhwp.mcp import server as server_mod
+
+        with pytest.raises(SystemExit):
+            server_mod.run(["--port", "9000"])
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_run_dispatch_stdio(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """``run([])`` 가 ``server.run()`` (stdio, 인자 없음) 호출."""
+        from fastmcp import FastMCP
+        from rhwp.mcp import server as server_mod
+
+        captured: dict[str, object] = {}
+
+        def fake_run(self: FastMCP, *args: object, **kwargs: object) -> None:
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+
+        monkeypatch.setattr(FastMCP, "run", fake_run)
+        server_mod.run([])
+        assert captured["args"] == ()
+        assert captured["kwargs"] == {}
+
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_run_dispatch_streamable_http(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """``run(["--transport", "streamable-http", ...])`` → ``server.run(transport=...)``."""
+        from fastmcp import FastMCP
+        from rhwp.mcp import server as server_mod
+
+        captured: dict[str, object] = {}
+
+        def fake_run(self: FastMCP, *args: object, **kwargs: object) -> None:
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+
+        monkeypatch.setattr(FastMCP, "run", fake_run)
+        server_mod.run(["--transport", "streamable-http", "--host", "127.0.0.1", "--port", "9001"])
+        # ^ 명시적 host / port 가 server.run kwargs 로 전달
+        assert captured["kwargs"] == {
+            "transport": "streamable-http",
+            "host": "127.0.0.1",
+            "port": 9001,
+        }
+
+    @pytest.mark.slow
+    @pytest.mark.spec("v0.5.0/mcp#AC-8")
+    def test_streamable_http_real_round_trip(self) -> None:
+        """실제 ``rhwp-mcp --transport streamable-http`` subprocess 기동 후 MCP 핸드셰이크.
+
+        ``slow`` 마커 — 매 PR 에는 미실행, ``test-slow`` 잡에서만 실행 (mcp.md § CI).
+        uvicorn ASGI 가 실제로 listen 하고 fastmcp Client 가 streamable-http 로
+        ``initialize`` + ``list_tools`` round-trip 을 성공함을 검증.
+
+        AC-8 의 invariant 는 "round-trip 성공" 이지 "도구 카운트 정확 매칭" 이 아님 —
+        7-도구 set equality 대신 sentinel 검증 (S1+ 도구 추가/제거 회귀에서 본 테스트
+        깨지지 않음). 도구 카운트는 AC-2 책임 (별도 테스트).
+        """
+        import asyncio
+        import socket
+        import subprocess
+        import sys
+        import time
+
+        # ^ TOCTOU port race 완화: bind 0 / close / subprocess bind 사이 race 가능 —
+        #   3 회 retry 로 병렬 CI / heavy load 환경의 flake 방어.
+        last_error: BaseException | None = None
+        for attempt in range(3):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(("127.0.0.1", 0))
+                port = s.getsockname()[1]
+
+            proc = subprocess.Popen(
+                [
+                    sys.executable,
+                    "-m",
+                    "rhwp.mcp",
+                    "--transport",
+                    "streamable-http",
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    str(port),
+                ],
+                # ^ stderr capture — listen 실패 시 uvicorn 진단 메시지를 AssertionError 에 surface
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+            try:
+                # ^ uvicorn 기동 대기 — port listen 될 때까지 polling (max 10s)
+                deadline = time.monotonic() + 10
+                listening = False
+                while time.monotonic() < deadline:
+                    if proc.poll() is not None:
+                        # ^ subprocess 가 일찍 죽음 — port collision / import error 등.
+                        #   stderr 캡처를 AssertionError 에 surface 후 다음 retry.
+                        stderr_bytes = proc.stderr.read() if proc.stderr else b""
+                        stderr_text = stderr_bytes.decode(errors="replace")
+                        last_error = AssertionError(
+                            f"rhwp-mcp subprocess exited early "
+                            f"(returncode={proc.returncode}, port={port}, "
+                            f"attempt={attempt + 1}/3). stderr:\n{stderr_text}"
+                        )
+                        break
+                    try:
+                        with socket.create_connection(("127.0.0.1", port), timeout=0.5):
+                            listening = True
+                            break
+                    except OSError:
+                        time.sleep(0.1)
+                if not listening:
+                    if last_error is None:
+                        last_error = AssertionError(
+                            f"rhwp-mcp did not listen on port {port} "
+                            f"within deadline (attempt {attempt + 1}/3)"
+                        )
+                    continue
+
+                from fastmcp.client import Client
+
+                async def round_trip(p: int = port) -> set[str]:
+                    async with Client(f"http://127.0.0.1:{p}/mcp/") as client:
+                        tools_list = await client.list_tools()
+                        return {t.name for t in tools_list}
+
+                names = asyncio.run(round_trip())
+                # ^ AC-8 sentinel 검증 — round-trip 성공 + 핵심 도구 노출 확인.
+                #   S2/S3 도구 추가 / 미래 도구 변경에서 본 테스트가 회귀 신호로 작동
+                #   하지 않게 sentinel 만 본다 (도구 카운트 정확 매칭은 AC-2 책임).
+                assert "extract_text" in names
+                assert "iter_blocks" in names
+                assert len(names) >= 7, f"expected at least 7 tools registered, got {names}"
+                return  # ^ 성공 — retry 종료
+            finally:
+                proc.terminate()
+                try:
+                    proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait()
+
+        # ^ 3 회 retry 모두 실패 — 마지막 에러 surface.
+        assert last_error is not None
+        raise last_error
 
 
 # ------------------------------------------------------------------ AC-9 / AC-10
