@@ -47,7 +47,7 @@ PATCH release. 단일 세션 규모로 단일 `migration.md` 채택 (CONVENTIONS
 
 | 파일 | 변경 |
 |---|---|
-| [tests/test_v0_3_1_marker_char_offset.py](../../../tests/test_v0_3_1_marker_char_offset.py) | 신규. AC-1 ~ AC-14 회귀 가드 (mapper 단위 + real fixture 통합) |
+| [tests/test_ir_marker_char_offset.py](../../../tests/test_ir_marker_char_offset.py) | 신규. AC-1 ~ AC-14 회귀 가드 (mapper 단위 + real fixture 통합). 파일명: 본 스펙 GA 시점 `test_v0_3_1_marker_char_offset.py` 로 작성, 후속 v0.5.0 에서 `test_ir_*` 패턴 통일 위해 rename (broken-link 보정, lifecycle 은 `pytest.mark.spec("v0.3.1/...")` marker 가 보유) |
 | `tests/test_ir_caption.py` / `test_ir_field.py` / `test_ir_footnote.py` / `test_ir_formula.py` / `test_ir_furniture.py` / `test_ir_mapper.py` / `test_ir_picture.py` / `test_ir_schema_export.py` / `test_ir_toc.py` | 기존 v0.3.0 테스트의 raw struct 생성자에 신규 `char_offset` / `marker_char_offset` 필드 추가 (Pydantic strict — 명시 필요). 일부 파일에 `pytest.mark.spec("v0.3.1/ir-marker-char-offset")` marker 추가 (trace report 매핑) |
 
 ### 메타
@@ -56,7 +56,7 @@ PATCH release. 단일 세션 규모로 단일 `migration.md` 채택 (CONVENTIONS
 |---|---|
 | [Cargo.toml](../../../Cargo.toml) | `version = "0.3.0"` → `"0.3.1"` (Cargo.toml 이 SSOT — `pyproject.toml` 의 `dynamic = ["version"]` 가 여기를 읽음) |
 | [CHANGELOG.md](../../../CHANGELOG.md) | `[0.3.1] — 2026-05-02` 섹션 신설 (Fixed / Build / Known limitations) |
-| [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) | pyright scope list 에 `tests/test_v0_3_1_marker_char_offset.py` 추가 |
+| [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) | pyright scope list 에 `tests/test_ir_marker_char_offset.py` 추가 |
 | [docs/traces/coverage.md](../../../docs/traces/coverage.md) | trace report 자동 갱신 — v0.3.1 spec 의 22개 테스트 매핑 (AC-1 ~ AC-14 + 파일 레벨 marker) |
 
 ## 2. 호환성
@@ -77,7 +77,7 @@ PATCH release. 단일 세션 규모로 단일 `migration.md` 채택 (CONVENTIONS
 |---|---|
 | `cargo clippy --all-targets -- -D warnings` | clean |
 | `uv run pytest -m "not slow"` (전체) | 246 passed, 2 skipped (`test_ir_footnote.py:345` 의 미주 케이스 + `test_ir_formula.py:310` 의 수식 케이스 — `aift.hwp` 샘플에 해당 컨트롤 부재. 합성 fixture 미도입 결정 = AC-14) |
-| `uv run pytest tests/test_v0_3_1_marker_char_offset.py -v` | 22 passed (AC-1 ~ AC-14 회귀 가드 전부 그린) |
+| `uv run pytest tests/test_ir_marker_char_offset.py -v` | 22 passed (AC-1 ~ AC-14 회귀 가드 전부 그린) |
 | Real fixture e2e (`aift.hwp`) | TableBlock 96 (5 populated, 91 None) / PictureBlock 14 (1 populated, 13 None) / FieldBlock 4 (4 populated, 0 None) / FootnoteBlock 1 (1 populated, char_start=333) — 모든 populated 케이스 `char_start == char_end` invariant 준수 |
 | Real fixture e2e (`table-vpos-01.hwpx`) | TableBlock 11 / PictureBlock 4 모두 `None` 폴백 (HWPX 샘플은 char_offsets 빈 paragraph 비율 더 높음). FieldBlock 1 populated. 폴백 경로 회귀 가드로서 의미 큼 |
 | Cargo 빌드 | `maturin develop --release` 성공. abi3-py310 wheel 단일 산출물 (Python 3.10–3.13+ 커버) 유지 |

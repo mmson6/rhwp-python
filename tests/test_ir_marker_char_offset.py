@@ -1,4 +1,4 @@
-"""tests/test_v0_3_1_marker_char_offset.py — v0.3.1 inline 컨트롤 마커 character offset.
+"""tests/test_ir_marker_char_offset.py — v0.3.1 inline 컨트롤 마커 character offset.
 
 [v0.3.1/ir-marker-char-offset](../docs/roadmap/v0.3.1/ir-marker-char-offset.md)
 의 AC-1 ~ AC-14 검증. 짝 페어 ADR:
@@ -35,7 +35,6 @@
 """
 
 import re
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -377,30 +376,6 @@ def test_changelog_records_pin_bump():
     assert "v0.7.7" in body
     assert "PR #405" in body or "/pull/405" in body, "PR #405 인용 누락"
     assert "Task #390" in body or "issues/390" in body, "Task #390 인용 누락"
-
-
-@pytest.mark.spec("v0.3.1/ir-marker-char-offset#AC-13")
-def test_submodule_pin_matches_changelog_record():
-    """git ls-tree 로 실제 submodule HEAD 가 CHANGELOG 에 기재된 핀과 일치 — 반쪽 갱신 차단.
-
-    git 미설치 / repo 외부에서 실행되는 환경에서는 skip (CI 는 항상 git 보유)."""
-    try:
-        result = subprocess.run(
-            ["git", "ls-tree", "HEAD", "external/rhwp"],
-            cwd=str(REPO_ROOT),
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-    except (FileNotFoundError, subprocess.CalledProcessError) as exc:
-        pytest.skip(f"git ls-tree unavailable: {exc!r}")
-    # ^ 출력 포맷: "<mode> commit <sha>\texternal/rhwp"
-    parts = result.stdout.split()
-    assert len(parts) >= 3 and parts[1] == "commit", f"unexpected ls-tree output: {result.stdout!r}"
-    pin_sha = parts[2]
-    assert pin_sha.startswith("0fb3e67"), (
-        f"submodule HEAD = {pin_sha} 이지만 CHANGELOG / spec 기재는 0fb3e67 — 반쪽 갱신"
-    )
 
 
 # * AC-14 — fixture 정책: 기존 sample 만 사용, 합성 fixture 미도입

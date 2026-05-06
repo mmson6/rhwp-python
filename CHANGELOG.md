@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 본 PR 의 a/b/c 결정 비교 + 14개 결정 historical record 는 [docs/implementation/spec-system-overhaul.md](docs/implementation/spec-system-overhaul.md) (Frozen) 가 보유.
 - spec body 구조 SSOT 정착 — `/new-spec` skill 안 `templates/spec.md` + `templates/adr.md` 신설 (skeleton + 섹션별 룰 보유, body 구조 SSOT). `docs/CONVENTIONS.md` 에 § Spec / ADR 본문 구조 (짧은 pointer) + § 섹션 역할 분리 — 정보 배치 룩업 (spec ↔ ADR ↔ CHANGELOG ↔ implementation log 의 cross-cutting 표) 신설. SKILL.md step 2/4/5 가 두 template 파일을 markdown 링크로 자연 참조 (공식 Claude Code skill 패턴 — 명령형). multi-template `templates/` sub-dir 은 Anthropic 공식 docs 의 `examples/` / `scripts/` 카테고리 sub-dir 패턴 + GitHub ISSUE_TEMPLATE 선례 follow.
 
+### Build
+
+- `external/rhwp` submodule pin `0fb3e67` (post-v0.7.8) → `62a458a` (v0.7.10). 상류 v0.7.10 GA 흡수 — 외부 기여자 PR 머지 + AI 파이프라인 / VLM 연동 + CLI 바이너리 릴리즈 파이프라인 + macOS cross-compile fix (Issue #612). 본 binding 관점 변경 0 — 공개 API / IR schema (`"1.1"`) / wheel 의존성 모두 동일, `cargo build --release` 통과로 시그니처 호환 직접 검증.
+- 부수 — `test_submodule_pin_matches_changelog_record` 제거 ([tests/test_ir_marker_char_offset.py](tests/test_ir_marker_char_offset.py)). 본래 v0.3.1 의 *deliberate* pin bump (v0.7.7 → 0fb3e67) 가 release-readiness 시점 기재됐는지 가드한 일회성 AC-13 의 일부였으나, GA shipped 후에도 영구 runtime 가드로 잔존해 일상 sync 마다 CHANGELOG 갱신을 강제하는 anti-pattern (1회성 release-gating AC 의 영구 테스트화 + 문서 텍스트 매칭 runtime test) 화. CHANGELOG 갱신은 릴리즈 시점 의무 (`publish.yml::verify-version` 로 version 일치 가드, 사람 review 가 핀 bump 정합성 점검) 로 이양. AC-13 의 historical record 검증은 동 파일 `test_changelog_records_pin_bump` (Frozen v0.3.1 섹션 텍스트 회귀 가드) 가 그대로 유지.
+- 부수 — 동 파일 이름 `test_v0_3_1_marker_char_offset.py` → `test_ir_marker_char_offset.py` (`test_ir_*` 패턴 통일, 본 spec lifecycle 은 `pytest.mark.spec("v0.3.1/...")` marker 가 보유).
+
 ## [0.4.0] — 2026-05-05
 
 MINOR release. Document IR (`HwpDocument`) → Markdown / HTML view 변환 표면을 추가한다. v0.7.0 MCP server (`to_markdown` / `to_html` 도구) + 후속 RAG 프레임워크 통합 (v0.5 LlamaIndex / v0.6 Haystack) 의 *문자열 출력* 1차 인터페이스로 사용. Pure-stdlib 구현 — 신규 의존성 0, schema (`"1.1"`) / 파싱 경로 / `Document` wrapper / extras 모두 변경 없음 (additive only).
