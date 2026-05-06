@@ -12,7 +12,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 - **v0.3.1** — Frozen, inline 컨트롤 마커 char offset 출고 GA (2026-05-03)
 - **v0.3.2** — Frozen, UTF-16 → codepoint 변환 SSOT 단일화 GA (2026-05-03)
 - **v0.4.0** — Frozen, IR view 렌더러 (Markdown / HTML) GA (2026-05-05)
-- **v0.5.0+** — 미착수, Phase 3 후속 (RAG 프레임워크 통합)
+- **v0.5.0+** — 미착수 (주제 미정, demand-driven)
 
 ## 활성 spec 인덱스
 
@@ -33,34 +33,15 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 
 본 섹션은 결정 미정 narrative — `vX.Y.Z` 디렉토리가 아직 없는 minor 들의 의도/스코프. 작업 시점이 가까워지면 `/new-spec <version> <topic>` 으로 정식 spec 으로 promote.
 
-### v0.5.0 ~ v0.6.0 — RAG 프레임워크 통합
+### v0.5.0+ — 미정 (demand-driven)
 
-선행 조건: v0.4.0 view 렌더러 GA. v0.2.0/v0.3.0 IR + v0.4.0 view 표면 이 안정화된 후 LangChain 외 RAG 프레임워크 (LlamaIndex / Haystack) 와 통합한다.
+v0.4.0 view 렌더러 GA 후 다음 minor 들. 주제 미정 — v0.3.0 LangChain integration 이 RAG 사용처 분모를 이미 커버하는 상황에서 추가 RAG 프레임워크 통합은 **demand-driven 으로 보류** (HWP × 비-LangChain RAG 교집합이 좁을 가능성). 구체화되면 `/new-spec <version> <topic>` 으로 promote.
 
-> v0.4.0 view 렌더러 (Markdown / HTML) 은 GA 완료 — [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md) 가 SSOT. 본 섹션은 후속 minor 들의 미착수 narrative.
-
-**v0.5.0 — LlamaIndex 통합**
-
-- `rhwp.integrations.llamaindex.HwpReader` (LlamaIndex `BaseReader` 구현)
-  - `load_data()` / `lazy_load_data()` 동기 + async
-  - IR → `Document`/`TextNode` 변환, `parent_id`/`prev`/`next` 링크 보존
-  - 섹션·단락을 `NodeRelationship.PARENT/CHILD` 로 표현 → `AutoMergingRetriever` 호환
-
-미확정 이슈:
-- **LlamaIndex 가 IR 스키마를 그대로 소비 가능한가** — 현재 LlamaIndex `BaseNode` 는 자유형 `metadata: dict`. 완전 호환은 불가 (IR 의 Pydantic 타입 손실). 변환 레이어 필수 — 메타데이터에 `rhwp.ir.json` 키로 원본 IR 직렬화 보존하여 라운드트립 가능하게 설계
-
-**v0.6.0 — Haystack 통합 + LangChain IR 활용**
-
-- `rhwp.integrations.haystack.HwpConverter` (Haystack 2.x `Converter`) — **커뮤니티 수요 확인 후**
-  - Haystack `Document` 로 변환, `meta` 에 섹션 경계 힌트 저장
-- LangChain 로더의 IR 직접 활용 (breadcrumb 자동 삽입 등 Anthropic Contextual Retrieval 스타일)
-
-미확정 이슈:
-- **Contextual Retrieval 자동 지원 여부** — Anthropic 기법은 LLM 호출 비용 유발. rhwp-python 이 이를 내장하면 비용이 사용자에게 불투명 → **미내장**. 대신 `doc.breadcrumb(node_id)` 헬퍼로 사용자가 수동 결합 가능하게 설계
+> v0.4.0 view 렌더러 (Markdown / HTML) 은 GA 완료 — [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md) 가 SSOT.
 
 ### v0.8.0 ~ v1.0.0 — JSON IR → HWP 역생성
 
-선행 조건: v0.6.0 까지 GA + v0.7.0 MCP server 안정 + rhwp Rust 코어의 HWP writer API 안정.
+선행 조건: v0.5.0+ minor 들 GA + v0.7.0 MCP server 안정 + rhwp Rust 코어의 HWP writer API 안정.
 
 IR 을 축으로 한 양방향 변환 — 사용자가 IR 을 편집해 새 HWP/HWPX 를 생성할 수 있게 함. 본 라인은 rhwp **Rust 코어의 쓰기 API 성숙도** 에 좌우됨. 업스트림 [edwardkim/rhwp](https://github.com/edwardkim/rhwp) 가 HWP writer 를 안정화해야 진행 가능. 시작 전 업스트림 상태 재평가 + 필요 시 writer PR 기여로 진입.
 

@@ -23,7 +23,7 @@ Project-specific instructions. Inherits all rules from `~/.claude/CLAUDE.md` (gl
 - `abi3-py310` feature: **one wheel covers 3.10–3.13+**. Don't bind to Python version-specific C API
 
 ### Async direction
-- Python-surface APIs for I/O and integrations are **async-first**: when adding LangChain / LlamaIndex / Haystack loaders, implement `aload` / `alazy_load` / async counterparts alongside sync versions
+- Python-surface APIs for I/O and integrations are **async-first**: when adding LangChain (or future RAG framework) loaders, implement `aload` / `alazy_load` / async counterparts alongside sync versions
 - **Forbidden pattern**: `asyncio.to_thread(rhwp.parse, path)` — `_Document` is unsendable (see Rust+Python hybrid build note above), the returned Document panics on main-thread access. `async fn` in `#[pymethods]` is also incompatible (PyO3 requires `Send + 'static` futures)
 - **Supported async pattern**: `aparse(path)` uses stdlib `asyncio.to_thread` to offload the file read to a thread pool, then calls `Document.from_bytes(data)` on the event-loop thread. Document never crosses a thread boundary. No external dependency — Python `asyncio` lacks native async file I/O so all async file libs (aiofiles etc.) wrap thread pools anyway; stdlib achieves the same effect with zero install footprint
 - **Document instance-level async methods (`doc.ato_ir()` etc.) are NOT provided** — they would require thread offload which unsendable forbids. For async code, `await rhwp.aparse(path)` once, then call sync methods on the Document directly (these are fast, in-memory, GIL-holding operations)

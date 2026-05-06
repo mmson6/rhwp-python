@@ -2,7 +2,7 @@
 status: Draft
 description: "v0.7.0 — 'rhwp-mcp' MCP 서버. LLM 에이전트가 HWP/HWPX 직접 파싱·요약·청크화 가능한 표준 프로토콜 표면"
 target: v0.7.0
-last_updated: 2026-04-30
+last_updated: 2026-05-06
 ---
 
 # v0.7.0 — MCP server (`rhwp-mcp`)
@@ -13,13 +13,13 @@ last_updated: 2026-04-30
 
 ## 배경 — phase 무관 단발 통합
 
-MCP 는 RAG 프레임워크 (LangChain / LlamaIndex / Haystack) 가 아니라 **LLM 에이전트 프로토콜** — Phase 3 의 "RAG 프레임워크 통합" 카테고리와는 도메인이 다르다. Phase 4 (IR → HWP 역생성) 와도 무관 (readonly). 따라서 **phase 소속 없이 독립 spec** 으로 진행한다 — 활성 spec 인덱스 ([roadmap/README.md](../README.md)) 가 SSOT.
+MCP 는 RAG 프레임워크 (LangChain 등) 가 아니라 **LLM 에이전트 프로토콜** — Phase 3 의 "RAG 프레임워크 통합" 카테고리와는 도메인이 다르다. Phase 4 (IR → HWP 역생성) 와도 무관 (readonly). 따라서 **phase 소속 없이 독립 spec** 으로 진행한다 — 활성 spec 인덱스 ([roadmap/README.md](../README.md)) 가 SSOT.
 
 v0.7.0 시점이 sweet spot 인 이유:
 
-- **노출할 도구가 풍부**: parse + IR (v0.2~0.3 GA) + view (v0.4 GA) + LangChain chunks (v0.3 GA) + LlamaIndex node (v0.5 GA) + Haystack converter (v0.6 GA) — Phase 3 통합 wave 종료 후라 MCP tool surface 가 유의미한 기능을 모두 묶어낼 수 있음
+- **노출할 도구가 풍부**: parse + IR (v0.2~0.3 GA) + view (v0.4 GA) + LangChain chunks (v0.3 GA) — IR / view / chunks 표면이 모두 안정화되어 MCP tool surface 가 유의미한 기능을 묶어낼 수 있음
 - **외부 의존성 0**: HWP writer API 안정에 좌우되는 작업 (IR → HWP 역생성, [roadmap/README.md § v0.8.0 ~ v1.0.0](../README.md)) 은 rhwp Rust 코어 일정에 좌우되어 유동적 — "시작 전 업스트림 상태 재평가" 명시. MCP 는 readonly 라 외부 의존 없어 v0.7.0 슬롯의 안정 채움 역할
-- **통합 패턴 정착**: LangChain (v0.3) → LlamaIndex (v0.5) → Haystack (v0.6) 세 통합으로 `python/rhwp/integrations/<framework>.py` + 옵셔널 extras 패턴이 완전 정립된 이후 — MCP 도 동일 패턴 답습
+- **통합 패턴 정착**: v0.3.0 LangChain integration 으로 `python/rhwp/integrations/<framework>.py` + 옵셔널 extras 패턴이 정립된 이후 — MCP 도 동일 패턴 답습
 
 ## 목표와 비목표
 
