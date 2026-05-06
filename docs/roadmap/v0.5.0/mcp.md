@@ -1,29 +1,29 @@
 ---
 status: Draft
-description: "v0.7.0 — 'rhwp-mcp' MCP 서버. LLM 에이전트가 HWP/HWPX 직접 파싱·요약·청크화 가능한 표준 프로토콜 표면"
-target: v0.7.0
+description: "v0.5.0 — 'rhwp-mcp' MCP 서버. LLM 에이전트가 HWP/HWPX 직접 파싱·요약·청크화 가능한 표준 프로토콜 표면"
+target: v0.5.0
 last_updated: 2026-05-06
 ---
 
-# v0.7.0 — MCP server (`rhwp-mcp`)
+# v0.5.0 — MCP server (`rhwp-mcp`)
 
 [Model Context Protocol](https://modelcontextprotocol.io/) (Anthropic, 2024) 기반의 MCP 서버를 새 entry point `rhwp-mcp` 로 노출한다. LLM 에이전트 (Claude Desktop / IDE 통합 / 자체 에이전트) 가 HWP/HWPX 파일을 직접 파싱·요약·청크화할 수 있도록 표준 프로토콜 표면을 제공한다.
 
-주요 결정 (SDK 채택 / transport 우선순위 / 동시성 모델 / 도구 분할 / 인증·sandboxing 정책) 의 업계 선례·대안·실패 시나리오는 짝 페어: [mcp-research.md](../../design/v0.7.0/mcp-research.md).
+주요 결정 (SDK 채택 / transport 우선순위 / 동시성 모델 / 도구 분할 / 인증·sandboxing 정책) 의 업계 선례·대안·실패 시나리오는 짝 페어: [mcp-research.md](../../design/v0.5.0/mcp-research.md).
 
 ## 배경 — phase 무관 단발 통합
 
 MCP 는 RAG 프레임워크 (LangChain 등) 가 아니라 **LLM 에이전트 프로토콜** — Phase 3 의 "RAG 프레임워크 통합" 카테고리와는 도메인이 다르다. Phase 4 (IR → HWP 역생성) 와도 무관 (readonly). 따라서 **phase 소속 없이 독립 spec** 으로 진행한다 — 활성 spec 인덱스 ([roadmap/README.md](../README.md)) 가 SSOT.
 
-v0.7.0 시점이 sweet spot 인 이유:
+v0.5.0 시점이 sweet spot 인 이유:
 
 - **노출할 도구가 풍부**: parse + IR (v0.2~0.3 GA) + view (v0.4 GA) + LangChain chunks (v0.3 GA) — IR / view / chunks 표면이 모두 안정화되어 MCP tool surface 가 유의미한 기능을 묶어낼 수 있음
-- **외부 의존성 0**: HWP writer API 안정에 좌우되는 작업 (IR → HWP 역생성, [roadmap/README.md § v0.8.0 ~ v1.0.0](../README.md)) 은 rhwp Rust 코어 일정에 좌우되어 유동적 — "시작 전 업스트림 상태 재평가" 명시. MCP 는 readonly 라 외부 의존 없어 v0.7.0 슬롯의 안정 채움 역할
-- **통합 패턴 정착**: v0.3.0 LangChain integration 으로 `python/rhwp/integrations/<framework>.py` + 옵셔널 extras 패턴이 정립된 이후 — MCP 도 동일 패턴 답습
+- **외부 의존성 0**: HWP writer API 안정에 좌우되는 작업 (IR → HWP 역생성, [roadmap/README.md § v0.8.0 ~ v1.0.0](../README.md)) 은 rhwp Rust 코어 일정에 좌우되어 유동적 — "시작 전 업스트림 상태 재평가" 명시. MCP 는 readonly 라 외부 의존 없어 v0.5.0 슬롯의 안정 채움 역할
+- **통합 패턴 정착**: v0.3.0 LangChain integration 으로 `python/rhwp/integrations/<framework>.py` + 옵셔널 extras 패턴이 정립된 이후 — MCP 도 동일 패턴 답습. Phase 3 후속 RAG 프레임워크 통합 (LlamaIndex / Haystack 등) 은 demand-driven 으로 보류 ([roadmap/README.md § 미착수 작업 계획](../README.md)) — MCP 가 다음 surface 확장의 우선순위가 됨
 
 ## 목표와 비목표
 
-### v0.7.0 목표
+### v0.5.0 목표
 
 1. **표준 MCP 서버 entry point**: `rhwp-mcp` 명령으로 stdio/streamable-http transport 기동
 2. **읽기 전용 도구 노출**: `parse_hwp_summary` / `extract_text` / `get_ir` / `iter_blocks` / `to_markdown` / `to_html` / `chunks`
@@ -31,7 +31,7 @@ v0.7.0 시점이 sweet spot 인 이유:
 4. **`unsendable` 안전 보장**: sync handler 안에서 parse → consume → primitive 반환 — Document 가 thread 경계를 안 넘는 패턴 강제
 5. **Claude Desktop 즉시 사용 가능**: README 에 `claude_desktop_config.json` 등록 예제 포함
 
-### 비목표 (v0.7.0)
+### 비목표 (v0.5.0)
 
 - **쓰기 도구** (HWP/HWPX 생성·수정) — Phase 4 (역생성) 의존. Phase 4 GA 후 별도 spec
 - **파일 업로드 / blob storage** — MCP `Resource` 추상에는 적합하나 file path 노출만으로 1차 충분. 업로드는 v0.8.0+ 재평가
@@ -188,10 +188,10 @@ python/rhwp/mcp/
 
 | # | 이슈 | 결정 | 근거 |
 |---|---|---|---|
-| 1 | SDK | 공식 `mcp` Python SDK (FastMCP) | 1st-party 유지·MCP spec 추종 보장. 직접 구현은 spec 변동 흡수 부담 — 상세: [mcp-research § 1](../../design/v0.7.0/mcp-research.md#1-sdk-선택) |
+| 1 | SDK | 공식 `mcp` Python SDK (FastMCP) | 1st-party 유지·MCP spec 추종 보장. 직접 구현은 spec 변동 흡수 부담 — 상세: [mcp-research § 1](../../design/v0.5.0/mcp-research.md#1-sdk-선택) |
 | 2 | Transport 우선순위 | stdio 기본 + streamable-http 옵션 | Claude Desktop 호환 + ASGI 배포 시나리오 양쪽 커버. SSE 단독은 비범위 |
-| 3 | Handler sync/async | **sync 강제** | `unsendable` Document 의 thread-safety. async + to_thread 는 panic — 상세: [mcp-research § 3](../../design/v0.7.0/mcp-research.md#3-handler-동시성-모델) |
-| 4 | 도구 분할 | 작은 도구 7개 (단일 통합 도구 X) | LLM 이 의도별로 명확히 호출 가능. 단일 도구 + `operation` 파라미터는 schema 가 모호 — 상세: [mcp-research § 4](../../design/v0.7.0/mcp-research.md#4-도구-분할-vs-통합) |
+| 3 | Handler sync/async | **sync 강제** | `unsendable` Document 의 thread-safety. async + to_thread 는 panic — 상세: [mcp-research § 3](../../design/v0.5.0/mcp-research.md#3-handler-동시성-모델) |
+| 4 | 도구 분할 | 작은 도구 7개 (단일 통합 도구 X) | LLM 이 의도별로 명확히 호출 가능. 단일 도구 + `operation` 파라미터는 schema 가 모호 — 상세: [mcp-research § 4](../../design/v0.5.0/mcp-research.md#4-도구-분할-vs-통합) |
 | 5 | 인증 / sandboxing | 미내장 (운영자 책임) | stdio = OS 권한 / streamable-http = reverse proxy. 라이브러리 레이어가 보안 책임지면 부분적 보호로 오해 유발 |
 | 6 | extras 명명 | `[mcp]` / `[mcp-chunks]` | CLI extras (`[cli]` / `[cli-chunks]`) 와 일관 패턴 |
 | 7 | 모듈 위치 | `python/rhwp/mcp/` (top-level) | entry point + lifecycle 보유 — `integrations/` (passive) 와 성격 다름. CLI 와 같은 위계 |
@@ -214,7 +214,7 @@ python/rhwp/mcp/
 
 - **`get_ir` 의 출력 크기** — 큰 문서는 IR JSON 이 수 MB. MCP `tools/call` 응답 한도 (클라이언트 별 상이) 와 충돌 가능. **검토**: `--max-bytes` 파라미터 추가 vs `Resource` 추상으로 재노출 (`hwp://path/ir`)
 - **에러 응답 형식** — `FileNotFoundError` / `ParseError` / `ExtrasNotInstalledError` 를 MCP `CallToolResult.isError=True` + `content[0].text` 로 통일할지, 또는 MCP `errors.MCPError` 표준 사용할지
-- **Resource 추상 사용 여부** — MCP `Resource` 는 "URL 기반 데이터 노출" 추상. 파일 path 를 `hwp://` URI 로 노출하면 클라이언트가 도구 호출 없이 직접 fetch 가능. v0.7.0 1차는 도구 7개만, Resource 는 v0.8.0+ 평가
+- **Resource 추상 사용 여부** — MCP `Resource` 는 "URL 기반 데이터 노출" 추상. 파일 path 를 `hwp://` URI 로 노출하면 클라이언트가 도구 호출 없이 직접 fetch 가능. v0.5.0 1차는 도구 7개만 — Resource 는 차기 minor 의 MCP 확장 spec 에서 평가
 - **Prompt 추상 사용 여부** — MCP `Prompt` 는 "재사용 가능한 LLM prompt template". HWP 문서를 Markdown 으로 변환 후 요약하는 prompt 템플릿 등을 노출하면 가치 있을 수 있으나 라이브러리 책임 범위 모호
 - **Claude Desktop 외 호환성 검증** — Cline / Continue.dev / Cursor / Goose 등 다른 MCP 클라이언트의 stdio handshake 차이 — Stage 5 손 검증 항목
 
@@ -232,5 +232,5 @@ python/rhwp/mcp/
 - Model Context Protocol 공식: <https://modelcontextprotocol.io/>
 - MCP Python SDK: <https://github.com/modelcontextprotocol/python-sdk>
 - 활성 spec 인덱스 (phase 무관 단발 통합): [roadmap/README.md](../README.md)
-- 짝 페어 (ADR): [mcp-research.md](../../design/v0.7.0/mcp-research.md)
+- 짝 페어 (ADR): [mcp-research.md](../../design/v0.5.0/mcp-research.md)
 - `unsendable` 패턴 배경: 프로젝트 [CLAUDE.md § Rust + Python 하이브리드 빌드](../../../CLAUDE.md)

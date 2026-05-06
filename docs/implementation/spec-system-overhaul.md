@@ -73,7 +73,7 @@ last_updated: YYYY-MM-DD                         # 자동 갱신 (D3)
 |---|---|---|
 | **Living** | frontmatter **없음** (정의상 항상 최신) | [docs/CONVENTIONS.md](../CONVENTIONS.md), [docs/roadmap/README.md](../roadmap/README.md) |
 | **Active** | `status: Active`, ga/target 둘 다 생략 | phase-3.md, phase-4.md (이후 폐기 — [roadmap/README.md](../roadmap/README.md) § 미착수 작업 계획 으로 흡수), [docs/upstream/issue-find-control-text-positions.md](../upstream/issue-find-control-text-positions.md) |
-| **Draft** | `status: Draft`, `target: vX.Y.Z` 필수 | [v0.7.0/mcp.md](../roadmap/v0.7.0/mcp.md) |
+| **Draft** | `status: Draft`, `target: vX.Y.Z` 필수 | [v0.5.0/mcp.md](../roadmap/v0.5.0/mcp.md) (작성 시점 v0.7.0 target, 이후 pull-forward) |
 | **Frozen** | `status: Frozen`, `ga: vX.Y.Z` 필수 | 나머지 17개 |
 | **Superseded** | `status: Superseded`, `superseded_by` 필수, ga 보존 | (현재 0건) |
 

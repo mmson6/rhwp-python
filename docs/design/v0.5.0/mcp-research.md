@@ -1,13 +1,13 @@
 ---
 status: Draft
-description: "v0.7.0 MCP ADR — SDK 채택 (FastMCP) / transport (stdio + streamable-http) / handler 동시성 (sync 전용) / 도구 분할 (7 개) 결정 근거"
-target: v0.7.0
-last_updated: 2026-04-30
+description: "v0.5.0 MCP ADR — SDK 채택 (FastMCP) / transport (stdio + streamable-http) / handler 동시성 (sync 전용) / 도구 분할 (7 개) 결정 근거"
+target: v0.5.0
+last_updated: 2026-05-06
 ---
 
-# v0.7.0 MCP server — 설계 의사결정 리서치 요약
+# v0.5.0 MCP server — 설계 의사결정 리서치 요약
 
-[v0.7.0/mcp.md](../../roadmap/v0.7.0/mcp.md) §결정 사항 중 외부 독자가 "왜?" 를 던질 만한 4건 (SDK 채택 · transport 우선순위 · handler 동시성 모델 · 도구 분할 정책) 의 업계 선례·대안·실패 시나리오를 기록한다. mcp.md 본문이 최종 결정을 기술하고, 본 문서는 그 결정의 근거를 담는다.
+[v0.5.0/mcp.md](../../roadmap/v0.5.0/mcp.md) §결정 사항 중 외부 독자가 "왜?" 를 던질 만한 4건 (SDK 채택 · transport 우선순위 · handler 동시성 모델 · 도구 분할 정책) 의 업계 선례·대안·실패 시나리오를 기록한다. mcp.md 본문이 최종 결정을 기술하고, 본 문서는 그 결정의 근거를 담는다.
 
 ## 결정 매트릭스
 
@@ -174,7 +174,7 @@ PyO3 `unsendable` = **객체가 생성된 thread 외에서 접근 시 runtime pa
 
 ## 참조
 
-- 짝 페어: [mcp.md](../../roadmap/v0.7.0/mcp.md)
+- 짝 페어: [mcp.md](../../roadmap/v0.5.0/mcp.md)
 - MCP 공식: <https://modelcontextprotocol.io/>
 - MCP Python SDK: <https://github.com/modelcontextprotocol/python-sdk>
 - 본 프로젝트 [CLAUDE.md](../../../CLAUDE.md) § Rust + Python 하이브리드 빌드

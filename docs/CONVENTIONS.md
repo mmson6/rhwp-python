@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **Living** | 항상 최신 — 다른 문서의 위치 포인터 + 시간선 + 규칙 | 자유 갱신, 매 변경 시 손봐도 무방 | `docs/CONVENTIONS.md` (자체), `docs/roadmap/README.md`, `docs/upstream/README.md`, `docs/traces/coverage.md`, `CHANGELOG.md`, `CLAUDE.md`, `AGENTS.md`, `README.md` |
 | **Active** | 외부 시스템으로 흘러가기 전 staging | 큰 변경만, in-place 갱신 OK | `docs/upstream/<topic>.md` |
-| **Draft** | 작성 중인 spec — 해당 버전 GA 전까지 활발 갱신 | 버전 GA 전까지 자유 갱신, GA 후 Frozen 으로 전환 | `docs/roadmap/v0.7.0/mcp.md` (현재 v0.7.0 GA 전) |
+| **Draft** | 작성 중인 spec — 해당 버전 GA 전까지 활발 갱신 | 버전 GA 전까지 자유 갱신, GA 후 Frozen 으로 전환 | `docs/roadmap/v<X.Y.Z>/<topic>.md` (target 미-GA 버전) |
 | **Frozen** | GA 완료된 spec / 완료된 stage / 완료된 검증 | **변경 금지** — 오타·링크 수정만 in-place 허용. 큰 변경은 새 spec + supersede | `docs/roadmap/v0.2.0/ir.md` (v0.2.0 GA 완료), `docs/implementation/v0.2.0/stages/*.md` |
 
 `Frozen` 은 [Rust RFC](https://rust-lang.github.io/rfcs/) / [Python PEP](https://peps.python.org/) 의 운영 모델. 결정의 historical record 가 보존되어 "왜 그렇게 설계됐는지" 가 명확해진다.
@@ -248,7 +248,7 @@ CHANGELOG 한 줄로 충분한 변경 (typo 정리, 단순 dep bump, 작은 docs
 
 spec-system-overhaul (2026-04-29) 이후 신규 작성 spec 의 § 인수조건 섹션은 각 항목에 `AC-N` ID 를 부여한다 (테스트 marker 와 1:1 매핑용). 형식은 자유 — testable 하고 명확하면 plain prose 도 OK. 모호성이 우려되면 [EARS notation](https://alistairmavin.com/ears/) (`THE ... SHALL`, `WHEN ..., THE ... SHALL` 등) 같은 구조화 패턴을 참고 가능 (강제 아님).
 
-**적용 시점**: overhaul 발효일 (2026-04-29) 이후 신규 작성 spec. 첫 적용 사례는 [v0.3.1/ir-marker-char-offset](roadmap/v0.3.1/ir-marker-char-offset.md) (PATCH minor 라도 발효 이후 신규면 적용 — cutoff 는 버전이 아닌 *시점*). 발효일 *이전* 작성된 Draft 도 본 PR 에서 일괄 retrofit ([v0.7.0/mcp.md](roadmap/v0.7.0/mcp.md)). 향후 grandfather 가 발생하면 다음 의미 변경 PR 시점에 함께 retrofit.
+**적용 시점**: overhaul 발효일 (2026-04-29) 이후 신규 작성 spec. 첫 적용 사례는 [v0.3.1/ir-marker-char-offset](roadmap/v0.3.1/ir-marker-char-offset.md) (PATCH minor 라도 발효 이후 신규면 적용 — cutoff 는 버전이 아닌 *시점*). 발효일 *이전* 작성된 Draft 도 본 PR 에서 일괄 retrofit. 향후 grandfather 가 발생하면 다음 의미 변경 PR 시점에 함께 retrofit.
 
 ```markdown
 ## 인수조건
