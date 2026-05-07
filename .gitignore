@@ -50,3 +50,5 @@ mutants/
 
 # * Examples 산출물
 render_output/
+
+.mcp.json

@@ -28,6 +28,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 부수 — `test_submodule_pin_matches_changelog_record` 제거 ([tests/test_ir_marker_char_offset.py](tests/test_ir_marker_char_offset.py)). 본래 v0.3.1 의 *deliberate* pin bump (v0.7.7 → 0fb3e67) 가 release-readiness 시점 기재됐는지 가드한 일회성 AC-13 의 일부였으나, GA shipped 후에도 영구 runtime 가드로 잔존해 일상 sync 마다 CHANGELOG 갱신을 강제하는 anti-pattern (1회성 release-gating AC 의 영구 테스트화 + 문서 텍스트 매칭 runtime test) 화. CHANGELOG 갱신은 릴리즈 시점 의무 (`publish.yml::verify-version` 로 version 일치 가드, 사람 review 가 핀 bump 정합성 점검) 로 이양. AC-13 의 historical record 검증은 동 파일 `test_changelog_records_pin_bump` (Frozen v0.3.1 섹션 텍스트 회귀 가드) 가 그대로 유지.
 - 부수 — 동 파일 이름 `test_v0_3_1_marker_char_offset.py` → `test_ir_marker_char_offset.py` (`test_ir_*` 패턴 통일, 본 spec lifecycle 은 `pytest.mark.spec("v0.3.1/...")` marker 가 보유).
 
+## [0.5.0] — 2026-05-06
+
+MINOR release. [Model Context Protocol](https://modelcontextprotocol.io/) (Anthropic, 2024) 서버를 새 entry point `rhwp-mcp` 로 노출한다. LLM 에이전트 (Claude Desktop / Cursor / Cline / Continue.dev / Goose / 자체 에이전트) 가 HWP/HWPX 를 직접 파싱·요약·청크화 가능. standalone [`fastmcp`](https://github.com/jlowin/fastmcp) v3 (jlowin) 기반 — 2026-05 기준 MCP 서버 약 70% 시장 점유의 사실상 표준. 7 도구 / 2 transport (stdio 기본 + streamable-http 옵션) / runtime extras gate / `unsendable` 안전 패턴 강제. 코어 wheel 의존성 변경 0 (additive extras), schema (`"1.1"`) 유지.
+
+### Added
+
+- 새 entry point `rhwp-mcp = "rhwp.mcp:run"` — argparse 기반 `--transport stdio | streamable-http` / `--host` / `--port` CLI. stdio 가 기본 (Claude Desktop / IDE 통합용), streamable-http 는 옵션 (서버 배포 / 다중 클라이언트, uvicorn ASGI). `--host` 기본 `127.0.0.1` 외부 노출 회피 + `--port` [1, 65535] argparse validator + stdio 와 명시적 host/port 조합 시 `parser.error` 강제 (silent ignore 보안 사고 회피).
+- 7 MCP 도구 (`mcp.server.fastmcp.FastMCP.tool()` 등록): `parse_hwp_summary(path)` / `extract_text(path)` / `get_ir(path)` / `iter_blocks(path, kind?, scope, limit?)` / `to_markdown(path)` / `to_html(path, *, include_css=False)` / `chunks(path, mode, size, overlap, include_furniture)`. 모두 sync 함수 — `_Document` 가 `unsendable` 이라 handler 안에서 parse → consume → primitive return 패턴 강제 (async + `asyncio.to_thread(rhwp.parse, ...)` 는 panic). `chunks` 는 런타임 lazy import — `langchain-text-splitters` 미설치 시 fastmcp `ToolError` 로 wrap → MCP `CallToolResult(isError=True)` 응답 (서버 기동 / 다른 6 도구는 정상 — AC-7).
+- 모듈 위치: `python/rhwp/mcp/{__init__.py, __main__.py, server.py, tools.py}` (top-level, `integrations/` 가 아님). `__init__.py` 는 lazy-import 패턴 — `rhwp.cli` 와 동일하게 `[mcp]` extras 미설치 시 친절 에러 + exit 2 (AC-1).
+- 새 extras: `[project.optional-dependencies] mcp = ["fastmcp>=3,<4"]` + `mcp-chunks = ["fastmcp>=3,<4", "langchain-core>=0.2", "langchain-text-splitters>=0.2"]`. extras 키 이름은 "MCP 서버 기능" 표시 — 의존성 패키지명 (`fastmcp`) 과 분리. `[examples]` extras 가 fastmcp 합집합 포함하도록 갱신.
+- `examples/06_mcp_server.py` — fastmcp `Client(server)` in-process round-trip 데모 (typer 기반, `--skip-chunks` 옵션). 7 도구 차례로 호출하며 출력 형식 학습용.
+- README § "MCP server (`rhwp-mcp`)" 섹션 신설 — 도구 7 종 표 / Claude Desktop `claude_desktop_config.json` 등록 예 / 클라이언트 호환성 표 (Claude Desktop / Cline / Cursor / Continue.dev / Goose / 자체 에이전트, transport 별 ✅/❌/⚠️) / streamable-http 사용 예.
+- spec / ADR / 구현 로그: [docs/roadmap/v0.5.0/mcp.md](docs/roadmap/v0.5.0/mcp.md) (Frozen, 11 인수조건) / [docs/design/v0.5.0/mcp-research.md](docs/design/v0.5.0/mcp-research.md) (Frozen, 4 결정 매트릭스 — SDK 채택 근거 / transport 우선순위 / handler 동시성 / 도구 분할) / [docs/implementation/v0.5.0/stages/](docs/implementation/v0.5.0/stages/) (S1 ~ S5 Frozen).
+
+### Changed
+
+- ADR § 1 SDK 결정 갱신 (S1 진행 중) — 공식 `mcp` Python SDK (FastMCP v1 흡수) → standalone `fastmcp` v3 (jlowin). 2026-05 현업 표준 패턴 정합 (시장 점유 약 70%) + v3 의 OAuth / OpenTelemetry / server composition / streamable-http 우선 같은 프로덕션 기능. 공식 SDK 의 FastMCP v1 은 frozen 상태 — 추가 framework 기능은 standalone 으로만 발전.
+- `docs-lint` 정책 갱신 (S1 진행 중) — `Frozen + target` 조합을 `docs/implementation/vX.Y.Z/` pre-GA stage log 에 한해 허용 (`scripts/_doc_lint.py` 의 `is_pre_ga_stage` 면제 분기). Rust RFC / PEP / ADR 의 editorial vs release 차원 분리 패턴 정합 — stage 본문은 작성 즉시 immutable, GA 라벨은 미부여 (CONVENTIONS § 131 의 의도). [CONVENTIONS.md § 필드 schema](docs/CONVENTIONS.md) 에 예외 명시.
+- CI `test-without-extras` job — expected skip count 4 → 5 (`tests/test_mcp_server.py` 의 file-level `pytest.importorskip("fastmcp")` 추가). `.github/workflows/ci.yml` + `AGENTS.md` § Tests 동시 갱신 (AC-11).
+
+### Build
+
+- `external/rhwp` submodule pin `0fb3e67` 유지 — 본 MINOR 는 pure Python MCP layer, 상류 변경 0.
+- 신규 의존성 (extras 만): `fastmcp>=3,<4` (`[mcp]`, `[mcp-chunks]`, `[examples]`, `[dependency-groups] testing`). 코어 wheel 의존성 (`pydantic>=2.5,<3`) 변경 없음.
+
+### Notes
+
+- 회귀 가드: [tests/test_mcp_server.py](tests/test_mcp_server.py) (40 테스트 — 36 fast + 1 slow + 3 LOW reviewer-suggested). file-level `importorskip("fastmcp")` 게이트, 메서드별 `importorskip("langchain_text_splitters")` 게이트로 chunks smoke 분리. AC-1 ~ AC-11 모두 11/11 충족 (evidence 매핑은 [stage-5.md § AC sweep](docs/implementation/v0.5.0/stages/stage-5.md) 참조).
+- 미확정 이슈는 v0.5.0 GA 후 demand-driven: `get_ir` 응답 크기 / 에러 응답 형식 통일 / Resource·Prompt 추상 / 출력 schema 강타입화 (`ChunkRecord` 등). spec [§ 미확정 이슈](docs/roadmap/v0.5.0/mcp.md) 에 기록.
+
 ## [0.4.0] — 2026-05-05
 
 MINOR release. Document IR (`HwpDocument`) → Markdown / HTML view 변환 표면을 추가한다. v0.7.0 MCP server (`to_markdown` / `to_html` 도구) + 후속 RAG 프레임워크 통합 (v0.5 LlamaIndex / v0.6 Haystack) 의 *문자열 출력* 1차 인터페이스로 사용. Pure-stdlib 구현 — 신규 의존성 0, schema (`"1.1"`) / 파싱 경로 / `Document` wrapper / extras 모두 변경 없음 (additive only).

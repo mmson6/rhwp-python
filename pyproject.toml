@@ -60,9 +60,22 @@ cli-chunks = [
     "langchain-core>=0.2",
     "langchain-text-splitters>=0.2",
 ]
-# ^ examples 는 01~05 예제 스크립트 일괄 실행용 우산 extras — typer + langchain-core + text-splitters 합집합
+# ^ examples 는 01~06 예제 스크립트 일괄 실행용 우산 extras — typer + langchain-core +
+#   text-splitters + fastmcp (06 MCP 데모) 합집합. v0.5.0+ 는 fastmcp v3 (jlowin) 포함.
 examples = [
     "typer>=0.12",
+    "langchain-core>=0.2",
+    "langchain-text-splitters>=0.2",
+    "fastmcp>=3,<4",
+]
+# ^ rhwp-mcp MCP 서버 (v0.5.0+). standalone fastmcp v3 (jlowin) — 2026-05 기준
+#   현업 표준 (MCP 서버 약 70% 사용). 공식 mcp SDK 안의 FastMCP v1 은 frozen 상태고
+#   v2/v3 의 OAuth / OpenTelemetry / server composition / streamable-http 우선 같은
+#   프로덕션 기능은 standalone 에만 존재. 상세: docs/design/v0.5.0/mcp-research.md § 1.
+mcp = ["fastmcp>=3,<4"]
+# ^ rhwp-mcp 의 chunks 도구 (v0.5.0 S3 부터). text-splitters 가 추가로 필요.
+mcp-chunks = [
+    "fastmcp>=3,<4",
     "langchain-core>=0.2",
     "langchain-text-splitters>=0.2",
 ]
@@ -71,6 +84,8 @@ examples = [
 # ^ Entry point — typer 미설치 시 rhwp.cli.app() 가 친절 에러 + exit 2.
 #   이름은 cli.md § 이름 선정 ("rhwp-py" 채택, 상류 rhwp 와 PATH 충돌 회피)
 rhwp-py = "rhwp.cli:app"
+# ^ Entry point — mcp 미설치 시 rhwp.mcp.run() 이 친절 에러 + exit 2 (cli 와 동일 패턴).
+rhwp-mcp = "rhwp.mcp:run"
 
 [dependency-groups]
 dev = ["maturin>=1.7"]
@@ -84,6 +99,8 @@ testing = [
     "jsonschema>=4",
     # ^ rhwp-py CLI smoke / integration tests (tests/test_cli.py)
     "typer>=0.12",
+    # ^ rhwp-mcp 서버 단위 테스트 (tests/test_mcp_server.py) — fastmcp 인스턴스 inspection.
+    "fastmcp>=3,<4",
 ]
 linting = [
     {include-group = "dev"},

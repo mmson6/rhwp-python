@@ -10,9 +10,13 @@ CONVENTIONS.md 정책 enforcement. 룰 일람:
    - status:Active → ga / target 둘 다 금지
    - status:Draft → target 필수, ga 금지
    - status:Frozen → ga 필수 (예외: meta-level docs/implementation/<topic>.md /
-     resolved docs/upstream/<topic>.md)
+     resolved docs/upstream/<topic>.md / pre-GA stage log)
+   - status:Frozen + target 허용 — `docs/implementation/vX.Y.Z/...` 경로의 pre-GA
+     stage log 에 한해 (CONVENTIONS § Implementation log 구조 § 131). 본문은
+     작성 즉시 immutable 이지만 부모 버전 GA 전까지 release 라벨 미부여 — Rust
+     RFC / PEP / ADR 의 editorial vs release 차원 분리 패턴
    - status:Superseded → ga 필수 + superseded_by 필수
-   - ga ↔ target mutex
+   - ga ↔ target mutex (단, Frozen pre-GA stage 예외)
    - ga / target SemVer (vX.Y.Z)
 2. **Supersede chain integrity** — superseded_by 가 가리키는 파일이 실재 +
    해당 파일의 supersedes 가 역참조
@@ -118,19 +122,28 @@ def validate_frontmatter(rel_str: str, meta: dict[str, str], repo: Path) -> list
         if has_ga:
             errors.append("frontmatter: status:Draft forbids 'ga' (use 'target')")
     elif status == "Frozen":
+        # ^ 면제: meta-level (vX.Y.Z 외부) implementation, resolved upstream
+        is_meta_level = rel_str.startswith("docs/implementation/") and not re.match(
+            r"docs/implementation/v\d+\.\d+\.\d+/", rel_str
+        )
+        is_upstream_resolved = rel_str.startswith("docs/upstream/")
+        # ^ 면제: pre-GA stage log — CONVENTIONS § Implementation log 구조 § 131.
+        #   Rust RFC / PEP / ADR 와 동일한 editorial vs release 차원 분리 패턴.
+        #   stage 본문은 작성 즉시 immutable (= Frozen) 이지만 부모 버전 GA 전까지
+        #   ga 라벨 미부여 — 그 구간에는 target 으로 표기. GA 시점 일괄 target → ga.
+        is_pre_ga_stage = (
+            re.match(r"docs/implementation/v\d+\.\d+\.\d+/", rel_str) is not None
+            and has_target
+            and not has_ga
+        )
         if not has_ga:
-            # ^ 면제: meta-level (vX.Y.Z 외부) implementation, resolved upstream
-            is_meta_level = rel_str.startswith("docs/implementation/") and not re.match(
-                r"docs/implementation/v\d+\.\d+\.\d+/", rel_str
-            )
-            is_upstream_resolved = rel_str.startswith("docs/upstream/")
-            if not (is_meta_level or is_upstream_resolved):
+            if not (is_meta_level or is_upstream_resolved or is_pre_ga_stage):
                 errors.append(
                     "frontmatter: status:Frozen requires 'ga' "
-                    "(except meta-level docs/implementation/<topic>.md and "
-                    "docs/upstream/<topic>.md)"
+                    "(except meta-level docs/implementation/<topic>.md, "
+                    "docs/upstream/<topic>.md, and pre-GA stage log)"
                 )
-        if has_target:
+        if has_target and not is_pre_ga_stage:
             errors.append("frontmatter: status:Frozen forbids 'target'")
     elif status == "Superseded":
         if not has_ga:

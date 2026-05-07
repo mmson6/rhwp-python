@@ -1,29 +1,29 @@
 ---
-status: Draft
-description: "v0.7.0 — 'rhwp-mcp' MCP 서버. LLM 에이전트가 HWP/HWPX 직접 파싱·요약·청크화 가능한 표준 프로토콜 표면"
-target: v0.7.0
-last_updated: 2026-04-30
+status: Frozen
+description: "v0.5.0 — 'rhwp-mcp' MCP 서버. LLM 에이전트가 HWP/HWPX 직접 파싱·요약·청크화 가능한 표준 프로토콜 표면"
+ga: v0.5.0
+last_updated: 2026-05-06
 ---
 
-# v0.7.0 — MCP server (`rhwp-mcp`)
+# v0.5.0 — MCP server (`rhwp-mcp`)
 
 [Model Context Protocol](https://modelcontextprotocol.io/) (Anthropic, 2024) 기반의 MCP 서버를 새 entry point `rhwp-mcp` 로 노출한다. LLM 에이전트 (Claude Desktop / IDE 통합 / 자체 에이전트) 가 HWP/HWPX 파일을 직접 파싱·요약·청크화할 수 있도록 표준 프로토콜 표면을 제공한다.
 
-주요 결정 (SDK 채택 / transport 우선순위 / 동시성 모델 / 도구 분할 / 인증·sandboxing 정책) 의 업계 선례·대안·실패 시나리오는 짝 페어: [mcp-research.md](../../design/v0.7.0/mcp-research.md).
+주요 결정 (SDK 채택 / transport 우선순위 / 동시성 모델 / 도구 분할 / 인증·sandboxing 정책) 의 업계 선례·대안·실패 시나리오는 짝 페어: [mcp-research.md](../../design/v0.5.0/mcp-research.md).
 
 ## 배경 — phase 무관 단발 통합
 
-MCP 는 RAG 프레임워크 (LangChain / LlamaIndex / Haystack) 가 아니라 **LLM 에이전트 프로토콜** — Phase 3 의 "RAG 프레임워크 통합" 카테고리와는 도메인이 다르다. Phase 4 (IR → HWP 역생성) 와도 무관 (readonly). 따라서 **phase 소속 없이 독립 spec** 으로 진행한다 — 활성 spec 인덱스 ([roadmap/README.md](../README.md)) 가 SSOT.
+MCP 는 RAG 프레임워크 (LangChain 등) 가 아니라 **LLM 에이전트 프로토콜** — Phase 3 의 "RAG 프레임워크 통합" 카테고리와는 도메인이 다르다. Phase 4 (IR → HWP 역생성) 와도 무관 (readonly). 따라서 **phase 소속 없이 독립 spec** 으로 진행한다 — 활성 spec 인덱스 ([roadmap/README.md](../README.md)) 가 SSOT.
 
-v0.7.0 시점이 sweet spot 인 이유:
+v0.5.0 시점이 sweet spot 인 이유:
 
-- **노출할 도구가 풍부**: parse + IR (v0.2~0.3 GA) + view (v0.4 GA) + LangChain chunks (v0.3 GA) + LlamaIndex node (v0.5 GA) + Haystack converter (v0.6 GA) — Phase 3 통합 wave 종료 후라 MCP tool surface 가 유의미한 기능을 모두 묶어낼 수 있음
-- **외부 의존성 0**: HWP writer API 안정에 좌우되는 작업 (IR → HWP 역생성, [roadmap/README.md § v0.8.0 ~ v1.0.0](../README.md)) 은 rhwp Rust 코어 일정에 좌우되어 유동적 — "시작 전 업스트림 상태 재평가" 명시. MCP 는 readonly 라 외부 의존 없어 v0.7.0 슬롯의 안정 채움 역할
-- **통합 패턴 정착**: LangChain (v0.3) → LlamaIndex (v0.5) → Haystack (v0.6) 세 통합으로 `python/rhwp/integrations/<framework>.py` + 옵셔널 extras 패턴이 완전 정립된 이후 — MCP 도 동일 패턴 답습
+- **노출할 도구가 풍부**: parse + IR (v0.2~0.3 GA) + view (v0.4 GA) + LangChain chunks (v0.3 GA) — IR / view / chunks 표면이 모두 안정화되어 MCP tool surface 가 유의미한 기능을 묶어낼 수 있음
+- **외부 의존성 0**: HWP writer API 안정에 좌우되는 작업 (IR → HWP 역생성, [roadmap/README.md § v0.8.0 ~ v1.0.0](../README.md)) 은 rhwp Rust 코어 일정에 좌우되어 유동적 — "시작 전 업스트림 상태 재평가" 명시. MCP 는 readonly 라 외부 의존 없어 v0.5.0 슬롯의 안정 채움 역할
+- **통합 패턴 정착**: v0.3.0 LangChain integration 으로 `python/rhwp/integrations/<framework>.py` + 옵셔널 extras 패턴이 정립된 이후 — MCP 도 동일 패턴 답습. Phase 3 후속 RAG 프레임워크 통합 (LlamaIndex / Haystack 등) 은 demand-driven 으로 보류 ([roadmap/README.md § 미착수 작업 계획](../README.md)) — MCP 가 다음 surface 확장의 우선순위가 됨
 
 ## 목표와 비목표
 
-### v0.7.0 목표
+### v0.5.0 목표
 
 1. **표준 MCP 서버 entry point**: `rhwp-mcp` 명령으로 stdio/streamable-http transport 기동
 2. **읽기 전용 도구 노출**: `parse_hwp_summary` / `extract_text` / `get_ir` / `iter_blocks` / `to_markdown` / `to_html` / `chunks`
@@ -31,7 +31,7 @@ v0.7.0 시점이 sweet spot 인 이유:
 4. **`unsendable` 안전 보장**: sync handler 안에서 parse → consume → primitive 반환 — Document 가 thread 경계를 안 넘는 패턴 강제
 5. **Claude Desktop 즉시 사용 가능**: README 에 `claude_desktop_config.json` 등록 예제 포함
 
-### 비목표 (v0.7.0)
+### 비목표 (v0.5.0)
 
 - **쓰기 도구** (HWP/HWPX 생성·수정) — Phase 4 (역생성) 의존. Phase 4 GA 후 별도 spec
 - **파일 업로드 / blob storage** — MCP `Resource` 추상에는 적합하나 file path 노출만으로 1차 충분. 업로드는 v0.8.0+ 재평가
@@ -54,7 +54,7 @@ v0.7.0 시점이 sweet spot 인 이유:
 | `iter_blocks(path, kind, scope, limit)` | `path: str`, `kind: Literal["paragraph", "table", "picture", ...]`, `scope: Literal["body", "furniture", "all"]`, `limit: int \| None` | `list[dict]` | core |
 | `to_markdown(path)` | `path: str` | `str` | **v0.4.0 view 의존** |
 | `to_html(path, include_css: bool)` | `path: str`, `include_css: bool = False` | `str` | **v0.4.0 view 의존** |
-| `chunks(path, mode, size, overlap)` | `path: str`, `mode: Literal["single", "paragraph", "ir-blocks"]`, `size: int = 500`, `overlap: int = 50` | `list[{page_content, metadata}]` | langchain-text-splitters |
+| `chunks(path, mode, size, overlap, include_furniture)` | `path: str`, `mode: Literal["single", "paragraph", "ir-blocks"]`, `size: int = 500`, `overlap: int = 50`, `include_furniture: bool = False` (`mode="ir-blocks"` 에서만 의미 — page_headers / page_footers / footnotes / endnotes 도 chunked Document 로 yield, metadata `scope="furniture"`. 다른 mode 에서는 무시) | `list[{page_content, metadata}]` | langchain-text-splitters |
 
 **도구 명명 규칙**:
 
@@ -117,17 +117,20 @@ streamable-http 는 **optional** — 서버 컨테이너 배포 / 원격 LLM 에
 
 ```toml
 [project.optional-dependencies]
-mcp = ["mcp>=1.12"]
-# ^ FastMCP API + stdio/streamable-http transport. v1.12 부터 stateless_http 안정
+mcp = ["fastmcp>=3,<4"]
+# ^ standalone fastmcp v3 (jlowin) — MCP 서버의 약 70% 가 사용하는 현업 표준 (2026-05).
+#   공식 mcp SDK 안의 FastMCP v1 은 frozen 상태 — v2/v3 의 OAuth / OpenTelemetry /
+#   server composition / OpenAPI 통합 / streamable-http 우선 같은 프로덕션 기능은
+#   standalone 에만 존재. ADR § 1 참조.
 mcp-chunks = [
-    "mcp>=1.12",
+    "fastmcp>=3,<4",
     "langchain-core>=0.2",
     "langchain-text-splitters>=0.2",
 ]
-# ^ chunks 도구는 langchain-text-splitters 도 요구. cli-chunks 와 동일 패턴
+# ^ chunks 도구는 langchain-text-splitters 도 요구. cli-chunks 와 동일 패턴.
 ```
 
-`pip install "rhwp-python[mcp]"` 로 `rhwp-mcp` 활성화. `chunks` 도구 사용자는 `[mcp-chunks]` 또는 `[mcp,langchain]` 조합.
+`pip install "rhwp-python[mcp]"` 로 `rhwp-mcp` 활성화. `chunks` 도구 사용자는 `[mcp-chunks]` 또는 `[mcp,langchain]` 조합. extras 키 이름은 `mcp` (기능 표시) — 실제 의존성은 `fastmcp` standalone.
 
 ### Entry point
 
@@ -136,10 +139,10 @@ mcp-chunks = [
 rhwp-mcp = "rhwp.mcp:run"
 ```
 
-CLI 와 같은 lazy-import 패턴 — `mcp` 미설치 시 친절한 에러:
+CLI 와 같은 lazy-import 패턴 — `fastmcp` 미설치 시 친절한 에러:
 
 ```
-rhwp-mcp requires `mcp`. Install with:
+rhwp-mcp requires `fastmcp`. Install with:
     pip install "rhwp-python[mcp]"
 ```
 
@@ -188,17 +191,17 @@ python/rhwp/mcp/
 
 | # | 이슈 | 결정 | 근거 |
 |---|---|---|---|
-| 1 | SDK | 공식 `mcp` Python SDK (FastMCP) | 1st-party 유지·MCP spec 추종 보장. 직접 구현은 spec 변동 흡수 부담 — 상세: [mcp-research § 1](../../design/v0.7.0/mcp-research.md#1-sdk-선택) |
+| 1 | SDK | standalone `fastmcp` v3 (jlowin) | 2026-05 현업 표준 (MCP 서버 약 70% 사용) + v3 의 OAuth / OpenTelemetry / server composition / streamable-http 우선 기능. 공식 `mcp` SDK 안의 FastMCP v1 은 frozen — 상세: [mcp-research § 1](../../design/v0.5.0/mcp-research.md#1-sdk-선택) |
 | 2 | Transport 우선순위 | stdio 기본 + streamable-http 옵션 | Claude Desktop 호환 + ASGI 배포 시나리오 양쪽 커버. SSE 단독은 비범위 |
-| 3 | Handler sync/async | **sync 강제** | `unsendable` Document 의 thread-safety. async + to_thread 는 panic — 상세: [mcp-research § 3](../../design/v0.7.0/mcp-research.md#3-handler-동시성-모델) |
-| 4 | 도구 분할 | 작은 도구 7개 (단일 통합 도구 X) | LLM 이 의도별로 명확히 호출 가능. 단일 도구 + `operation` 파라미터는 schema 가 모호 — 상세: [mcp-research § 4](../../design/v0.7.0/mcp-research.md#4-도구-분할-vs-통합) |
+| 3 | Handler sync/async | **sync 강제** | `unsendable` Document 의 thread-safety. async + to_thread 는 panic — 상세: [mcp-research § 3](../../design/v0.5.0/mcp-research.md#3-handler-동시성-모델) |
+| 4 | 도구 분할 | 작은 도구 7개 (단일 통합 도구 X) | LLM 이 의도별로 명확히 호출 가능. 단일 도구 + `operation` 파라미터는 schema 가 모호 — 상세: [mcp-research § 4](../../design/v0.5.0/mcp-research.md#4-도구-분할-vs-통합) |
 | 5 | 인증 / sandboxing | 미내장 (운영자 책임) | stdio = OS 권한 / streamable-http = reverse proxy. 라이브러리 레이어가 보안 책임지면 부분적 보호로 오해 유발 |
-| 6 | extras 명명 | `[mcp]` / `[mcp-chunks]` | CLI extras (`[cli]` / `[cli-chunks]`) 와 일관 패턴 |
+| 6 | extras 명명 | `[mcp]` / `[mcp-chunks]` (의존성은 `fastmcp`) | CLI extras (`[cli]` / `[cli-chunks]`) 와 일관 패턴. extras 키는 "MCP 서버 기능" 을 표시 — 의존성 패키지명 (`fastmcp`) 과 분리 |
 | 7 | 모듈 위치 | `python/rhwp/mcp/` (top-level) | entry point + lifecycle 보유 — `integrations/` (passive) 와 성격 다름. CLI 와 같은 위계 |
 
 ## 인수조건
 
-- **AC-1** — `mcp` extras 미설치 시 `rhwp-mcp` 호출이 친절 에러 + exit 2 (CLI extras gate 패턴 동일, 결정 6)
+- **AC-1** — `[mcp]` extras (= `fastmcp`) 미설치 시 `rhwp-mcp` 호출이 친절 에러 + exit 2 (CLI extras gate 패턴 동일, 결정 6)
 - **AC-2** — `rhwp-mcp` stdio 기동 후 MCP `tools/list` 응답이 7 개 도구 (`parse_hwp_summary` / `extract_text` / `get_ir` / `iter_blocks` / `to_markdown` / `to_html` / `chunks`) 정확히 노출 (§ 노출 도구, 결정 4)
 - **AC-3** — `iter_blocks(kind="invalid_value")` 호출 시 Pydantic validation error → MCP `CallToolResult.isError=True` 응답 (panic 아님, § 단위 테스트)
 - **AC-4** — `extract_text("nonexistent.hwp")` 호출 시 `FileNotFoundError` → MCP `isError=True` 응답 (§ 단위 테스트)
@@ -206,15 +209,15 @@ python/rhwp/mcp/
 - **AC-6** — `to_markdown(path)` / `to_html(path, include_css=False)` 도구가 v0.4.0 view API (`HwpDocument.to_markdown()` / `HwpDocument.to_html()`) 위 thin wrapper 로 동작 (S2)
 - **AC-7** — `chunks` 도구 호출 시 `langchain-text-splitters` 미설치면 MCP `isError=True` 응답 — 서버 기동은 정상 + 다른 6 도구는 사용 가능 (런타임 extras gate, S3)
 - **AC-8** — `rhwp-mcp --transport streamable-http --port N` 옵션이 uvicorn ASGI 로 기동, MCP `initialize` + `tools/list` round-trip 정상 (결정 2, S4 — endpoint path 는 SDK 기본값 추종)
-- **AC-9** — `pyproject.toml` 에 `[project.optional-dependencies]` `mcp = ["mcp>=1.12"]` + `mcp-chunks` extras 등록 + `[project.scripts]` `rhwp-mcp = "rhwp.mcp:run"` entry point 등록 (§ 의존성 / 배포)
+- **AC-9** — `pyproject.toml` 에 `[project.optional-dependencies]` `mcp = ["fastmcp>=3,<4"]` + `mcp-chunks` extras 등록 + `[project.scripts]` `rhwp-mcp = "rhwp.mcp:run"` entry point 등록 (§ 의존성 / 배포)
 - **AC-10** — `python/rhwp/mcp/` 모듈 위치 (top-level, `integrations/` 가 아님 — 결정 7). `__init__.py` 는 빈 파일 또는 docstring only (CLAUDE.md 규칙)
-- **AC-11** — CI `test-without-extras` job 의 expected skip count 가 4 → 5 로 증가 (`tests/test_mcp_server.py` 가 module-level `pytest.importorskip("mcp")` 로 1 skip 기여). `.github/workflows/ci.yml` + `AGENTS.md` § Tests 동시 갱신 (§ 다른 산출물의 파급)
+- **AC-11** — CI `test-without-extras` job 의 expected skip count 가 4 → 5 로 증가 (`tests/test_mcp_server.py` 가 module-level `pytest.importorskip("fastmcp")` 로 1 skip 기여). `.github/workflows/ci.yml` + `AGENTS.md` § Tests 동시 갱신 (§ 다른 산출물의 파급)
 
 ## 미확정 이슈
 
 - **`get_ir` 의 출력 크기** — 큰 문서는 IR JSON 이 수 MB. MCP `tools/call` 응답 한도 (클라이언트 별 상이) 와 충돌 가능. **검토**: `--max-bytes` 파라미터 추가 vs `Resource` 추상으로 재노출 (`hwp://path/ir`)
 - **에러 응답 형식** — `FileNotFoundError` / `ParseError` / `ExtrasNotInstalledError` 를 MCP `CallToolResult.isError=True` + `content[0].text` 로 통일할지, 또는 MCP `errors.MCPError` 표준 사용할지
-- **Resource 추상 사용 여부** — MCP `Resource` 는 "URL 기반 데이터 노출" 추상. 파일 path 를 `hwp://` URI 로 노출하면 클라이언트가 도구 호출 없이 직접 fetch 가능. v0.7.0 1차는 도구 7개만, Resource 는 v0.8.0+ 평가
+- **Resource 추상 사용 여부** — MCP `Resource` 는 "URL 기반 데이터 노출" 추상. 파일 path 를 `hwp://` URI 로 노출하면 클라이언트가 도구 호출 없이 직접 fetch 가능. v0.5.0 1차는 도구 7개만 — Resource 는 차기 minor 의 MCP 확장 spec 에서 평가
 - **Prompt 추상 사용 여부** — MCP `Prompt` 는 "재사용 가능한 LLM prompt template". HWP 문서를 Markdown 으로 변환 후 요약하는 prompt 템플릿 등을 노출하면 가치 있을 수 있으나 라이브러리 책임 범위 모호
 - **Claude Desktop 외 호환성 검증** — Cline / Continue.dev / Cursor / Goose 등 다른 MCP 클라이언트의 stdio handshake 차이 — Stage 5 손 검증 항목
 
@@ -232,5 +235,5 @@ python/rhwp/mcp/
 - Model Context Protocol 공식: <https://modelcontextprotocol.io/>
 - MCP Python SDK: <https://github.com/modelcontextprotocol/python-sdk>
 - 활성 spec 인덱스 (phase 무관 단발 통합): [roadmap/README.md](../README.md)
-- 짝 페어 (ADR): [mcp-research.md](../../design/v0.7.0/mcp-research.md)
+- 짝 페어 (ADR): [mcp-research.md](../../design/v0.5.0/mcp-research.md)
 - `unsendable` 패턴 배경: 프로젝트 [CLAUDE.md § Rust + Python 하이브리드 빌드](../../../CLAUDE.md)

@@ -6,10 +6,11 @@
 ## 사전 준비
 
 ```bash
-# 01 ~ 05 예제 전부 한 방에 설치 (typer + langchain-core + text-splitters)
+# 01 ~ 06 예제 전부 한 방에 설치 (typer + langchain-core + text-splitters + fastmcp)
 pip install "rhwp-python[examples]"
 ```
 
+> 06 의 `chunks` MCP 도구는 `langchain-text-splitters` 가 필요한데 위 한 줄에 포함됨.
 > 통합 레이어만 필요하면 (예제 러너 없이 직접 `HwpLoader` 사용) `pip install "rhwp-python[langchain]"` 만으로 충분하다.
 
 ## 스크립트
@@ -76,6 +77,24 @@ python examples/05_langchain_ir_blocks.py path/to/your/file.hwp --kind-filter ta
 - `--kind-filter / -k {all,paragraph,table}` : 표시 종류 필터 (기본 `all`)
 - `--limit / -n INT` : 미리보기할 Document 최대 개수 (기본 10)
 
+### 6. MCP server (rhwp-mcp) 데모 — `06_mcp_server.py`
+
+```bash
+python examples/06_mcp_server.py path/to/your/file.hwp
+python examples/06_mcp_server.py path/to/your/file.hwp --skip-chunks
+```
+
+`rhwp.mcp.server.build_server()` 로 fastmcp 인스턴스를 만들고, fastmcp `Client` 로
+in-process round-trip — 7 도구 (`parse_hwp_summary` / `extract_text` / `get_ir` /
+`iter_blocks` / `to_markdown` / `to_html` / `chunks`) 를 차례로 호출하며 출력 형식을 학습.
+
+실제 운영에는 Claude Desktop / Cursor / Cline 등이 stdio subprocess 로 `rhwp-mcp`
+명령을 spawn 하지만, 본 예제는 같은 프로세스에서 client/server 를 묶어 빠르고 확정적으로
+동작 검증 가능. 등록 / 실배포 가이드는 [README §MCP server](../README.md#mcp-server-rhwp-mcp).
+
+옵션:
+- `--skip-chunks` : `[mcp-chunks]` extras 미설치 환경에서 chunks 호출 스킵
+
 ## 릴리스 전 실제 HWP 검증
 
-릴리스 직전 **본인의 업무 HWP 파일 3종 (일반 문서 / 장문 / HWPX)** 으로 다섯 스크립트를 순서대로 돌려 출력을 육안 확인한다. 한컴오피스 뷰어로 연 원본과 대조해 섹션/문단/페이지 수치, SVG/PDF 렌더, IR 의 block/table 구조, LangChain Document 매핑이 깨지지 않는지 본다.
+릴리스 직전 **본인의 업무 HWP 파일 3종 (일반 문서 / 장문 / HWPX)** 으로 여섯 스크립트를 순서대로 돌려 출력을 육안 확인한다. 한컴오피스 뷰어로 연 원본과 대조해 섹션/문단/페이지 수치, SVG/PDF 렌더, IR 의 block/table 구조, LangChain Document 매핑, MCP 도구 7 종이 깨지지 않는지 본다.
