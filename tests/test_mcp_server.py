@@ -1,4 +1,4 @@
-"""rhwp.mcp fastmcp 서버 단위 테스트 (S1 + S2 + S3 + S4).
+"""rhwp.mcp fastmcp 서버 단위 테스트 (S1 + S2 + S3 + S4 + v0.5.1 typed-output).
 
 ``fastmcp`` (``[mcp]`` extras) 미설치 환경에서는 file-level ``importorskip`` 로
 전체 skip — CI ``test-without-extras`` 잡이 카운트 검증 (AC-1).
@@ -7,7 +7,7 @@
 로 게이트 — 본 파일은 fastmcp 만 file-level gate, langchain 미설치 환경에서는
 chunks smoke 만 개별 skip (file-level skip 카운트 영향 없음).
 
-인수조건 매핑:
+v0.5.0 인수조건 매핑:
 
 - AC-2  (도구 7 개 노출 — S1 코어 4 + S2 view 2 + S3 chunks 1) → ``TestToolRegistry``
 - AC-3  (잘못된 enum → isError=True)                          → ``TestErrorHandling``
@@ -18,9 +18,22 @@ chunks smoke 만 개별 skip (file-level skip 카운트 영향 없음).
 - AC-8  (--transport streamable-http --port N CLI 기동)       → ``TestTransportCli``
 - AC-9  (pyproject 등록)                                      → ``TestPackagingSurface``
 - AC-10 (모듈 위치)                                           → ``TestPackagingSurface``
+
+v0.5.1 인수조건 매핑 (mcp-typed-output PATCH):
+
+- AC-1  (``get_ir`` 반환 타입 = ``HwpDocument``)              → ``TestTypedSignatures``
+- AC-2  (``iter_blocks`` 반환 타입 = ``list[Block]``)         → ``TestTypedSignatures``
+- AC-3  (``chunks`` 반환 타입 = ``list[ChunkRecord]``)        → ``TestTypedSignatures``
+- AC-4  (outputSchema 강화)                                   → ``TestTypedOutputSchema``
+- AC-5  (wire format byte-equal — v0.5.0 회귀 가드)           → ``TestBackwardsCompat``
+- AC-6  (fastmcp Client ``result.data`` 가 typed 인스턴스)    → ``TestTypedClientData``
+- AC-7  (``ChunkRecord.metadata`` = ``dict[str, Any]``)       → ``TestTypedSignatures``
+- AC-8  (도구 등록 7 개 회귀 보존)                            → 기존 ``TestToolRegistry`` 가 cover
+- AC-9  (extras / skip count 변동 없음)                       → 기존 CI ``test-without-extras`` job
 """
 
 import sys
+import typing
 from pathlib import Path
 
 import pytest
@@ -31,13 +44,18 @@ pytest.importorskip("fastmcp")
 import asyncio  # noqa: E402
 import importlib  # noqa: E402
 import inspect  # noqa: E402
+import json  # noqa: E402
+from typing import Any  # noqa: E402
 
 import rhwp  # noqa: E402
+from fastmcp.client import Client  # noqa: E402
 from fastmcp.exceptions import NotFoundError, ToolError  # noqa: E402
 from fastmcp.tools.function_tool import FunctionTool  # noqa: E402
 from pydantic import ValidationError  # noqa: E402
+from rhwp.ir.nodes import Block, HwpDocument  # noqa: E402
 from rhwp.mcp import tools  # noqa: E402
 from rhwp.mcp.server import build_server  # noqa: E402
+from rhwp.mcp.tools import ChunkRecord  # noqa: E402
 
 pytestmark = pytest.mark.spec("v0.5.0/mcp")
 
@@ -155,12 +173,18 @@ class TestExtractText:
 
 
 class TestGetIr:
-    def test_returns_dict_with_schema_envelope(self, hwp_sample: Path) -> None:
+    def test_returns_typed_hwp_document(self, hwp_sample: Path) -> None:
+        """v0.5.1 부터 typed ``HwpDocument`` 인스턴스 반환 (v0.5.0 의 dict 출력 대체).
+
+        wire format byte-equal 회귀 가드는 ``TestBackwardsCompat`` 가 보유.
+        """
         result = tools.get_ir(str(hwp_sample))
-        assert isinstance(result, dict)
-        assert result["schema_name"] == "HwpDocument"
-        assert "schema_version" in result
-        assert "body" in result
+        assert isinstance(result, HwpDocument)
+        # ^ schema_name 은 Literal-constrained — Pydantic validator 가 강제
+        assert result.schema_name == "HwpDocument"
+        assert result.schema_version
+        # ^ body 는 list[Block] — 빈 리스트도 허용 (빈 문서 회귀 회피)
+        assert isinstance(result.body, list)
 
 
 class TestToMarkdown:
@@ -202,17 +226,19 @@ class TestToHtml:
 
 
 class TestIterBlocks:
-    def test_default_returns_dicts(self, hwp_sample: Path) -> None:
+    def test_default_returns_typed_blocks(self, hwp_sample: Path) -> None:
+        """v0.5.1 부터 typed Block 유니온 인스턴스 리스트 반환."""
         result = tools.iter_blocks(str(hwp_sample))
         assert isinstance(result, list)
-        assert all(isinstance(b, dict) for b in result)
-        assert all("kind" in b for b in result)
+        # ^ Block 유니온의 모든 변형이 ``kind`` attribute 를 보유 (Discriminator key)
+        assert all(hasattr(b, "kind") for b in result)
+        assert all(isinstance(b.kind, str) for b in result)
 
     def test_kind_filter_paragraph(self, hwp_sample: Path) -> None:
         # ^ kind=None (또는 미지정) 이면 필터 미적용 — IR 의 모든 종류 yield
         all_blocks = tools.iter_blocks(str(hwp_sample), kind=None)
         para_blocks = tools.iter_blocks(str(hwp_sample), kind="paragraph")
-        assert all(b["kind"] == "paragraph" for b in para_blocks)
+        assert all(b.kind == "paragraph" for b in para_blocks)
         assert len(para_blocks) <= len(all_blocks)
 
     def test_limit_truncates(self, hwp_sample: Path) -> None:
@@ -244,11 +270,11 @@ class TestChunks:
         assert isinstance(result, list)
         assert result, "chunks must yield at least one chunk for fixture"
         for d in result:
-            assert isinstance(d, dict)
-            assert "page_content" in d
-            assert "metadata" in d
-            assert isinstance(d["page_content"], str)
-            assert isinstance(d["metadata"], dict)
+            # ^ v0.5.1 부터 typed ChunkRecord 인스턴스 — wire format byte-equal 은
+            #   ``TestBackwardsCompat`` 회귀 가드.
+            assert isinstance(d, ChunkRecord)
+            assert isinstance(d.page_content, str)
+            assert isinstance(d.metadata, dict)
 
     def test_modes_all_supported(self, hwp_sample: Path) -> None:
         pytest.importorskip("langchain_text_splitters")
@@ -274,7 +300,7 @@ class TestChunks:
         assert len(with_furniture) >= len(body_only)
         # ^ aift.hwp 샘플은 page_headers 를 보유 —
         #   한 개 이상 추가 청크가 ``scope="furniture"`` 메타로 yield
-        furniture_chunks = [c for c in with_furniture if c["metadata"].get("scope") == "furniture"]
+        furniture_chunks = [c for c in with_furniture if c.metadata.get("scope") == "furniture"]
         assert furniture_chunks, (
             "aift.hwp 는 page_headers 를 보유 — include_furniture=True 가 "
             "'scope=furniture' 메타로 청크를 yield 해야 함"
@@ -623,3 +649,263 @@ class TestPackagingSurface:
     # ^ "__init__.py 가 lazy import 패턴인지" 는 implementation 측면 — behavior
     #   측면 검증은 CI ``test-without-extras`` 잡 (fastmcp 미설치 환경에서 file 전체
     #   skip = 5 카운트) 이 SSOT. 본 파일에 추가 source-grep 테스트는 두지 않는다.
+
+
+# ====================================================================
+#                      v0.5.1 — MCP typed output PATCH
+# ====================================================================
+# get_ir / iter_blocks / chunks 의 출력 시그니처를 dict[str, Any] 에서
+# Pydantic 모델 (HwpDocument / list[Block] / list[ChunkRecord]) 로 강화.
+# wire format (result.structured_content) 은 v0.5.0 과 byte-equal —
+# 외부 클라이언트 영향 0. spec: docs/roadmap/v0.5.1/mcp-typed-output.md.
+
+
+# ------------------------------------------------------------------ AC-1 / AC-2 / AC-3 / AC-7
+class TestTypedSignatures:
+    """v0.5.1 도구 출력 어노테이션 — fastmcp 자동 outputSchema 의 입력원."""
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-1")
+    def test_get_ir_return_annotation_is_hwp_document(self) -> None:
+        """``get_ir`` 의 정적 반환 타입 = ``HwpDocument`` (fastmcp v3 자동 schema 진입점)."""
+        sig = inspect.signature(tools.get_ir)
+        assert sig.return_annotation is HwpDocument
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-2")
+    def test_iter_blocks_return_annotation_is_list_of_block(self) -> None:
+        """``iter_blocks`` 의 정적 반환 타입 = ``list[Block]`` (Discriminator + Tag 11 변형)."""
+        hints = typing.get_type_hints(tools.iter_blocks, include_extras=True)
+        assert hints["return"] == list[Block]
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-3")
+    def test_chunks_return_annotation_is_list_of_chunk_record(self) -> None:
+        """``chunks`` 의 정적 반환 타입 = ``list[ChunkRecord]``."""
+        hints = typing.get_type_hints(tools.chunks)
+        assert hints["return"] == list[ChunkRecord]
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-3")
+    def test_chunk_record_is_exposed_on_tools_module(self) -> None:
+        """``ChunkRecord`` 가 ``rhwp.mcp.tools`` 모듈에서 import 가능 (외부 코드 사용 가능)."""
+        assert hasattr(tools, "ChunkRecord")
+        assert tools.ChunkRecord is ChunkRecord
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-7")
+    def test_chunk_record_metadata_annotation_is_free_dict(self) -> None:
+        """``ChunkRecord.metadata`` 어노테이션 = ``dict[str, Any]``.
+
+        결정 5 (mode × kind 분기 거부) 의 grep-friendly evidence — 새 metadata 키
+        추가 시 모델 갱신 강제 회피. 분기 모델 도입 PR 회귀 가드.
+        """
+        anno = ChunkRecord.model_fields["metadata"].annotation
+        assert anno == dict[str, Any]
+
+
+# ------------------------------------------------------------------ AC-4
+class TestTypedOutputSchema:
+    """fastmcp 자동 생성 outputSchema 가 v0.5.0 의 약타입 → 강타입으로 전환됨을 검증.
+
+    v0.5.0 의 dict[str, Any] 출력은 ``additionalProperties: true`` 만 (LLM 이 키
+    이름조차 모름). v0.5.1 부터 HwpDocument / Block / ChunkRecord 의 필드가
+    schema 에 직접 노출 — LLM 의 응답 해석 정확도 향상.
+    """
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-4")
+    def test_get_ir_schema_exposes_hwp_document_defs(self) -> None:
+        server = build_server()
+        tool = next(t for t in asyncio.run(server.list_tools()) if t.name == "get_ir")
+        schema_text = json.dumps(tool.output_schema)
+        # ^ HwpDocument 의 sub-model 들이 schema 에 등장 (v0.5.0 의 약타입엔 부재)
+        for ref in ("HwpDocument", "ParagraphBlock", "TableBlock"):
+            assert ref in schema_text, (
+                f"expected {ref!r} in get_ir output schema (v0.5.1 강타입화). "
+                f"v0.5.0 약타입 회귀 의심."
+            )
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-4")
+    def test_iter_blocks_schema_exposes_block_union_variants(self) -> None:
+        """배열 item 의 ``oneOf`` (또는 inline `$defs`) 가 11 변형 모두 노출."""
+        server = build_server()
+        tool = next(t for t in asyncio.run(server.list_tools()) if t.name == "iter_blocks")
+        schema_text = json.dumps(tool.output_schema)
+        for variant in (
+            "ParagraphBlock",
+            "TableBlock",
+            "PictureBlock",
+            "FormulaBlock",
+            "FootnoteBlock",
+            "EndnoteBlock",
+            "ListItemBlock",
+            "CaptionBlock",
+            "TocBlock",
+            "FieldBlock",
+            "UnknownBlock",
+        ):
+            assert variant in schema_text, (
+                f"expected {variant!r} in iter_blocks output schema "
+                f"(Block 유니온 11 변형 — v0.5.1 강타입화)"
+            )
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-4")
+    def test_chunks_schema_exposes_chunk_record_fields(self) -> None:
+        """``page_content`` + ``metadata`` 가 schema 에 노출 — metadata 자유 dict 유지."""
+        server = build_server()
+        tool = next(t for t in asyncio.run(server.list_tools()) if t.name == "chunks")
+        schema_text = json.dumps(tool.output_schema)
+        assert "page_content" in schema_text
+        assert "metadata" in schema_text
+
+
+# ------------------------------------------------------------------ AC-5
+class TestBackwardsCompat:
+    """v0.5.0 → v0.5.1 wire format 회귀 가드 — ``result.structured_content`` byte-equal.
+
+    v0.5.0 의 dict 출력 == v0.5.1 의 fastmcp 자동 직렬화 (Pydantic ``model_dump``).
+    이 invariant 가 깨지면 외부 MCP 클라이언트 (Claude Desktop / Cline 등) 의 기존
+    LLM 프롬프트 / 후처리 코드가 영향 받음 — PATCH 의 SemVer 의무 위반.
+    """
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-5")
+    def test_get_ir_structured_content_matches_v050_dump(self, hwp_sample: Path) -> None:
+        """v0.5.0 의 ``HwpDocument.model_dump(mode="json")`` 와 v0.5.1 wire format byte-equal.
+
+        BaseModel 반환은 fastmcp v3 가 wrap 없이 fields 직접 노출 — list / scalar
+        반환의 ``{"result": ...}`` wrapper 와 다른 패턴 (fastmcp v3.2.4 docs § Use
+        Typed Models for Structured Output).
+        """
+        expected = rhwp.parse(str(hwp_sample)).to_ir().model_dump(mode="json")
+        server = build_server()
+
+        async def _call() -> Any:
+            async with Client(server) as client:
+                return await client.call_tool("get_ir", {"path": str(hwp_sample)})
+
+        result = asyncio.run(_call())
+        assert result.structured_content == expected
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-5")
+    def test_iter_blocks_structured_content_matches_v050_dump(self, hwp_sample: Path) -> None:
+        """v0.5.0 의 ``[Block.model_dump(mode="json"), ...]`` 와 byte-equal."""
+        ir_doc = rhwp.parse(str(hwp_sample)).to_ir()
+        expected = [
+            block.model_dump(mode="json")
+            for block in ir_doc.iter_blocks(scope="body", recurse=True)
+        ]
+        server = build_server()
+
+        async def _call() -> Any:
+            async with Client(server) as client:
+                return await client.call_tool("iter_blocks", {"path": str(hwp_sample)})
+
+        result = asyncio.run(_call())
+        assert result.structured_content == {"result": expected}
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-5")
+    def test_chunks_structured_content_matches_v050_dump(self, hwp_sample: Path) -> None:
+        """v0.5.0 의 dict 평탄화 결과와 v0.5.1 wire format byte-equal."""
+        pytest.importorskip("langchain_text_splitters")
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        from rhwp.integrations.langchain import HwpLoader
+
+        # ^ v0.5.0 chunks 의 정확한 dict 평탄화 패턴 재현
+        loader = HwpLoader(str(hwp_sample), mode="paragraph", include_furniture=False)
+        docs = loader.load()
+        splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+        split_docs = splitter.split_documents(docs)
+        expected = [{"page_content": d.page_content, "metadata": d.metadata} for d in split_docs]
+
+        server = build_server()
+
+        async def _call() -> Any:
+            async with Client(server) as client:
+                return await client.call_tool("chunks", {"path": str(hwp_sample)})
+
+        result = asyncio.run(_call())
+        assert result.structured_content == {"result": expected}
+
+
+# ------------------------------------------------------------------ AC-6
+class TestTypedClientData:
+    """fastmcp Client 의 ``result.data`` 가 v0.5.1 부터 typed deserialization.
+
+    v0.5.0 의 dict 출력에서는 ``result.data`` 가 raw dict 또는 list[dict].
+    v0.5.1 부터 fastmcp 가 outputSchema 기반으로 Pydantic-like 객체로 reconstruct —
+    attribute access 가 가능해 LLM 에이전트의 결과 후처리가 정확.
+    """
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-6")
+    def test_get_ir_client_data_has_typed_attributes(self, hwp_sample: Path) -> None:
+        server = build_server()
+
+        async def _call() -> Any:
+            async with Client(server) as client:
+                return await client.call_tool("get_ir", {"path": str(hwp_sample)})
+
+        result = asyncio.run(_call())
+        data = result.data
+        # ^ schema_name / schema_version 이 attribute 로 access 가능 (v0.5.0 dict 와 다름)
+        assert hasattr(data, "schema_name")
+        assert data.schema_name == "HwpDocument"
+        assert hasattr(data, "schema_version")
+        assert hasattr(data, "body")
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-6")
+    def test_iter_blocks_client_data_is_typed_list(self, hwp_sample: Path) -> None:
+        """``list[Block]`` 의 ``result.data`` — fastmcp v3 의 oneOf 한계로 list element
+        는 dict 폴백 (callable Discriminator + Tag union 을 dynamic Pydantic 모델로
+        reconstruct 불가). server side 출력 자체는 typed (AC-2). client side 의
+        의미 있는 검증은 ``"kind"`` key 가 노출되어 있고 v0.5.0 dict access 패턴이
+        그대로 동작한다는 것 — wire format 의 byte-equality 가 더 strict 한 회귀 가드 (AC-5).
+        """
+        server = build_server()
+
+        async def _call() -> Any:
+            async with Client(server) as client:
+                return await client.call_tool("iter_blocks", {"path": str(hwp_sample)})
+
+        result = asyncio.run(_call())
+        data = result.data
+        assert isinstance(data, list)
+        assert data, "iter_blocks 의 fixture 결과는 빈 리스트가 아니어야 함"
+        # ^ Discriminator key 'kind' 가 모든 변형의 dict key (v0.5.0 access 호환)
+        for block in data:
+            assert "kind" in block
+            assert isinstance(block["kind"], str)
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-6")
+    def test_chunks_client_data_is_typed_list(self, hwp_sample: Path) -> None:
+        pytest.importorskip("langchain_text_splitters")
+        server = build_server()
+
+        async def _call() -> Any:
+            async with Client(server) as client:
+                return await client.call_tool("chunks", {"path": str(hwp_sample)})
+
+        result = asyncio.run(_call())
+        data = result.data
+        assert isinstance(data, list)
+        assert data, "chunks fixture 결과는 빈 리스트가 아니어야 함"
+        for chunk in data:
+            # ^ ChunkRecord 의 두 필드가 attribute 로 access 가능
+            assert hasattr(chunk, "page_content")
+            assert hasattr(chunk, "metadata")
+            assert isinstance(chunk.page_content, str)
+            assert isinstance(chunk.metadata, dict)
+
+
+# ------------------------------------------------------------------ Pydantic round-trip
+class TestTypedModelRoundTrip:
+    """Pydantic dump → load → equality — 모델 정의의 결정성 회귀 가드."""
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-1")
+    def test_get_ir_round_trip(self, hwp_sample: Path) -> None:
+        original = tools.get_ir(str(hwp_sample))
+        reloaded = HwpDocument.model_validate_json(original.model_dump_json())
+        assert reloaded == original
+
+    @pytest.mark.spec("v0.5.1/mcp-typed-output#AC-3")
+    def test_chunk_record_round_trip(self) -> None:
+        original = ChunkRecord(
+            page_content="hello",
+            metadata={"kind": "paragraph", "section_idx": 0, "para_idx": 0},
+        )
+        reloaded = ChunkRecord.model_validate_json(original.model_dump_json())
+        assert reloaded == original
