@@ -498,6 +498,18 @@ class FieldBlock(BaseModel):
     prov: Provenance
 
 
+def _unknown_kind_schema_extra(schema: dict[str, Any]) -> None:
+    """``UnknownBlock.kind`` 의 JSON Schema 에 ``not.enum`` 추가.
+
+    callable 로 분리한 이유 — ``_KNOWN_KINDS`` 가 ``UnknownBlock`` 정의 *뒤* 에
+    위치하므로 클래스 정의 시점에는 미정의. 함수는 호출 시점 (schema 생성
+    시점) 에만 ``_KNOWN_KINDS`` 평가하므로 모듈 fully-loaded 상태 보장.
+
+    ``Field(json_schema_extra=callable)`` 표준 hook — schema dict 를 in-place 변경.
+    """
+    schema["not"] = {"enum": sorted(_KNOWN_KINDS)}
+
+
 class UnknownBlock(BaseModel):
     """Forward-compatibility catch-all.
 
@@ -513,7 +525,17 @@ class UnknownBlock(BaseModel):
     # ^ extra="allow" — 미지 variant 의 payload 를 보존해 소비자가 최소한 로그/raw 접근 가능
     model_config = ConfigDict(extra="allow", frozen=True)
 
-    kind: str
+    kind: Annotated[
+        str,
+        Field(
+            description=(
+                "Unknown block kind — must NOT match any known block kind. "
+                "callable Discriminator (`_block_discriminator`) 가 미지 kind 만 "
+                "본 variant 로 라우팅하므로 SSOT 와 정합."
+            ),
+            json_schema_extra=_unknown_kind_schema_extra,
+        ),
+    ]
     prov: Provenance
 
 
