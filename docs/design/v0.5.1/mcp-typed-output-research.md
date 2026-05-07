@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.5.1 MCP 출력 강타입화 ADR — 'HwpDocument' / 'list[Block]' / 'ChunkRecord' 채택 / 'metadata' 자유 dict 유지 / fastmcp 자동 schema 위임 결정 근거"
-target: v0.5.1
+ga: v0.5.1
 last_updated: 2026-05-07
 ---
 

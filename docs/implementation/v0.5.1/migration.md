@@ -1,7 +1,7 @@
 ---
 status: Frozen
 description: "v0.5.1 구현 로그 — MCP tool 출력 schema 강타입화 (`get_ir` / `iter_blocks` / `chunks`). wire format byte-equal. `UnknownBlock.kind` JSON Schema not.enum 추가로 fastmcp strict oneOf 호환"
-target: v0.5.1
+ga: v0.5.1
 last_updated: 2026-05-07
 ---
 

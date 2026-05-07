@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.5.1 — 'rhwp-mcp' 도구 출력 schema 강타입화. 'get_ir' / 'iter_blocks' / 'chunks' 의 'dict[str, Any]' 반환을 Pydantic 모델로 교체. 'UnknownBlock.kind' JSON Schema not.enum 추가로 fastmcp strict 'oneOf' 호환"
-target: v0.5.1
+ga: v0.5.1
 last_updated: 2026-05-07
 ---
 
