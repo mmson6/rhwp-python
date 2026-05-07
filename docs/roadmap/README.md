@@ -13,6 +13,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 - **v0.3.2** — Frozen, UTF-16 → codepoint 변환 SSOT 단일화 GA (2026-05-03)
 - **v0.4.0** — Frozen, IR view 렌더러 (Markdown / HTML) GA (2026-05-05)
 - **v0.5.0** — Frozen, MCP server (`rhwp-mcp`) GA (2026-05-06)
+- **v0.5.1** — Frozen, MCP tool 출력 schema 강타입화 GA (2026-05-07)
 - **v0.6.0+** — 미착수 (주제 미정, demand-driven)
 
 ## 활성 spec 인덱스
@@ -29,6 +30,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 | v0.3.2 (IR upstream UTF-16 helper) | Frozen | [v0.3.2/ir-upstream-utf16-helper.md](v0.3.2/ir-upstream-utf16-helper.md) | [design/v0.3.2/ir-upstream-utf16-helper-research.md](../design/v0.3.2/ir-upstream-utf16-helper-research.md) |
 | v0.4.0 (view 렌더러) | Frozen | [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md) | [design/v0.4.0/view-renderer-research.md](../design/v0.4.0/view-renderer-research.md) |
 | v0.5.0 (MCP server) | Frozen | [v0.5.0/mcp.md](v0.5.0/mcp.md) | [design/v0.5.0/mcp-research.md](../design/v0.5.0/mcp-research.md) |
+| v0.5.1 (MCP typed output) | Frozen | [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md) | [design/v0.5.1/mcp-typed-output-research.md](../design/v0.5.1/mcp-typed-output-research.md) |
 
 ## 미착수 작업 계획
 
@@ -36,9 +38,9 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 
 ### v0.6.0+ — 미정 (demand-driven)
 
-v0.5.0 MCP server (Frozen, [v0.5.0/mcp.md](v0.5.0/mcp.md)) 이후 다음 minor 들. 주제 미정 — v0.3.0 LangChain integration + v0.5.0 MCP 가 RAG / LLM 에이전트 사용처 분모를 이미 커버하는 상황에서 추가 RAG 프레임워크 통합은 **demand-driven 으로 보류** (HWP × 비-LangChain RAG 교집합이 좁을 가능성). 구체화되면 `/new-spec <version> <topic>` 으로 promote.
+v0.5.0 MCP server (Frozen, [v0.5.0/mcp.md](v0.5.0/mcp.md)) + v0.5.1 후속 polish (Frozen, [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md)) 이후 다음 minor 들. 주제 미정 — v0.3.0 LangChain integration + v0.5.0 MCP 가 RAG / LLM 에이전트 사용처 분모를 이미 커버하는 상황에서 추가 RAG 프레임워크 통합은 **demand-driven 으로 보류** (HWP × 비-LangChain RAG 교집합이 좁을 가능성). 구체화되면 `/new-spec <version> <topic>` 으로 promote.
 
-> v0.4.0 view 렌더러 (Markdown / HTML) / v0.5.0 MCP server (`rhwp-mcp`) 모두 GA 완료 — [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md), [v0.5.0/mcp.md](v0.5.0/mcp.md) 가 SSOT.
+> v0.4.0 view 렌더러 (Markdown / HTML) / v0.5.0 MCP server (`rhwp-mcp`) / v0.5.1 MCP 출력 강타입화 모두 GA 완료 — [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md), [v0.5.0/mcp.md](v0.5.0/mcp.md), [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md) 가 SSOT.
 
 ### v0.8.0 ~ v1.0.0 — JSON IR → HWP 역생성
 
@@ -87,6 +89,7 @@ SemVer 0.x.y 단계에서 minor 는 단조 증가 — v0.9 다음은 v0.10 (v1.0
 | v0.3.1 | [implementation/v0.3.1/migration.md](../implementation/v0.3.1/migration.md) | — |
 | v0.4.0 | [implementation/v0.4.0/migration.md](../implementation/v0.4.0/migration.md) | — |
 | v0.5.0 | [implementation/v0.5.0/stages/](../implementation/v0.5.0/stages/) (S1~S5) | — |
+| v0.5.1 | [implementation/v0.5.1/migration.md](../implementation/v0.5.1/migration.md) | — |
 
 ## 원칙
 

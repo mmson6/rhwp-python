@@ -28,6 +28,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 부수 — `test_submodule_pin_matches_changelog_record` 제거 ([tests/test_ir_marker_char_offset.py](tests/test_ir_marker_char_offset.py)). 본래 v0.3.1 의 *deliberate* pin bump (v0.7.7 → 0fb3e67) 가 release-readiness 시점 기재됐는지 가드한 일회성 AC-13 의 일부였으나, GA shipped 후에도 영구 runtime 가드로 잔존해 일상 sync 마다 CHANGELOG 갱신을 강제하는 anti-pattern (1회성 release-gating AC 의 영구 테스트화 + 문서 텍스트 매칭 runtime test) 화. CHANGELOG 갱신은 릴리즈 시점 의무 (`publish.yml::verify-version` 로 version 일치 가드, 사람 review 가 핀 bump 정합성 점검) 로 이양. AC-13 의 historical record 검증은 동 파일 `test_changelog_records_pin_bump` (Frozen v0.3.1 섹션 텍스트 회귀 가드) 가 그대로 유지.
 - 부수 — 동 파일 이름 `test_v0_3_1_marker_char_offset.py` → `test_ir_marker_char_offset.py` (`test_ir_*` 패턴 통일, 본 spec lifecycle 은 `pytest.mark.spec("v0.3.1/...")` marker 가 보유).
 
+## [0.5.1] — 2026-05-07
+
+PATCH release. v0.5.0 GA 한 `rhwp-mcp` 의 7 도구 중 약타입 (`dict[str, Any]` / `list[dict[str, Any]]`) 으로 반환하던 3 도구 (`get_ir` / `iter_blocks` / `chunks`) 의 출력 시그니처를 Pydantic V2 모델 (`HwpDocument` / `list[Block]` / `list[ChunkRecord]`) 로 강타입화. fastmcp v3 의 자동 outputSchema 가 약타입 (`additionalProperties: true` 만) → 강타입 (필드별 type / Discriminator + Tag 11 변형 / required 명시) 으로 강화 — LLM 의 응답 해석 / 후속 도구 호출 정확도 향상. wire format byte-equal — 외부 클라이언트 (Claude Desktop / Cline 등) 의 LLM 프롬프트 / 후처리 코드 영향 0. 코어 wheel 의존성 / extras / schema (`"1.1"`) 변경 없음.
+
+### Added
+
+- `rhwp.mcp.tools.ChunkRecord` BaseModel 신규 — `page_content: str` + `metadata: dict[str, Any]`. `model_config = ConfigDict(extra="forbid", frozen=True)`. RAG 청크의 직렬화 표면 — LangChain `Document` 의 `page_content` / `metadata` 평탄화. mode × block kind 동적 metadata 키 집합은 `rhwp.integrations.langchain.HwpLoader` 가 SSOT — 분기 모델 (`ChunkRecord_Single` 등) 거부 결정으로 `metadata` 자유 dict 유지 (schema 비대 + forward-compat 깨짐 회피).
+
+### Changed
+
+- `rhwp.mcp.tools.get_ir(path)` 반환 타입 — `dict[str, Any]` → `HwpDocument`. fastmcp 가 자동으로 `model_dump(mode="json")` 직렬화 → `result.structured_content` 가 v0.5.0 dict 출력과 byte-equal. `result.data` 는 typed BaseModel 인스턴스 (v0.5.1 신규 표면) — discriminated union block 들의 강타입 access 가능.
+- `rhwp.mcp.tools.iter_blocks(path, ...)` 반환 타입 — `list[dict[str, Any]]` → `list[Block]`. callable Discriminator + Tag 11 변형 (paragraph / table / picture / formula / footnote / endnote / list_item / caption / toc / field / unknown) 그대로 노출 — outputSchema 의 `oneOf` 11 변형이 LLM 에 정확한 `kind` 별 필드 구조 노출.
+- `rhwp.mcp.tools.chunks(path, ...)` 반환 타입 — `list[dict[str, Any]]` → `list[ChunkRecord]`. dict 평탄화 코드 제거 — fastmcp 자동 직렬화에 위임.
+- README MCP 도구 표 출력 컬럼 갱신 + v0.5.1 마이그 노트 한 단락 추가 — `result.data` 의 dict 인덱싱 → typed attribute access 마이그 (단 `iter_blocks` list element 는 fastmcp v3 의 `oneOf` deserialization 한계로 dict 폴백 — v0.5.0 access 패턴 그대로 동작).
+
+### Fixed
+
+- `python/rhwp/ir/nodes.py` 의 `UnknownBlock.kind` 의 JSON Schema 에 `not.enum: sorted(_KNOWN_KINDS)` constraint 추가 (`Field(json_schema_extra=callable)` 표준 hook). `fastmcp` v3 + `jsonschema` 의 strict `oneOf` validation 이 ParagraphBlock 과 UnknownBlock 양쪽 valid 인스턴스 (예: 빈 ParagraphBlock) 에서 `RuntimeError: Invalid structured content` 로 fail 하던 client side wire format 호환 깨짐 해결. callable Discriminator (`_block_discriminator`) 의 런타임 동작은 SSOT 그대로 — schema export 만 strict 화. packaged `python/rhwp/ir/schema/hwp_ir_v1.json` 자동 재생성. v0.2.0 Frozen IR 의 forward-compat 라우팅 (미지 kind → `UnknownBlock`) 보존 — `tests/test_ir_schema_export.py::test_unknown_kind_routing_pydantic_matches_schema` 가 회귀 가드.
+
+### Build
+
+- `external/rhwp` submodule pin 변경 없음 — v0.5.0 동일 (`62a458a`, v0.7.10). 본 PATCH 는 pure Python schema 강화, 상류 변경 0.
+- 신규 의존성 / extras 변경 없음. CI `test-without-extras` job 의 expected skip count 5 그대로 (`tests/test_mcp_server.py` 의 file-level `pytest.importorskip("fastmcp")` 보존).
+
+### Notes
+
+- spec / ADR / 구현 로그: [docs/roadmap/v0.5.1/mcp-typed-output.md](docs/roadmap/v0.5.1/mcp-typed-output.md) (Frozen, 10 인수조건, 8 결정) / [docs/design/v0.5.1/mcp-typed-output-research.md](docs/design/v0.5.1/mcp-typed-output-research.md) (Frozen, 5 결정 매트릭스) / [docs/implementation/v0.5.1/migration.md](docs/implementation/v0.5.1/migration.md) (Frozen).
+- v0.5.1 작업 중 표면화된 fastmcp v3 의 두 한계는 spec body 에 정확히 반영: (1) `result.structured_content` 의 wrap 분기 (BaseModel = inline / `list[T]` = `{"result": ...}` envelope), (2) callable Discriminator + Tag 유니온의 `oneOf` schema 가 dynamic 모델 reconstruct 안 됨 (list element dict 폴백). server side 의 typed 출력은 AC-2 / AC-3 가, wire format byte-equal 은 AC-5 가 cover.
+
 ## [0.5.0] — 2026-05-06
 
 MINOR release. [Model Context Protocol](https://modelcontextprotocol.io/) (Anthropic, 2024) 서버를 새 entry point `rhwp-mcp` 로 노출한다. LLM 에이전트 (Claude Desktop / Cursor / Cline / Continue.dev / Goose / 자체 에이전트) 가 HWP/HWPX 를 직접 파싱·요약·청크화 가능. standalone [`fastmcp`](https://github.com/jlowin/fastmcp) v3 (jlowin) 기반 — 2026-05 기준 MCP 서버 약 70% 시장 점유의 사실상 표준. 7 도구 / 2 transport (stdio 기본 + streamable-http 옵션) / runtime extras gate / `unsendable` 안전 패턴 강제. 코어 wheel 의존성 변경 0 (additive extras), schema (`"1.1"`) 유지.

@@ -12,9 +12,10 @@
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 import rhwp
+from rhwp.ir.nodes import Block, HwpDocument
 
 
 class ParseSummary(BaseModel):
@@ -24,6 +25,29 @@ class ParseSummary(BaseModel):
     paragraphs: int = Field(description="전체 섹션을 통틀어 누적된 문단 수.")
     pages: int = Field(description="페이지네이션 후 페이지 수.")
     rhwp_core_version: str = Field(description="파싱에 사용된 상류 rhwp Rust 코어 버전.")
+
+
+class ChunkRecord(BaseModel):
+    """RAG 청크의 직렬화 표면 — LangChain ``Document`` 의 ``page_content`` / ``metadata`` 평탄화.
+
+    fastmcp 가 자동 생성하는 outputSchema 가 ``page_content: str`` + ``metadata: object``
+    의 *상위 schema* 만 강타입화 — ``metadata`` 내부 키는 mode × block kind 조합으로
+    동적이라 자유 dict 유지. 키 집합 SSOT 는 ``rhwp.integrations.langchain.HwpLoader``.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    page_content: str = Field(
+        description="Chunk text (마크다운 / 평문 / HTML — chunks mode 에 따름).",
+    )
+    metadata: dict[str, Any] = Field(
+        description=(
+            "Mode-dependent metadata. 공통 키 source / paragraph_count + mode 별 키 — "
+            "paragraph: paragraph_index, ir-blocks: kind / section_idx / para_idx / "
+            "char_start / char_end / image_uri / rows / cols / caption / scope. "
+            "키 집합은 'rhwp.integrations.langchain.HwpLoader' 가 SSOT."
+        ),
+    )
 
 
 # ^ Block kind enum — IR ``Block.kind`` Literal 과 1:1. "필터 미적용" 은 sentinel
@@ -73,13 +97,15 @@ def extract_text(path: str) -> str:
     return rhwp.parse(path).extract_text()
 
 
-def get_ir(path: str) -> dict[str, Any]:
-    """HWP 또는 HWPX 파일을 파싱해 Document IR 전체를 JSON 직렬화 가능한 dict 로 반환.
+def get_ir(path: str) -> HwpDocument:
+    """HWP 또는 HWPX 파일을 파싱해 Document IR 전체를 ``HwpDocument`` 모델로 반환.
 
-    Pydantic ``HwpDocument.model_dump(mode="json")`` 결과 — discriminated union
-    block 들이 모두 평탄화된 형태. RAG 인덱싱 또는 LLM 후처리에 그대로 입력 가능.
+    fastmcp 가 자동으로 ``model_dump(mode="json")`` 직렬화하므로 wire format
+    (``result.structured_content``) 은 v0.5.0 dict 출력과 byte-equal. ``result.data``
+    는 typed BaseModel 인스턴스 (v0.5.1 신규 표면) — discriminated union block
+    들의 강타입 access 가능. RAG 인덱싱 또는 LLM 후처리에 그대로 입력 가능.
     """
-    return rhwp.parse(path).to_ir().model_dump(mode="json")
+    return rhwp.parse(path).to_ir()
 
 
 def to_markdown(path: str) -> str:
@@ -117,11 +143,16 @@ def iter_blocks(
     kind: BlockKind | None = None,
     scope: BlockScope = "body",
     limit: int | None = None,
-) -> list[dict[str, Any]]:
-    """IR 블록을 ``kind`` / ``scope`` 로 필터링해 dict 리스트로 반환.
+) -> list[Block]:
+    """IR 블록을 ``kind`` / ``scope`` 로 필터링해 ``Block`` 리스트로 반환.
 
     재귀 진입 (``recurse=True``) 으로 컨테이너 블록 (TableCell / Footnote /
     Endnote / Caption) 내부까지 평탄화 — 결과는 RAG 청커가 그대로 소비할 수 있다.
+
+    fastmcp 가 자동으로 각 ``Block`` 을 ``model_dump(mode="json")`` 직렬화하므로
+    wire format 은 v0.5.0 dict 리스트와 byte-equal. ``Block`` 의 callable
+    Discriminator + Tag 유니온 (11 변형) 이 outputSchema 의 ``oneOf`` 로 노출 —
+    LLM 이 ``kind`` 별 필드 구조를 정확히 추론.
 
     Args:
         path: HWP 또는 HWPX 파일 경로.
@@ -131,15 +162,15 @@ def iter_blocks(
         limit: 최대 출고 개수. ``None`` 이면 전체.
 
     Returns:
-        ``Block.model_dump(mode="json")`` dict 의 리스트.
+        ``Block`` 인스턴스의 리스트 (Discriminator + Tag 유니온 변형 11 종).
     """
     doc = rhwp.parse(path)
     ir_doc = doc.to_ir()
-    out: list[dict[str, Any]] = []
+    out: list[Block] = []
     for block in ir_doc.iter_blocks(scope=scope, recurse=True):
         if kind is not None and block.kind != kind:
             continue
-        out.append(block.model_dump(mode="json"))
+        out.append(block)
         if limit is not None and len(out) >= limit:
             break
     return out
@@ -151,13 +182,17 @@ def chunks(
     size: int = 500,
     overlap: int = 50,
     include_furniture: bool = False,
-) -> list[dict[str, Any]]:
+) -> list[ChunkRecord]:
     """HWP/HWPX 를 RAG 청크 리스트로 변환 (LangChain ``RecursiveCharacterTextSplitter``).
 
     런타임에 ``langchain-text-splitters`` 를 lazy import — ``[mcp]`` extras 만
     설치한 사용자에게도 서버 기동 / 다른 도구 호출은 정상 동작 (mcp.md AC-7).
     chunks 도구만 호출 시점에 ImportError → fastmcp 가 ``ToolError`` 로 wrap
     → MCP 응답 ``CallToolResult(isError=True)``.
+
+    fastmcp 가 자동으로 각 ``ChunkRecord`` 를 ``model_dump(mode="json")``
+    직렬화하므로 wire format (``result.structured_content``) 은 v0.5.0 dict
+    리스트와 byte-equal.
 
     Args:
         path: HWP 또는 HWPX 파일 경로.
@@ -177,8 +212,8 @@ def chunks(
             RAG body 검색 오염 회피.
 
     Returns:
-        ``[{"page_content": str, "metadata": dict}]`` — LangChain Document 의
-        직렬화 가능 형태.
+        ``ChunkRecord`` 인스턴스의 리스트 — LangChain Document 의 ``page_content``
+        / ``metadata`` 평탄화.
     """
     try:
         from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -196,4 +231,4 @@ def chunks(
     docs = loader.load()
     splitter = RecursiveCharacterTextSplitter(chunk_size=size, chunk_overlap=overlap)
     split_docs = splitter.split_documents(docs)
-    return [{"page_content": d.page_content, "metadata": d.metadata} for d in split_docs]
+    return [ChunkRecord(page_content=d.page_content, metadata=d.metadata) for d in split_docs]

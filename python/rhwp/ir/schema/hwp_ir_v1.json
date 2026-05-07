@@ -1146,8 +1146,7 @@
       "description": "Forward-compatibility catch-all.\n\nPydantic V2 의 기본 string discriminator 는 미지의 ``kind`` 를 만나면\n``union_tag_invalid`` 로 문서 전체 파싱을 거부한다. callable Discriminator\n로 미지 ``kind`` 를 본 variant 로 라우팅하여, 나중에 새로운 블록 타입이\n추가되어도 구 버전 소비자가 읽기-불가 상태가 되지 않게 한다.\n\n소비자는 ``case UnknownBlock(): skip`` 패턴을 사용한다. ``assert_never``\n패턴은 새 variant 추가 시 빌드가 깨지므로 **사용 금지**.",
       "properties": {
         "kind": {
-          "title": "Kind",
-          "type": "string",
+          "description": "Unknown block kind — must NOT match any known block kind. callable Discriminator (`_block_discriminator`) 가 미지 kind 만 본 variant 로 라우팅하므로 SSOT 와 정합.",
           "not": {
             "enum": [
               "caption",
@@ -1161,7 +1160,9 @@
               "table",
               "toc"
             ]
-          }
+          },
+          "title": "Kind",
+          "type": "string"
         },
         "prov": {
           "$ref": "#/$defs/Provenance"

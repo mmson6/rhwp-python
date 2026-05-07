@@ -175,13 +175,15 @@ pip install "rhwp-python[mcp-chunks]"    # + chunks (RAG 청킹 — langchain-te
 
 | 도구 | 입력 | 출력 |
 |---|---|---|
-| `parse_hwp_summary` | `path` | sections / paragraphs / pages 카운트 + rhwp-core 버전 |
-| `extract_text` | `path` | 단락별 평문 (LF 결합) |
-| `get_ir` | `path` | Document IR 전체 (JSON-serializable dict) |
-| `iter_blocks` | `path`, `kind?`, `scope`, `limit?` | IR 블록 dict 리스트 (kind / scope 필터링) |
-| `to_markdown` | `path` | GFM Markdown — v0.4.0 view API thin wrapper |
-| `to_html` | `path`, `include_css` | HTML5 문서 — v0.4.0 view API thin wrapper |
-| `chunks` | `path`, `mode`, `size`, `overlap`, `include_furniture` | LangChain `RecursiveCharacterTextSplitter` 적용 청크 — `[mcp-chunks]` extras 필요 |
+| `parse_hwp_summary` | `path` | `ParseSummary` — sections / paragraphs / pages 카운트 + rhwp-core 버전 |
+| `extract_text` | `path` | `str` — 단락별 평문 (LF 결합) |
+| `get_ir` | `path` | `HwpDocument` — Document IR 전체 (Pydantic 모델, fastmcp 자동 직렬화) |
+| `iter_blocks` | `path`, `kind?`, `scope`, `limit?` | `list[Block]` — discriminated union (paragraph / table / picture / ... 11 변형, kind / scope 필터링) |
+| `to_markdown` | `path` | `str` — GFM Markdown (v0.4.0 view API thin wrapper) |
+| `to_html` | `path`, `include_css` | `str` — HTML5 문서 (v0.4.0 view API thin wrapper) |
+| `chunks` | `path`, `mode`, `size`, `overlap`, `include_furniture` | `list[ChunkRecord]` — LangChain `RecursiveCharacterTextSplitter` 적용 청크. `[mcp-chunks]` extras 필요 |
+
+> **v0.5.1 마이그 노트** — 출력 시그니처가 dict / list[dict] 에서 Pydantic 모델로 강화됐습니다 (PATCH). fastmcp Client 의 `result.structured_content` (raw dict, MCP wire format) 는 v0.5.0 과 byte-equal — 외부 LLM 프롬프트 / 후처리 코드 영향 0. 다만 `result.data` 사용 패턴은 변경: v0.5.0 의 `result.data["body"]` (dict 인덱싱) → v0.5.1 의 `result.data.body` (typed attribute) 또는 `result.data.model_dump()["body"]`. `iter_blocks` 의 list element 는 fastmcp v3 의 `oneOf` deserialization 한계로 dict 폴백 — `block["kind"]` access 패턴은 그대로 동작.
 
 ### Claude Desktop 등록
 
