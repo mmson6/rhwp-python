@@ -20,6 +20,7 @@ chunks smoke 만 개별 skip (file-level skip 카운트 영향 없음).
 - AC-10 (모듈 위치)                                           → ``TestPackagingSurface``
 """
 
+import sys
 from pathlib import Path
 
 import pytest
@@ -588,10 +589,14 @@ class TestPackagingSurface:
     @pytest.mark.spec("v0.5.0/mcp#AC-9")
     def test_pyproject_declares_fastmcp_extras_and_script(self) -> None:
         """``[project.optional-dependencies] mcp = ["fastmcp..."]`` + ``rhwp-mcp`` script 등록."""
-        try:
-            import tomllib  # py 3.11+
-        except ModuleNotFoundError:  # pragma: no cover — py3.10 폴백
-            import tomli as tomllib  # type: ignore[import-not-found,no-redef]
+        # ^ ``sys.version_info`` guard 로 pyright 가 Python 3.10 / 3.11+ 를 정확히 분기.
+        #   try/except ModuleNotFoundError 는 런타임 동작은 옳지만 pyright 의 statically-
+        #   resolved 모듈 검증을 통과 못 함 (3.10 venv 에선 ``tomllib`` 가 stdlib 부재).
+        #   ``tomli`` 는 pytest>=8 / langchain 등의 transitive 로 testing extras 에 가용.
+        if sys.version_info >= (3, 11):
+            import tomllib
+        else:
+            import tomli as tomllib  # type: ignore[no-redef]
 
         repo_root = Path(__file__).resolve().parent.parent
         with open(repo_root / "pyproject.toml", "rb") as f:
