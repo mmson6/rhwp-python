@@ -1,7 +1,7 @@
 ---
 status: Frozen
 description: "v0.5.0 S4 작업 로그 — streamable-http transport (--transport / --host / --port CLI 옵션, fastmcp v3 의 uvicorn ASGI 분기). stdio 기본 backward-compat 유지, AC-8 충족"
-target: v0.5.0
+ga: v0.5.0
 last_updated: 2026-05-06
 ---
 

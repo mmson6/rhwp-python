@@ -1,7 +1,7 @@
 ---
 status: Frozen
 description: "v0.5.0 S3 작업 로그 — chunks 도구 추가 (RAG 청킹). langchain-text-splitters 런타임 extras gate (AC-7), 도구 카운트 6 → 7 (mcp.md AC-2 GA 기준 충족)"
-target: v0.5.0
+ga: v0.5.0
 last_updated: 2026-05-06
 ---
 

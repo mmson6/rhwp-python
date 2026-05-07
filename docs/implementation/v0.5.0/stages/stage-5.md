@@ -1,7 +1,7 @@
 ---
 status: Frozen
 description: "v0.5.0 S5 작업 로그 — 문서화·검증. README MCP 섹션 / Claude Desktop 등록 예제 / examples/06_mcp_server.py / AC-1~AC-11 sweep. v0.5.0 GA 직전 마지막 stage"
-target: v0.5.0
+ga: v0.5.0
 last_updated: 2026-05-06
 ---
 

@@ -1,7 +1,7 @@
 ---
 status: Frozen
 description: "v0.5.0 S2 작업 로그 — view 도구 추가 (to_markdown / to_html). v0.4.0 view 렌더러 위 thin wrapper, 도구 카운트 4 → 6"
-target: v0.5.0
+ga: v0.5.0
 last_updated: 2026-05-06
 ---
 

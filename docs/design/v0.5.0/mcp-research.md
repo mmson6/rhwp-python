@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.5.0 MCP ADR — SDK 채택 (fastmcp v3 standalone) / transport (stdio + streamable-http) / handler 동시성 (sync 전용) / 도구 분할 (7 개) 결정 근거"
-target: v0.5.0
+ga: v0.5.0
 last_updated: 2026-05-06
 ---
 

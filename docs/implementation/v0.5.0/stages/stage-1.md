@@ -1,7 +1,7 @@
 ---
 status: Frozen
 description: "v0.5.0 S1 작업 로그 — rhwp.mcp 패키지 + FastMCP 서버 스켈레톤 + 4 도구 (parse_hwp_summary / extract_text / get_ir / iter_blocks) + ADR § 1 SDK 결정 갱신 (공식 mcp SDK → standalone fastmcp v3)"
-target: v0.5.0
+ga: v0.5.0
 last_updated: 2026-05-06
 ---
 

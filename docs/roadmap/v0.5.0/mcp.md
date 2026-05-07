@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.5.0 — 'rhwp-mcp' MCP 서버. LLM 에이전트가 HWP/HWPX 직접 파싱·요약·청크화 가능한 표준 프로토콜 표면"
-target: v0.5.0
+ga: v0.5.0
 last_updated: 2026-05-06
 ---
 
