@@ -1,7 +1,8 @@
 """v0.6.0 페이지 PNG 렌더링 회귀 가드 — render_png / arender_png / MCP 도구 검증.
 
 AC-1 ~ AC-7 매핑은 ``docs/roadmap/v0.6.0/png-vlm-render.md`` § 인수조건. PIL 은
-``testing`` dependency-group 에 포함 (디코드 후 dimension 검증 — AC-3).
+``testing`` dependency-group 에 포함 (디코드 후 dimension 검증 — AC-3) — 미설치
+환경에서는 file-level skip 으로 본 파일 전체가 1 skip 으로 카운트.
 """
 
 import asyncio
@@ -10,7 +11,10 @@ import io
 from pathlib import Path
 
 import pytest
-from PIL import Image as PilImage
+
+# ^ test-without-extras CI job 의 expected skip count 를 위해 file-level 가드.
+#   testing 그룹 (dev / 본 CI test job) 에는 Pillow 포함 — 정상 실행.
+PilImage = pytest.importorskip("PIL.Image")
 
 import rhwp
 
@@ -48,9 +52,7 @@ class TestRenderPng:
 
 class TestExportPng:
     @pytest.mark.spec("v0.6.0/png-vlm-render#AC-7")
-    def test_writes_files_with_png_magic(
-        self, parsed_hwp: rhwp.Document, tmp_path: Path
-    ) -> None:
+    def test_writes_files_with_png_magic(self, parsed_hwp: rhwp.Document, tmp_path: Path) -> None:
         out_dir = tmp_path / "png_out"
         paths = parsed_hwp.export_png(str(out_dir))
         assert len(paths) == parsed_hwp.page_count
@@ -76,7 +78,6 @@ class TestMcpRenderPagePng:
         #   skip 회피 (다른 AC 가드는 fastmcp 무관하게 실행)
         pytest.importorskip("fastmcp")
         from mcp.types import ImageContent
-
         from rhwp.mcp.tools import render_page_png
 
         result = render_page_png(str(hwp_sample), 0)

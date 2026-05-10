@@ -292,7 +292,7 @@ class Document:
         루프를 직접 사용한다. SVG / PDF 와 동일 메모리 모델.
 
         Raises:
-ValueError: 렌더링 실패.
+            ValueError: 렌더링 실패.
         """
         return self._inner.render_all_png()
 
@@ -308,7 +308,7 @@ ValueError: 렌더링 실패.
             생성된 파일 경로 리스트.
 
         Raises:
-OSError: 디렉토리 생성 또는 파일 쓰기 실패.
+            OSError: 디렉토리 생성 또는 파일 쓰기 실패.
             ValueError: 렌더링 실패.
         """
         return self._inner.export_png(output_dir, prefix=prefix)

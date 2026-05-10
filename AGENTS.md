@@ -33,7 +33,7 @@ Project-specific instructions. Inherits all rules from `~/.claude/CLAUDE.md` (gl
 - Real HWP fixtures live in the submodule: `external/rhwp/samples/aift.hwp` (HWP5), `table-vpos-01.hwpx` (HWPX). `tests/conftest.py` + `benches/bench_gil.py` reference this path
 - When changing one path, change both
 - Markers: `slow` (PDF render), `langchain` (extras required). Default run: `pytest -m "not slow"`
-- Extras-gated test files use module-level `pytest.importorskip` so the whole file counts as **1 skip** when the extra is missing. Current gated files: `test_langchain_loader.py` + `test_langchain_loader_ir.py` (langchain-core), `test_ir_schema_export.py` (jsonschema), `test_cli.py` (typer), `test_mcp_server.py` (fastmcp) → CI's `test-without-extras` job validates **exactly 5 skipped** (see `.github/workflows/ci.yml`). When adding a new extras-gated file, bump the count in both AGENTS.md and ci.yml
+- Extras-gated test files use module-level `pytest.importorskip` so the whole file counts as **1 skip** when the extra is missing. Current gated files: `test_langchain_loader.py` + `test_langchain_loader_ir.py` (langchain-core), `test_ir_schema_export.py` (jsonschema), `test_cli.py` (typer), `test_mcp_server.py` (fastmcp), `test_render_png.py` (Pillow) → CI's `test-without-extras` job validates **exactly 6 skipped** (see `.github/workflows/ci.yml`). When adding a new extras-gated file, bump the count in both AGENTS.md and ci.yml
 - `tests/type_check_errors.py` holds **exactly 4 intentional pyright errors** — CI validates that too. When editing, preserve count; don't fix them
 
 ### Git workflow
