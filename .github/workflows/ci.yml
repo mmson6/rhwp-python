@@ -110,12 +110,14 @@ jobs:
           name: rhwp-python-linux-wheel
           path: dist/
       - run: uv pip install --reinstall dist/*.whl
+      # ^ --no-sync: build-linux-wheel 가 만든 wheel 을 그대로 사용. uv 가 lock 기준으로 프로젝트
+      #   를 editable 빌드하려 하면 native-skia 시스템 의존성 (freetype / fontconfig dev) 필요해서 fail.
       - name: Run pytest (not slow) with coverage
-        run: uv run pytest tests/ -m "not slow" --cov=rhwp --cov-report=term-missing -v
+        run: uv run --no-sync pytest tests/ -m "not slow" --cov=rhwp --cov-report=term-missing -v
       - name: Run pyright (normal)
         if: matrix.lint
         run: |
-          uv run pyright python/ \
+          uv run --no-sync pyright python/ \
             tests/test_smoke.py tests/test_parse.py tests/test_text_extraction.py \
             tests/test_errors.py tests/test_svg_rendering.py tests/test_pdf_rendering.py \
             tests/test_langchain_loader.py tests/test_langchain_loader_ir.py \
@@ -135,8 +137,8 @@ jobs:
         if: matrix.lint
         run: |
           set +e
-          uv run pyright --outputjson tests/type_check_errors.py > pyright-errors.json
-          count=$(uv run python -c "import json; print(json.load(open('pyright-errors.json'))['summary']['errorCount'])")
+          uv run --no-sync pyright --outputjson tests/type_check_errors.py > pyright-errors.json
+          count=$(uv run --no-sync python -c "import json; print(json.load(open('pyright-errors.json'))['summary']['errorCount'])")
           echo "intentional error count: $count"
           if [ "$count" != "4" ]; then
             echo "::error::expected 4 intentional errors, got $count"
@@ -193,7 +195,7 @@ jobs:
           name: rhwp-python-linux-wheel
           path: dist/
       - run: uv pip install --reinstall dist/*.whl
-      - run: uv run pytest tests/ -m slow -v
+      - run: uv run --no-sync pytest tests/ -m slow -v
 
   # * Rust unit tests — src/ir.rs 의 #[cfg(test)] 모듈 실행
   #   Cargo.toml 의 default features 에서 extension-module 이 빠져 있어 libpython 링크 시도 안 함.
@@ -252,7 +254,7 @@ jobs:
         #   test_mcp_server.py (fastmcp), test_render_png.py (Pillow) → 총 6 파일.
         #   test_async.py 는 v0.3.0 부터 stdlib 만 사용 (aiofiles 의존성 제거).
         run: |
-          uv run pytest tests/ -m "not slow" -v | tee pytest-output.txt
+          uv run --no-sync pytest tests/ -m "not slow" -v | tee pytest-output.txt
           if ! grep -qE '(^|[^0-9])6 skipped([^0-9]|$)' pytest-output.txt; then
             echo "::error::expected 6 extras-gated files to auto-skip via importorskip (langchain×2, jsonschema, typer, fastmcp, Pillow)"
             exit 1
