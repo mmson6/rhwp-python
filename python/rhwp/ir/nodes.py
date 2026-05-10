@@ -751,7 +751,8 @@ class HwpDocument(BaseModel):
         """
         from rhwp.ir._view import render_markdown
 
-        return render_markdown(self)
+        # ^ py3.10 pyright 가 Self 와 nominal HwpDocument 를 다르게 처리 — 동일 클래스라 호출 정합
+        return render_markdown(self)  # type: ignore[arg-type]
 
     def to_html(self, *, include_css: bool = False) -> str:
         """IR → 완전 HTML5 문서 (``<!DOCTYPE html>`` + ``<html>`` + ``<head>`` + ``<body>``).
@@ -770,7 +771,8 @@ class HwpDocument(BaseModel):
         """
         from rhwp.ir._view import render_html
 
-        return render_html(self, include_css=include_css)
+        # ^ py3.10 pyright 가 Self 와 nominal HwpDocument 를 다르게 처리 — 동일 클래스라 호출 정합
+        return render_html(self, include_css=include_css)  # type: ignore[arg-type]
 
 
 def _walk_blocks(blocks: Sequence["Block"], recurse: bool) -> Iterator["Block"]:
