@@ -13,7 +13,7 @@ last_updated: 2026-05-10
 
 | # | 항목 | 옵션 비교 | 채택 | 1차 근거 |
 |---|---|---|---|---|
-| 1 | native-skia 활성화 + 배포 형태 | A: default features 통합 (모든 wheel 에 강제) / B: `[png]` extras 분리 (Python-side 마커 + Cargo features 활성화) / C: 별도 PyPI 패키지 (`rhwp-png`) | **B** | skia-safe 빌드 비용 (수십 MB binary-cache) 을 모든 사용자에게 강제하지 않으면서 단일 코드베이스 유지. cli / mcp / langchain 분리 extras 패턴 정합 |
+| 1 | native-skia 활성화 + 배포 형태 | A: default 통합 (모든 wheel 에 native-skia, extras 없음) / B: `[png]` extras 분리 (Python-side 마커 + Pillow 의존성) / C: 별도 PyPI 패키지 (`rhwp-png`) | **A** | PyPI single-package 모델은 wheel 분리를 지원하지 않아 옵션 B 의 extras 도 어차피 통합 wheel 다운로드 — 분리 신호는 cosmetic. render_png 자체는 native skia 단독으로 작동하므로 Python 런타임 의존성 0 → cli / mcp / langchain 의 *런타임 Python 의존성 분리* 패턴과 본질이 다름. 사용자 학습 비용 최소화 |
 | 2 | Python API 시그니처 | A: SVG/PDF API mirror (`render_png` / `render_all_png` / `export_png`) / B: 새 `RenderOptions` dataclass 인자 통일 / C: kwargs-only 단일 `render` dispatcher | **A** | v0.1.0 부터 SVG / PDF 가 같은 3-메서드 패턴, 사용자 학습 비용 0. `RasterRenderOptions` 7 필드 중 1차 3개만 노출 — demand-driven 확장 |
 | 3 | 출력 코덱 | A: PNG 만 / B: PNG + JPEG / C: 사용자 지정 format enum | **A** | 상류 skia 가 `RasterOutputFormat::Png` 만 구현, 다른 format 은 명시적 거부. VLM 1차 호환 코덱 (Claude / GPT-4V / Gemini Vision 모두 PNG 1st-tier). 추가 코덱은 상류 PR 선행 후 |
 | 4 | MCP 출력 인코딩 | A: `bytes` 반환 (fastmcp 자동 처리) / B: `ImageContent(data=base64, mime="image/png")` / C: `file://path` URI 반환 | **B** | fastmcp v3 docs 가 `ImageContent` 를 LLM 시각 입력 1st-tier 패턴으로 명시. Anthropic / OpenAI MCP client 가 image content 를 LLM 메시지에 직접 wire — base64 변환을 클라이언트에 맡기지 않음 |
@@ -34,15 +34,14 @@ last_updated: 2026-05-10
 
 ### 검증자 반박
 
-- "native-skia 를 default features 에 통합하면 사용자 단일 install 로 모든 기능 사용 가능 — UX 단순. 왜 분리?" → skia-safe 빌드가 모든 wheel 에 강제되면 (1) wheel 크기 50-100 MB 까지 증가 가능 (PyPI 제약 근접), (2) macOS / Linux / Windows × x86_64 / aarch64 매트릭스 5종 모두 빌드 시간 분 단위 증가 (CI 비용), (3) PNG 미사용자 (대부분의 RAG / IR 사용처) 가 불필요한 코드 다운로드. extras 분리가 비용 대 가치 균형
-- "별도 PyPI 패키지 `rhwp-png` 분리 (옵션 C) 가 더 깨끗하지 않나?" → 두 패키지 동시 유지보수 부담 + version sync 의무 (`rhwp-python==0.6.0` ↔ `rhwp-png==0.6.0` 정합) + 사용자가 `pip install rhwp-png` 시 `rhwp-python` 도 같이 가져가야 하는 의존 그래프. 단일 패키지 + extras 가 PyPI 표준 패턴 (예: `langchain[community]`, `pydantic[email]`)
-- "Python `[png]` extras 가 native code 활성화를 어떻게 트리거?" → 두 갈래: (1) `Cargo.toml` features 활성화는 wheel 빌드 시점 결정 (CI 가 하나의 wheel 만 빌드), (2) Python `[png]` extras 는 런타임 import 마커만 — `import rhwp._png_marker` 같은 빈 모듈을 extras 가 추가, 미설치 시 친절 ImportError. 즉 wheel 자체는 native-skia 통합, Python-side extras 는 marker 의 역할만
-- "wheel 자체는 통합인데 Python extras 는 분리 — 사용자가 `[png]` 미설치 상태로 wheel 만 깔면 native skia 코드가 죽은 채로 따라옴. 의미 있나?" → 사용자가 의도적으로 `pip install rhwp-python` (extras 미선택) 시 PNG 메서드 호출 의도가 없는 것으로 가정 — Python ImportError 가드만으로 충분. wheel 의 native skia 코드는 dead binary (런타임 영향 0). 진짜 wheel 분리 (multiple wheels per release) 는 PyPI 의 single-package model 와 충돌 + Trusted Publisher 워크플로 복잡화 → 옵션 외
-- "wheel 크기가 100 MB 초과하면?" → 임계 측정 필요 (spec § 미확정 이슈). 초과 시 fallback 옵션 — 별도 PyPI 패키지로 분리 (옵션 C 재검토). 본 spec 시점은 옵션 B 선결정, 측정 결과로 재평가
+- "extras 분리 (옵션 B) 가 cli / mcp / langchain 패턴과 정합 아닌가?" → 본질이 다름. cli / mcp / langchain 은 *런타임 Python 패키지* (typer / fastmcp / langchain-core) 의존성 분리 — extras 미선택 시 진짜 의존성 그래프에서 빠지고 친절 ImportError 가 *진짜* 발동한다. 반면 PNG 표면은 native skia binary 만으로 작동하므로 Python 런타임 의존성이 0 — extras 가 추가할 것이 없다. Pillow 를 끼워 넣어 *인위적* 으로 의존성을 만들 수는 있으나 (옵션 B 의 시도) , render_png 자체는 Pillow 없이도 PNG bytes 반환이 가능 → 가드는 사실 *과도한 강제*
+- "별도 PyPI 패키지 `rhwp-png` 분리 (옵션 C) 가 wheel 크기 회피에 진짜 유리하지 않나?" → 두 패키지 동시 유지보수 부담 + version sync 의무 (`rhwp-python==0.6.0` ↔ `rhwp-png==0.6.0` 정합) + 사용자가 `pip install rhwp-png` 시 `rhwp-python` 도 같이 가져가야 하는 의존 그래프. PNG 가 미래 진짜 분리할 가치가 생기면 (skia-safe 빌드 비용이 임계 초과 시) 그때 옵션 C 로 마이그레이션 — 본 spec 시점은 단순화가 더 큰 가치
+- "skia-safe 빌드가 모든 wheel 에 강제되면 (1) wheel 크기 50-100 MB 까지 증가 가능, (2) 빌드 시간 분 단위 증가, (3) PNG 미사용자 가 불필요한 코드 다운로드 — 부담 아닌가?" → 인정. 다만 옵션 B 도 동일 비용 (wheel 통합 빌드라 어차피 모든 사용자가 다운로드). 진짜로 비용을 회피하려면 옵션 C (별도 PyPI 패키지) 필요. 본 spec 시점은 비용을 받아들이고 단순함을 택함 — 임계 (wheel > 100 MB) 도달 시 옵션 C 로 재평가
+- "사용자가 PNG 사용 의도를 명시 시그널 (`pip install rhwp-python[png]`) 로 표현하는 것이 자연스럽지 않나?" → 시그널 자체는 가치가 있으나 *비용 (학습 부담)* 이 *효익* 보다 큼. 사용자가 `[png]` extras 의 의미를 학습 → "왜 필요한가?" → "어차피 wheel 에 들어 있는데 왜 별도 install?" → "Pillow 가 들어옴" → 그러나 render_png 자체엔 Pillow 불필요 → 시그널 효익이 cosmetic 으로 축소. extras 없는 직관적 install path 가 더 좋은 UX
 
 ### 최종 결정
 
-**B 채택** — `Cargo.toml` 의 `rhwp` dependency 에 `features = ["native-skia"]` 추가, Python 측은 `[project.optional-dependencies] png = []` extras + `python/rhwp/_png_marker.py` 빈 마커 모듈. wheel 은 단일 통합, 사용자 install path 만 분리. spec § 인수조건 AC-1 (`[png]` 미설치 → 친절 ImportError) + AC-8 (skip count 5 → 6) 가 회귀 가드. 옵션 C (별도 PyPI 패키지) 는 wheel 크기 측정 후 재평가.
+**A 채택** — `Cargo.toml` 의 `rhwp` dependency 에 `features = ["native-skia"]` 추가 (default 통합). Python 측 별도 extras / marker 없음. `pip install rhwp-python` 만으로 render_png 사용 가능. testing dependency-group 에는 Pillow 추가 — AC-3 (스케일 후 dimension 검증) 회귀 테스트가 디코드 라이브러리 필요. 옵션 C (별도 PyPI 패키지) 는 wheel 크기 임계 (>100 MB) 도달 시 재평가.
 
 ### 1차 소스
 
