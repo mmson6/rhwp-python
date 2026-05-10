@@ -2,11 +2,13 @@
 
 from rhwp.document import Document as Document
 from rhwp.document import aparse as aparse
+from rhwp.document import arender_png as arender_png
 from rhwp.document import parse as parse
 
 __all__ = [
     "Document",
     "aparse",
+    "arender_png",
     "parse",
     "rhwp_core_version",
     "version",

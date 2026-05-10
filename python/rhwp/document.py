@@ -253,6 +253,66 @@ class Document:
         """
         return self._inner.export_pdf(output_path)
 
+    def render_png(
+        self,
+        page: int,
+        *,
+        scale: float = 1.0,
+        dpi: float | None = None,
+        max_pixels: int | None = None,
+    ) -> bytes:
+        """특정 페이지를 PNG 바이트로 렌더링한다 (상류 native-skia raster).
+
+        VLM (Vision-Language Model — Claude / GPT-4V / Gemini 등) 의 시각 입력
+        용도. 텍스트 표면 (SVG / Markdown / IR) 으로는 평탄화되는 표 / 수식 /
+        그림 / 레이아웃의 시각 의미를 보존한다.
+
+        Args:
+            page: 0-based 페이지 인덱스.
+            scale: 페이지 크기 배율 (기본 1.0). 2.0 이면 픽셀 너비/높이가 약 2배.
+            dpi: 메타데이터에 기록되는 DPI. 픽셀 수 자체에는 영향이 없다 — 픽셀
+                수는 ``scale`` 로 제어한다 (상류 ``RasterRenderOptions`` 정합).
+            max_pixels: DoS 방어용 픽셀 상한. 초과 시 ``ValueError``. 미지정 시
+                상류 default (8192 × 8192 = 67_108_864) 적용.
+
+        Returns:
+            PNG 인코딩 바이트 (magic ``b"\\x89PNG\\r\\n\\x1a\\n"`` 으로 시작).
+
+        Raises:
+            ValueError: 페이지 인덱스 범위 초과, 픽셀 한도 초과 (``max_pixels``),
+                상류 raster pipeline 의 기타 invariant 위반.
+        """
+        return self._inner.render_png(page, scale=scale, dpi=dpi, max_pixels=max_pixels)
+
+    def render_all_png(self) -> list[bytes]:
+        """모든 페이지를 PNG 바이트 리스트로 렌더링 (``len == page_count``).
+
+        대용량 문서에서는 메모리 부담이 있다 (페이지 100 × 약 500 KB ≈ 50 MB).
+        스트리밍이 필요하면 ``for page in range(doc.page_count): doc.render_png(page)``
+        루프를 직접 사용한다. SVG / PDF 와 동일 메모리 모델.
+
+        Raises:
+ValueError: 렌더링 실패.
+        """
+        return self._inner.render_all_png()
+
+    def export_png(self, output_dir: str, *, prefix: str | None = None) -> list[str]:
+        """모든 페이지를 PNG 파일로 저장.
+
+        Args:
+            output_dir: 출력 디렉토리 (자동 생성).
+            prefix: 파일명 접두사 (기본 ``"page"``). 다중 페이지 시
+                ``{prefix}_{NNN}.png``, 단일 페이지 시 ``{prefix}.png``.
+
+        Returns:
+            생성된 파일 경로 리스트.
+
+        Raises:
+OSError: 디렉토리 생성 또는 파일 쓰기 실패.
+            ValueError: 렌더링 실패.
+        """
+        return self._inner.export_png(output_dir, prefix=prefix)
+
     def __repr__(self) -> str:
         return repr(self._inner)
 
@@ -273,6 +333,45 @@ def parse(path: str) -> Document:
         ValueError: 파일 포맷이 유효하지 않을 때.
     """
     return Document(path)
+
+
+async def arender_png(
+    path: str,
+    page: int,
+    *,
+    scale: float = 1.0,
+    dpi: float | None = None,
+    max_pixels: int | None = None,
+) -> bytes:
+    """:meth:`Document.render_png` 의 async 변형 — 파일 읽기만 async, render 는 sync.
+
+    ``aparse`` 와 동일 패턴: 파일 read 만 stdlib ``asyncio.to_thread`` 로 thread
+    pool 에 offload, 파싱 + render 는 호출 스레드 (event loop) 에서 동기 실행
+    (Rust ``py.detach`` 가 GIL 해제). Document 가 thread 경계를 넘지 않으므로
+    ``unsendable`` panic 회피.
+
+    Document 인스턴스 재사용 패턴 (``await aparse(...)`` 후 sync ``render_png``
+    여러 번 호출) 이 더 효율적 — 본 함수는 단발 페이지 렌더링용.
+
+    Args:
+        path: HWP 또는 HWPX 파일 경로.
+        page: 0-based 페이지 인덱스.
+        scale: 페이지 크기 배율 (기본 1.0).
+        dpi: 메타데이터 DPI.
+        max_pixels: DoS 방어용 픽셀 상한.
+
+    Returns:
+        PNG 인코딩 바이트.
+
+    Raises:
+        FileNotFoundError / PermissionError / OSError: 파일 I/O 실패.
+        ValueError: 파싱 또는 렌더링 실패.
+    """
+    import asyncio
+
+    data = await asyncio.to_thread(_read_bytes, path)
+    doc = Document.from_bytes(data, source_uri=path)
+    return doc.render_png(page, scale=scale, dpi=dpi, max_pixels=max_pixels)
 
 
 async def aparse(path: str) -> Document:
