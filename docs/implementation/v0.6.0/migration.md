@@ -162,7 +162,7 @@ v0.6.0 작업 중 표면화된 항목 + 보류 결정 정리.
 | abi3-py310 호환성 (Linux / Windows × aarch64 빌드) | 본 release 환경 (macOS arm64) 만 검증 | publish.yml 의 cibuildwheel 결과로 확인 |
 | MCP `ImageContent` 의 LLM 클라이언트 호환성 | 미검증 (Claude Desktop / Cline 등 transport 별 base64 인코딩 안정성) | v0.5.0 클라이언트 호환성 표 (text-only 응답 기준) 의 image 컬럼 추가 — 별도 손 검증 |
 | stdio MCP transport 의 base64 페이로드 크기 (A4 페이지 약 100-500 KB → base64 약 130-660 KB) | 미측정 | 임계 초과 시 README 에 streamable-http 권장 안내 |
-| `tests/test_mcp_server.py` 의 v0.5.0 7-tool 가드 | v0.6.0 의 8-tool 등록 후 자연 회귀 — `test_lists_exactly_seven_tools` → `test_lists_exactly_expected_tools` 로 갱신 (set 기반 정확 매칭, render_page_png 추가). `test_missing_extras_does_not_break_other_tools` 의 `len == 7` 도 sentinel 기반 가드로 단순화 (카운트는 TestToolRegistry 가 책임) | code-reviewer 후속 fix commit 에서 처리됨 |
+| `tests/test_mcp_server.py` 의 v0.5.0 7-tool 가드 | v0.6.0 의 8-tool 등록 후 자연 회귀 — `test_lists_exactly_seven_tools` → `test_lists_exactly_expected_tools` 로 갱신 (set 기반 정확 매칭, render_page_png 추가). `test_missing_extras_does_not_break_other_tools` 의 `len == 7` 도 sentinel 기반 가드로 단순화 (카운트는 TestToolRegistry 가 책임) | 본 release 의 후속 fix commit 에서 처리됨 |
 | `Cargo.toml` bump / `CHANGELOG.md [0.6.0]` 섹션 추가 | 본 release 의 commit 6 에 포함 (사용자 GA 절차 와 다른 패턴 — 본 release 는 사용자 요청대로 commit 분할 안에 포함) | — |
 
 ## 7. v0.6.0 GA 절차 (인계)
