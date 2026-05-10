@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.6.0 — 페이지 PNG 렌더링 표면. 상류 'native-skia' 백엔드를 'Document.render_png' / 'export_png' 로 default 노출 + MCP 'render_page_png' 도구로 VLM 입력 시나리오 지원"
-target: v0.6.0
+ga: v0.6.0
 last_updated: 2026-05-10
 ---
 

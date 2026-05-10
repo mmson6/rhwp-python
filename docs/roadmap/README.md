@@ -4,7 +4,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 
 본 문서는 Living — 자유 갱신.
 
-## 현재 상태 (2026-05-06)
+## 현재 상태 (2026-05-10)
 
 - **v0.1.0 / v0.1.1** — Frozen, PyPI 배포 완료
 - **v0.2.0** — Frozen, Document IR v1 GA (2026-04-25)
@@ -14,7 +14,8 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 - **v0.4.0** — Frozen, IR view 렌더러 (Markdown / HTML) GA (2026-05-05)
 - **v0.5.0** — Frozen, MCP server (`rhwp-mcp`) GA (2026-05-06)
 - **v0.5.1** — Frozen, MCP tool 출력 schema 강타입화 GA (2026-05-07)
-- **v0.6.0+** — 미착수 (주제 미정, demand-driven)
+- **v0.6.0** — Frozen, 페이지 PNG 렌더링 (VLM 입력) GA (2026-05-10)
+- **v0.7.0+** — 미착수 (주제 미정, demand-driven)
 
 ## 활성 spec 인덱스
 
@@ -31,17 +32,17 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 | v0.4.0 (view 렌더러) | Frozen | [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md) | [design/v0.4.0/view-renderer-research.md](../design/v0.4.0/view-renderer-research.md) |
 | v0.5.0 (MCP server) | Frozen | [v0.5.0/mcp.md](v0.5.0/mcp.md) | [design/v0.5.0/mcp-research.md](../design/v0.5.0/mcp-research.md) |
 | v0.5.1 (MCP typed output) | Frozen | [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md) | [design/v0.5.1/mcp-typed-output-research.md](../design/v0.5.1/mcp-typed-output-research.md) |
-| v0.6.0 (png-vlm-render) | Draft | [v0.6.0/png-vlm-render.md](v0.6.0/png-vlm-render.md) | [design/v0.6.0/png-vlm-render-research.md](../design/v0.6.0/png-vlm-render-research.md) |
+| v0.6.0 (png-vlm-render) | Frozen | [v0.6.0/png-vlm-render.md](v0.6.0/png-vlm-render.md) | [design/v0.6.0/png-vlm-render-research.md](../design/v0.6.0/png-vlm-render-research.md) |
 
 ## 미착수 작업 계획
 
 본 섹션은 결정 미정 narrative — `vX.Y.Z` 디렉토리가 아직 없는 minor 들의 의도/스코프. 작업 시점이 가까워지면 `/new-spec <version> <topic>` 으로 정식 spec 으로 promote.
 
-### v0.6.0+ — 미정 (demand-driven)
+### v0.7.0+ — 미정 (demand-driven)
 
-v0.5.0 MCP server (Frozen, [v0.5.0/mcp.md](v0.5.0/mcp.md)) + v0.5.1 후속 polish (Frozen, [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md)) 이후 다음 minor 들. 주제 미정 — v0.3.0 LangChain integration + v0.5.0 MCP 가 RAG / LLM 에이전트 사용처 분모를 이미 커버하는 상황에서 추가 RAG 프레임워크 통합은 **demand-driven 으로 보류** (HWP × 비-LangChain RAG 교집합이 좁을 가능성). 구체화되면 `/new-spec <version> <topic>` 으로 promote.
+v0.5.0 MCP server (Frozen, [v0.5.0/mcp.md](v0.5.0/mcp.md)) + v0.5.1 후속 polish (Frozen, [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md)) + v0.6.0 페이지 PNG 렌더링 (Frozen, [v0.6.0/png-vlm-render.md](v0.6.0/png-vlm-render.md)) 이후 다음 minor 들. 주제 미정 — v0.3.0 LangChain integration + v0.5.0 MCP + v0.6.0 PNG (VLM) 가 RAG / LLM 에이전트 사용처 분모를 이미 커버하는 상황에서 추가 RAG 프레임워크 통합은 **demand-driven 으로 보류** (HWP × 비-LangChain RAG 교집합이 좁을 가능성). 구체화되면 `/new-spec <version> <topic>` 으로 promote.
 
-> v0.4.0 view 렌더러 (Markdown / HTML) / v0.5.0 MCP server (`rhwp-mcp`) / v0.5.1 MCP 출력 강타입화 모두 GA 완료 — [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md), [v0.5.0/mcp.md](v0.5.0/mcp.md), [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md) 가 SSOT.
+> v0.4.0 view 렌더러 (Markdown / HTML) / v0.5.0 MCP server (`rhwp-mcp`) / v0.5.1 MCP 출력 강타입화 / v0.6.0 페이지 PNG (VLM 입력) 모두 GA 완료 — [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md), [v0.5.0/mcp.md](v0.5.0/mcp.md), [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md), [v0.6.0/png-vlm-render.md](v0.6.0/png-vlm-render.md) 가 SSOT.
 
 ### v0.8.0 ~ v1.0.0 — JSON IR → HWP 역생성
 
@@ -91,6 +92,7 @@ SemVer 0.x.y 단계에서 minor 는 단조 증가 — v0.9 다음은 v0.10 (v1.0
 | v0.4.0 | [implementation/v0.4.0/migration.md](../implementation/v0.4.0/migration.md) | — |
 | v0.5.0 | [implementation/v0.5.0/stages/](../implementation/v0.5.0/stages/) (S1~S5) | — |
 | v0.5.1 | [implementation/v0.5.1/migration.md](../implementation/v0.5.1/migration.md) | — |
+| v0.6.0 | [implementation/v0.6.0/migration.md](../implementation/v0.6.0/migration.md) | — |
 
 ## 원칙
 

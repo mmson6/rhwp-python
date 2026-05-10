@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.6.0 png-vlm-render ADR — 'native-skia' feature 활성화 / API mirror / PNG-only 코덱 / MCP 'ImageContent' 채택 / max_pixels 가드 SSOT 결정 근거"
-target: v0.6.0
+ga: v0.6.0
 last_updated: 2026-05-10
 ---
 
