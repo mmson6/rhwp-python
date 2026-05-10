@@ -101,6 +101,10 @@ testing = [
     "typer>=0.12",
     # ^ rhwp-mcp 서버 단위 테스트 (tests/test_mcp_server.py) — fastmcp 인스턴스 inspection.
     "fastmcp>=3,<4",
+    # ^ v0.6.0 PNG 렌더링 회귀 테스트 (tests/test_render_png.py) — dimension 검증 (AC-3).
+    #   render_png 자체는 Pillow 무관 (native skia 단독). 본 의존성은 *테스트 측* PNG
+    #   디코드용. test-without-extras CI job 에서 미설치되어 file-level skip 발동.
+    "pillow>=10",
 ]
 linting = [
     {include-group = "dev"},

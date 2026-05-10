@@ -62,10 +62,10 @@ pytestmark = pytest.mark.spec("v0.5.0/mcp")
 
 # ------------------------------------------------------------------ AC-2
 class TestToolRegistry:
-    """도구 등록 (S1 코어 4 + S2 view 2 + S3 chunks 1 = 7 개, GA 기준)."""
+    """도구 등록 (v0.5.0 의 7 + v0.6.0 PNG 1 = 8 개, GA 기준)."""
 
     @pytest.mark.spec("v0.5.0/mcp#AC-2")
-    def test_lists_exactly_seven_tools(self) -> None:
+    def test_lists_exactly_expected_tools(self) -> None:
         server = build_server()
         names = {t.name for t in asyncio.run(server.list_tools())}
         assert names == {
@@ -76,6 +76,7 @@ class TestToolRegistry:
             "to_markdown",
             "to_html",
             "chunks",
+            "render_page_png",
         }
 
     def test_each_tool_has_description(self) -> None:
@@ -339,14 +340,16 @@ class TestChunks:
     def test_missing_extras_does_not_break_other_tools(
         self, hwp_sample: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """langchain-text-splitters 미설치여도 다른 6 도구 + 서버 기동은 정상."""
+        """langchain-text-splitters 미설치여도 다른 도구 + 서버 기동은 정상."""
         import sys
 
         monkeypatch.setitem(sys.modules, "langchain_text_splitters", None)
         server = build_server()
         # ^ 서버 build 는 등록만 (lazy import 가 아직 안 일어남) — 정상
         names = {t.name for t in asyncio.run(server.list_tools())}
-        assert len(names) == 7
+        # ^ v0.5.0 의 7 + v0.6.0 PNG 1 = 8. 카운트 정확 매칭은 TestToolRegistry 가 책임 —
+        #   본 테스트는 "lazy extras 미설치여도 build 가 깨지지 않음" 만 가드.
+        assert "chunks" in names
         # ^ 다른 도구 (extract_text) 호출이 langchain 의존성과 무관하게 동작
         result = asyncio.run(server.call_tool("extract_text", {"path": str(hwp_sample)}))
         assert result is not None

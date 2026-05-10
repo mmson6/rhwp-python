@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-05-10
+
+MINOR release. 페이지 PNG 렌더링 표면을 추가하여 VLM (Vision-Language Model — Claude / GPT-4V / Gemini Vision 등) 의 시각 입력 시나리오를 지원한다. 상류 `rhwp` v0.7.10 (PR #599 PNG 게이트웨이) 의 `SkiaLayerRenderer::render_raster_with_options` 위 thin wrapper — `Document.render_png(page) -> bytes` / `render_all_png()` / `export_png(out_dir)` 3 메서드 + 모듈-level `arender_png(path, page)` async + MCP 도구 `render_page_png` (fastmcp `ImageContent` 출고) 신규. `[png]` extras 분리 없이 default wheel 통합 (Cargo `native-skia` feature 항상 활성화 — skia binary 약 30 MB 추가) — `pip install rhwp-python` 만으로 즉시 사용 가능. 추가만 있고 v0.5.x 의 SVG / PDF / IR / MCP 표면은 모두 보존 (additive only), schema (`"1.1"`) 유지.
+
+### Added
+
+- `Document.render_png(page, *, scale=1.0, dpi=None, max_pixels=None) -> bytes` 신규 — 페이지 단위 PNG 렌더링. `scale` 은 픽셀 너비/높이 배율, `dpi` 는 메타데이터 DPI (픽셀 수에 영향 없음), `max_pixels` 는 DoS 방어용 픽셀 상한 (미지정 시 상류 default 67_108_864 = 8192×8192). 반환 bytes 는 PNG magic (`b"\x89PNG\r\n\x1a\n"`) 으로 시작.
+- `Document.render_all_png() -> list[bytes]` — 모든 페이지 일괄 렌더링 (길이 == `page_count`). 메모리 모델은 SVG / PDF 와 동일.
+- `Document.export_png(output_dir, *, prefix=None) -> list[str]` — 모든 페이지를 PNG 파일로 저장. 다중 페이지 시 `{prefix}_{NNN}.png`, 단일 페이지 시 `{prefix}.png`. 디렉토리 자동 생성, 반환은 생성된 파일 경로 리스트.
+- 모듈-level `rhwp.arender_png(path, page, *, scale, dpi, max_pixels) -> bytes` async 함수 — `aparse` 와 동일 패턴 (파일 read 만 thread offload, render 는 호출 스레드). Document 가 thread 경계를 안 넘어 `unsendable` panic 회피.
+- MCP 도구 `render_page_png(path, page, *, scale, max_pixels) -> ImageContent` — fastmcp v3 의 `ImageContent` 표준 (base64 + `mimeType="image/png"`). LLM 클라이언트 (Claude Desktop / Cline / Cursor 등) 가 응답을 LLM 메시지의 `image` content block 으로 자동 wire. v0.5.0 의 7 도구 → 8 도구.
+- README § "페이지 PNG 렌더링 (VLM 입력)" 섹션 신설 — 사용 예 + Anthropic Vision API 호출 코드 + `max_pixels` 안내. MCP 도구 표 1행 추가 (8 도구 갱신).
+- spec / ADR / 구현 로그: [docs/roadmap/v0.6.0/png-vlm-render.md](docs/roadmap/v0.6.0/png-vlm-render.md) (Frozen, 9 인수조건 / 8 결정 / 7 영구 비목표) / [docs/design/v0.6.0/png-vlm-render-research.md](docs/design/v0.6.0/png-vlm-render-research.md) (Frozen, 5 결정 매트릭스).
+
 ### Changed — 문서 시스템 대규모 개편
 
 본 변경은 메타 — 사용자 facing API / wheel 영향 0. 내부 문서 운영 체계 정비.
@@ -25,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Build
 
 - `external/rhwp` submodule pin `0fb3e67` (post-v0.7.8) → `62a458a` (v0.7.10). 상류 v0.7.10 GA 흡수 — 외부 기여자 PR 머지 + AI 파이프라인 / VLM 연동 + CLI 바이너리 릴리즈 파이프라인 + macOS cross-compile fix (Issue #612). 본 binding 관점 변경 0 — 공개 API / IR schema (`"1.1"`) / wheel 의존성 모두 동일, `cargo build --release` 통과로 시그니처 호환 직접 검증.
+- `Cargo.toml` 의 `rhwp` 의존성에 `features = ["native-skia"]` 추가 — 상류 `SkiaLayerRenderer` (skia-safe v0.93.1) 활성화. wheel 빌드 시점 약 30 MB binary-cache 다운로드, abi3-py310 single wheel 정합 유지 (Python 3.10 ~ 3.13+ 동일 wheel). PNG 표면을 default 통합한 결정 근거는 [docs/design/v0.6.0/png-vlm-render-research.md](docs/design/v0.6.0/png-vlm-render-research.md) § 1.
+- `testing` dependency-group 에 `pillow>=10` 추가 — `tests/test_render_png.py` 의 AC-3 (스케일 후 dimension 검증) 회귀 테스트가 디코드 라이브러리 필요. 사용자 wheel 의존성 / extras 영향 0.
 - 부수 — `test_submodule_pin_matches_changelog_record` 제거 ([tests/test_ir_marker_char_offset.py](tests/test_ir_marker_char_offset.py)). 본래 v0.3.1 의 *deliberate* pin bump (v0.7.7 → 0fb3e67) 가 release-readiness 시점 기재됐는지 가드한 일회성 AC-13 의 일부였으나, GA shipped 후에도 영구 runtime 가드로 잔존해 일상 sync 마다 CHANGELOG 갱신을 강제하는 anti-pattern (1회성 release-gating AC 의 영구 테스트화 + 문서 텍스트 매칭 runtime test) 화. CHANGELOG 갱신은 릴리즈 시점 의무 (`publish.yml::verify-version` 로 version 일치 가드, 사람 review 가 핀 bump 정합성 점검) 로 이양. AC-13 의 historical record 검증은 동 파일 `test_changelog_records_pin_bump` (Frozen v0.3.1 섹션 텍스트 회귀 가드) 가 그대로 유지.
 - 부수 — 동 파일 이름 `test_v0_3_1_marker_char_offset.py` → `test_ir_marker_char_offset.py` (`test_ir_*` 패턴 통일, 본 spec lifecycle 은 `pytest.mark.spec("v0.3.1/...")` marker 가 보유).
 

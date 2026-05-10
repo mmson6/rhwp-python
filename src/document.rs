@@ -168,6 +168,61 @@ impl PyDocument {
         })
     }
 
+    /// 특정 페이지를 PNG bytes 로 렌더링한다 (상류 native-skia raster).
+    ///
+    /// `scale` / `dpi` / `max_pixels` 는 RasterRenderOptions 의 동일 필드로 wire-through.
+    /// 미지정 시 상류 default (`scale=1.0` / `dpi=None` / `max_pixels=67_108_864` ≈ 8192×8192).
+    /// 픽셀 한도 위반 시 상류 메시지 그대로 ValueError (예: "raster pixel count out of range: ...").
+    #[pyo3(signature = (page, *, scale=None, dpi=None, max_pixels=None))]
+    fn render_png<'py>(
+        &self,
+        py: Python<'py>,
+        page: u32,
+        scale: Option<f64>,
+        dpi: Option<f64>,
+        max_pixels: Option<u64>,
+    ) -> PyResult<Bound<'py, PyBytes>> {
+        let bytes = self.render_png_internal(py, page, scale, dpi, max_pixels)?;
+        Ok(PyBytes::new(py, &bytes))
+    }
+
+    fn render_all_png<'py>(&self, py: Python<'py>) -> PyResult<Vec<Bound<'py, PyBytes>>> {
+        let page_count = self.inner.page_count();
+        let mut out = Vec::with_capacity(page_count as usize);
+        for page in 0..page_count {
+            let bytes = self.render_png_internal(py, page, None, None, None)?;
+            out.push(PyBytes::new(py, &bytes));
+        }
+        Ok(out)
+    }
+
+    #[pyo3(signature = (output_dir, *, prefix=None))]
+    fn export_png(
+        &self,
+        py: Python<'_>,
+        output_dir: &str,
+        prefix: Option<&str>,
+    ) -> PyResult<Vec<String>> {
+        let out_dir = std::path::Path::new(output_dir);
+        std::fs::create_dir_all(out_dir).map_err(|e| PyIOError::new_err(e.to_string()))?;
+
+        let page_count = self.inner.page_count();
+        let stem = prefix.unwrap_or("page");
+        let mut written = Vec::with_capacity(page_count as usize);
+        for page in 0..page_count {
+            let bytes = self.render_png_internal(py, page, None, None, None)?;
+            let filename = if page_count == 1 {
+                format!("{stem}.png")
+            } else {
+                format!("{stem}_{:03}.png", page + 1)
+            };
+            let path = out_dir.join(&filename);
+            std::fs::write(&path, &bytes).map_err(|e| PyIOError::new_err(e.to_string()))?;
+            written.push(path.to_string_lossy().into_owned());
+        }
+        Ok(written)
+    }
+
     /// 문서를 Document IR (Pydantic `HwpDocument`) 로 변환하여 반환한다.
     ///
     /// 첫 호출 시 문서 트리를 순회하며 IR 을 구성하고 결과를 인스턴스에 캐시한다.
@@ -259,6 +314,38 @@ impl PyDocument {
                     .map_err(|e| PyValueError::new_err(format!("render page {p} failed: {e:?}")))
             })
             .collect()
+    }
+
+    fn render_png_internal(
+        &self,
+        py: Python<'_>,
+        page: u32,
+        scale: Option<f64>,
+        dpi: Option<f64>,
+        max_pixels: Option<u64>,
+    ) -> PyResult<Vec<u8>> {
+        // ^ layer tree 빌드는 GIL 유지 (DocumentCore 의 RefCell 캐시 접근 — !Sync).
+        //   결과 PageLayerTree 는 owned values 만 포함 → py.detach 클로저로 이동 가능.
+        let layer_tree = self
+            .inner
+            .build_page_layer_tree(page)
+            .map_err(|e| PyValueError::new_err(format!("render page {page} failed: {e:?}")))?;
+        let mut options = rhwp::renderer::layer_renderer::RasterRenderOptions::default();
+        if let Some(s) = scale {
+            options.scale = s;
+        }
+        if let Some(d) = dpi {
+            options.dpi = Some(d);
+        }
+        if let Some(mp) = max_pixels {
+            options.max_pixels = mp;
+        }
+        py.detach(move || {
+            use rhwp::renderer::layer_renderer::LayerRasterRenderer;
+            rhwp::renderer::skia::SkiaLayerRenderer::new()
+                .render_png_with_options(&layer_tree, options)
+                .map_err(|e| PyValueError::new_err(format!("render page {page} failed: {e:?}")))
+        })
     }
 }
 

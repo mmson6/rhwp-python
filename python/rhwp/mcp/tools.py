@@ -8,10 +8,13 @@
 - S1 — `parse_hwp_summary` / `extract_text` / `get_ir` / `iter_blocks` (코어 4)
 - S2 — `to_markdown` / `to_html` (v0.4.0 view API thin wrapper)
 - S3 — `chunks` (RAG 청킹 — langchain-text-splitters 런타임 extras gate)
+- v0.6.0 — `render_page_png` (페이지 PNG → fastmcp ImageContent — VLM 입력)
 """
 
+import base64
 from typing import Any, Literal
 
+from mcp.types import ImageContent
 from pydantic import BaseModel, ConfigDict, Field
 
 import rhwp
@@ -232,3 +235,40 @@ def chunks(
     splitter = RecursiveCharacterTextSplitter(chunk_size=size, chunk_overlap=overlap)
     split_docs = splitter.split_documents(docs)
     return [ChunkRecord(page_content=d.page_content, metadata=d.metadata) for d in split_docs]
+
+
+def render_page_png(
+    path: str,
+    page: int,
+    scale: float = 1.0,
+    max_pixels: int | None = None,
+) -> ImageContent:
+    """HWP 또는 HWPX 의 특정 페이지를 PNG 로 렌더해 fastmcp ``ImageContent`` 반환.
+
+    VLM (Vision-Language Model — Claude / GPT-4V / Gemini 등) 의 시각 입력 1차
+    시민. fastmcp v3 의 ``ImageContent`` 표준 (base64 + ``mimeType="image/png"``)
+    으로 출고 → MCP client (Claude Desktop / Cline / Cursor) 가 LLM 메시지의
+    ``image`` content block 으로 자동 wire — bytes 반환 후 클라이언트 측 base64
+    변환은 비결정 dict 가 되므로 거부.
+
+    A4 페이지 PNG 가 약 100-500 KB → base64 약 130-660 KB. stdio MCP transport
+    의 JSON-RPC 메시지 크기 제한과 충돌 가능성 — 큰 페이지 / 다수 페이지는
+    ``--transport streamable-http`` 권장.
+
+    Args:
+        path: HWP 또는 HWPX 파일 경로.
+        page: 0-based 페이지 인덱스.
+        scale: 페이지 크기 배율 (기본 1.0). VLM 입력 권장 값은 1.0-2.0 — 너무
+            크면 LLM context 비용이 급증.
+        max_pixels: DoS 방어용 픽셀 상한. 미지정 시 상류 default
+            67_108_864 (= 8192 × 8192).
+
+    Returns:
+        ``ImageContent(type="image", data=base64-encoded PNG, mimeType="image/png")``.
+    """
+    png_bytes = rhwp.parse(path).render_png(page, scale=scale, max_pixels=max_pixels)
+    return ImageContent(
+        type="image",
+        data=base64.b64encode(png_bytes).decode("ascii"),
+        mimeType="image/png",
+    )

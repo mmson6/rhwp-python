@@ -62,6 +62,68 @@ byte_size: int = doc.export_pdf("output.pdf")
 
 `rhwp.Document(path)` 는 `rhwp.parse(path)` 와 동일하게 동작.
 
+## 페이지 PNG 렌더링 (VLM 입력)
+
+VLM (Vision-Language Model — Claude / GPT-4V / Gemini Vision 등) 의 시각 입력
+용도. 텍스트 표면 (SVG / Markdown / IR) 으로는 평탄화되는 표 셀 병합 / 수식의
+공간 배치 / 그림 / 복잡 레이아웃의 시각 의미를 보존한다. 상류 `rhwp` v0.7.10
+의 native-skia raster pipeline (PR #599) 위 thin wrapper — 별도 extras 없이
+default wheel 에 통합 (skia binary 포함).
+
+```python
+import rhwp
+
+doc = rhwp.parse("report.hwp")
+
+# 단일 페이지 — bytes (PNG magic 으로 시작)
+png: bytes = doc.render_png(page=0)
+png_2x: bytes = doc.render_png(page=0, scale=2.0)        # 픽셀 너비 약 2배
+
+# 모든 페이지 일괄 (메모리 모델 — 페이지 100 × 약 500 KB ≈ 50 MB)
+all_pngs: list[bytes] = doc.render_all_png()
+
+# 디스크 export — page_001.png, page_002.png, ... (단일 페이지면 page.png)
+written: list[str] = doc.export_png("output/", prefix="page")
+
+# Async 변형 (파일 read 만 thread offload, render 는 호출 스레드)
+import asyncio
+png = asyncio.run(rhwp.arender_png("report.hwp", 0, scale=1.5))
+```
+
+**Anthropic Vision API 호출 예** — Claude 가 페이지 시각 정보를 직접 해석:
+
+```python
+import base64
+import anthropic
+import rhwp
+
+png_bytes = rhwp.parse("report.hwp").render_png(page=0, scale=1.5)
+client = anthropic.Anthropic()
+message = client.messages.create(
+    model="claude-opus-4-7",
+    max_tokens=1024,
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/png",
+                    "data": base64.b64encode(png_bytes).decode("ascii"),
+                },
+            },
+            {"type": "text", "text": "이 페이지의 표 셀 병합 구조를 설명해."},
+        ],
+    }],
+)
+print(message.content[0].text)
+```
+
+`max_pixels` 는 DoS 방어용 픽셀 상한 (기본 8192 × 8192 = 67_108_864). 초과 시
+`ValueError("raster pixel count out of range: ...")`. 사용자가 명시 override
+가능 — 예: `doc.render_png(0, max_pixels=200_000_000)`.
+
 ## LangChain 통합
 
 ```bash
@@ -171,7 +233,7 @@ pip install "rhwp-python[mcp]"           # 도구 6 종 (parse / extract / IR / 
 pip install "rhwp-python[mcp-chunks]"    # + chunks (RAG 청킹 — langchain-text-splitters)
 ```
 
-### 노출 도구 (7 종)
+### 노출 도구 (8 종)
 
 | 도구 | 입력 | 출력 |
 |---|---|---|
@@ -182,6 +244,7 @@ pip install "rhwp-python[mcp-chunks]"    # + chunks (RAG 청킹 — langchain-te
 | `to_markdown` | `path` | `str` — GFM Markdown (v0.4.0 view API thin wrapper) |
 | `to_html` | `path`, `include_css` | `str` — HTML5 문서 (v0.4.0 view API thin wrapper) |
 | `chunks` | `path`, `mode`, `size`, `overlap`, `include_furniture` | `list[ChunkRecord]` — LangChain `RecursiveCharacterTextSplitter` 적용 청크. `[mcp-chunks]` extras 필요 |
+| `render_page_png` | `path`, `page`, `scale`, `max_pixels?` | `ImageContent` — base64 PNG + `mimeType="image/png"`. VLM 시각 입력용 (v0.6.0+) |
 
 > **v0.5.1 마이그 노트** — 출력 시그니처가 dict / list[dict] 에서 Pydantic 모델로 강화됐습니다 (PATCH). fastmcp Client 의 `result.structured_content` (raw dict, MCP wire format) 는 v0.5.0 과 byte-equal — 외부 LLM 프롬프트 / 후처리 코드 영향 0. 다만 `result.data` 사용 패턴은 변경: v0.5.0 의 `result.data["body"]` (dict 인덱싱) → v0.5.1 의 `result.data.body` (typed attribute) 또는 `result.data.model_dump()["body"]`. `iter_blocks` 의 list element 는 fastmcp v3 의 `oneOf` deserialization 한계로 dict 폴백 — `block["kind"]` access 패턴은 그대로 동작.
 
@@ -201,7 +264,7 @@ pip install "rhwp-python[mcp-chunks]"    # + chunks (RAG 청킹 — langchain-te
 
 (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`. Windows:
 `%APPDATA%\Claude\claude_desktop_config.json`.) Claude Desktop 재시작 후 도구
-아이콘에 7 개 도구 노출.
+아이콘에 8 개 도구 노출.
 
 ### 다른 클라이언트
 
