@@ -31,6 +31,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 | v0.4.0 (view 렌더러) | Frozen | [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md) | [design/v0.4.0/view-renderer-research.md](../design/v0.4.0/view-renderer-research.md) |
 | v0.5.0 (MCP server) | Frozen | [v0.5.0/mcp.md](v0.5.0/mcp.md) | [design/v0.5.0/mcp-research.md](../design/v0.5.0/mcp-research.md) |
 | v0.5.1 (MCP typed output) | Frozen | [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md) | [design/v0.5.1/mcp-typed-output-research.md](../design/v0.5.1/mcp-typed-output-research.md) |
+| v0.6.0 (png-vlm-render) | Draft | [v0.6.0/png-vlm-render.md](v0.6.0/png-vlm-render.md) | [design/v0.6.0/png-vlm-render-research.md](../design/v0.6.0/png-vlm-render-research.md) |
 
 ## 미착수 작업 계획
 
