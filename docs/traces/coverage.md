@@ -628,3 +628,10 @@ v0.4.0+ 신규 spec 의 인수조건 ↔ 테스트 매핑. 기존 v0.1.0 ~ v0.3.
 | v0.5.1/mcp-typed-output | AC-6 | `tests/test_mcp_server.py::TestTypedClientData::test_get_ir_client_data_has_typed_attributes` |
 | v0.5.1/mcp-typed-output | AC-6 | `tests/test_mcp_server.py::TestTypedClientData::test_iter_blocks_client_data_is_typed_list` |
 | v0.5.1/mcp-typed-output | AC-7 | `tests/test_mcp_server.py::TestTypedSignatures::test_chunk_record_metadata_annotation_is_free_dict` |
+| v0.6.0/png-vlm-render | AC-1 | `tests/test_render_png.py::TestRenderPng::test_returns_png_magic` |
+| v0.6.0/png-vlm-render | AC-2 | `tests/test_render_png.py::TestRenderPng::test_render_all_count_matches_page_count` |
+| v0.6.0/png-vlm-render | AC-3 | `tests/test_render_png.py::TestRenderPng::test_scale_doubles_width` |
+| v0.6.0/png-vlm-render | AC-4 | `tests/test_render_png.py::TestRenderPng::test_max_pixels_guard_raises` |
+| v0.6.0/png-vlm-render | AC-5 | `tests/test_render_png.py::TestMcpRenderPagePng::test_returns_image_content` |
+| v0.6.0/png-vlm-render | AC-6 | `tests/test_render_png.py::TestArenderPng::test_async_returns_png_without_panic` |
+| v0.6.0/png-vlm-render | AC-7 | `tests/test_render_png.py::TestExportPng::test_writes_files_with_png_magic` |
