@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] — 2026-05-18
+
+PATCH release. v0.6.0 (Frozen, 2026-05-10) 의 GitHub Release / PyPI publish 가 누락된 상태에서 발견된 release 인프라 정합화 + 후속 polish 를 한 묶음 PATCH 로 발행한다. 사용자 영향: PyPI 첫 게시 패키지가 `v0.5.1` 다음 `v0.6.1` 로 점프 — v0.6.0 의 모든 표면 (페이지 PNG 렌더링 + 문서 시스템 개편) 은 변경 없이 그대로 포함하며 `[0.6.0]` 섹션은 historical record 로 보존. 외부 공개 API / IR schema (`"1.1"`) 변경 0.
+
+### Added
+
+- `examples/07_render_png.py` 신규 — v0.6.0 PNG 표면의 typer 진입점 예제 (단일 페이지 / `--all` 일괄 / `--scale` / `--max-pixels` / `--output-dir` / `--prefix`). Pillow 가 있으면 디코드 dimension 까지 검증, 없으면 PNG magic + 길이만 출력 (graceful degrade). README §"페이지 PNG 렌더링 (VLM 입력)" 의 typer 진입점 시연.
+- `examples/README.md` §7 항목 + "일곱 스크립트" 안내. `[examples]` extras 에 Pillow 추가 (07 디코드 검증용).
+- `benches/bench_gil.py` 에 `png_task` 추가 — `parse + render_png(page=0)` 의 ThreadPoolExecutor worker 1/2/4/8 별 wall-clock 비교 (기존 `parse + render_pdf` 패턴 동형). `--json` 플래그 출고 옵션 — drift 추적 / ADR 첨부 재활용. v0.6.0 spec row-6 의 "≥50 ms 임계 충족" rationale 을 closed-loop 으로 실측 검증.
+
+### Changed
+
+- `rhwp.parse` / `rhwp.aparse` / `rhwp.arender_png` / `Document.__init__` 가 `path: str` → `path: str | os.PathLike[str]` 수용. 내부에서 `str(path)` 정규화 후 Rust `_Document(&str)` 위임. 사용자가 `pathlib.Path` 인스턴스를 그대로 넘길 수 있다 — IDE 자동완성 정합. v0.5.x 의 `str` 호출 시그니처는 그대로 유지 (additive widening, breaking 아님).
+
+### Build
+
+- `external/rhwp` submodule pin `62a458a` (v0.7.10) → `1899ef9b` (v0.7.12). v0.6.0 Build 섹션 disclosure 의 v0.7.10 record 와 wheel binary 의 불일치를 해소. 본 binding 관점 변경 0 — 공개 API / IR schema (`"1.1"`) / wheel 의존성 모두 동일, `cargo check` clean + `maturin develop --release` clean + IR baseline byte-equal (`tests/test_view_baseline.py` 2/2 pass) + 회귀 가드 592 통과 직접 검증. 상류 v0.7.11 + v0.7.12 GA 흡수 — Renderer 시각 회귀 fix 다수 + Text IR v2 (`GlyphRun` / `GlyphOutline` variant, rhwp-python 미소비) + HWP3 ch=9 탭 spec 정합 + skia-safe `0.93.1` → `0.97.0` binary-cache. macOS PNG headless hang (상류 [#823](https://github.com/edwardkim/rhwp/issues/823)) 은 v0.7.12 에서도 미해결 — 별도 issue 진행.
+- `Cargo.toml` 의 `version` `0.6.0` → `0.6.1`. `pyproject.toml` 은 `dynamic = ["version"]` 으로 자동 추종.
+- `[project.optional-dependencies] examples` 에 `pillow>=10` 추가 — 07 예제의 dimension 디코드 검증 옵션. 미설치 시 graceful degrade (PNG magic + 길이만).
+
+### Notes
+
+- v0.6.0 publish 누락의 회복 경로 — `[0.6.0]` historical record 보존 + v0.6.1 = v0.6.0 표면 + 본 PATCH 변경. SemVer 측 단조 증가 (PyPI 는 게시되지 않은 v0.6.0 의 부재를 허용).
+- `tests/type_check_errors.py` 의 의도된 pyright 에러 4건 + `test-without-extras` job 의 expected skip count 6 변동 없음.
+
 ## [0.6.0] — 2026-05-10
 
 MINOR release. 페이지 PNG 렌더링 표면을 추가하여 VLM (Vision-Language Model — Claude / GPT-4V / Gemini Vision 등) 의 시각 입력 시나리오를 지원한다. 상류 `rhwp` v0.7.10 (PR #599 PNG 게이트웨이) 의 `SkiaLayerRenderer::render_raster_with_options` 위 thin wrapper — `Document.render_png(page) -> bytes` / `render_all_png()` / `export_png(out_dir)` 3 메서드 + 모듈-level `arender_png(path, page)` async + MCP 도구 `render_page_png` (fastmcp `ImageContent` 출고) 신규. `[png]` extras 분리 없이 default wheel 통합 (Cargo `native-skia` feature 항상 활성화 — skia binary 약 30 MB 추가) — `pip install rhwp-python` 만으로 즉시 사용 가능. 추가만 있고 v0.5.x 의 SVG / PDF / IR / MCP 표면은 모두 보존 (additive only), schema (`"1.1"`) 유지.
