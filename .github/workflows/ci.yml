@@ -154,7 +154,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        # ^ macos-latest 는 상류 edwardkim/rhwp#823 (headless macOS 에서 PNG 렌더
+        #   hang — CoreText downloadable lookup IPC 영구 대기) 해결 시 복귀.
+        #   현재 GHA macos runner 에서 30분+ hang 으로 wheel 검증이 불가.
+        os: [windows-latest]
     defaults:
       run:
         shell: bash
