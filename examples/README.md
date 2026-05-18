@@ -6,11 +6,13 @@
 ## 사전 준비
 
 ```bash
-# 01 ~ 06 예제 전부 한 방에 설치 (typer + langchain-core + text-splitters + fastmcp)
+# 01 ~ 07 예제 전부 한 방에 설치 (typer + langchain-core + text-splitters + fastmcp + pillow)
 pip install "rhwp-python[examples]"
 ```
 
 > 06 의 `chunks` MCP 도구는 `langchain-text-splitters` 가 필요한데 위 한 줄에 포함됨.
+> 07 의 디코드 dimension 검증에는 Pillow 가 필요한데 위 한 줄에 포함됨 (미설치 시
+> PNG magic + 길이만 출력하는 graceful degrade).
 > 통합 레이어만 필요하면 (예제 러너 없이 직접 `HwpLoader` 사용) `pip install "rhwp-python[langchain]"` 만으로 충분하다.
 
 ## 스크립트
@@ -95,6 +97,30 @@ in-process round-trip — 7 도구 (`parse_hwp_summary` / `extract_text` / `get_
 옵션:
 - `--skip-chunks` : `[mcp-chunks]` extras 미설치 환경에서 chunks 호출 스킵
 
+### 7. 페이지 PNG 렌더링 (VLM 입력) — `07_render_png.py`
+
+```bash
+python examples/07_render_png.py path/to/your/file.hwp
+python examples/07_render_png.py path/to/your/file.hwp --page 2 --scale 2.0
+python examples/07_render_png.py path/to/your/file.hwp --all
+python examples/07_render_png.py path/to/your/file.hwp --all --scale 1.5 -o ./out
+```
+
+`Document.render_png(page)` / `Document.export_png(dir)` 두 표면을 시연. 단일 페이지
+모드 (기본) 는 한 장을 `{prefix}.png` 로 저장 — VLM (Claude Vision / GPT-4V / Gemini)
+입력용으로 가장 흔한 형태. `--all` 모드는 전 페이지를 `{prefix}_{NNN}.png` 로 저장한다
+(`--scale` / `--max-pixels` 가 기본값과 다르면 page 단위 루프, 아니면 `export_png`
+일괄 호출 — 두 API 의 trade-off 학습 포인트). Pillow 가 설치돼 있으면 디코드 dimension
+까지 출력, 미설치 시 PNG magic + 길이만 출력 (graceful degrade).
+
+옵션:
+- `--page / -p INT` : 0-based 페이지 인덱스 (기본 0). `--all` 지정 시 무시
+- `--all` : 전 페이지 일괄 렌더링
+- `--scale / -s FLOAT` : 픽셀 너비/높이 배율 (기본 1.0). VLM 해상도 ↑ 시 `2.0` ~ `3.0`
+- `--max-pixels INT` : DoS 가드 픽셀 상한 (기본 8192×8192 = 67_108_864)
+- `--output-dir / -o PATH` : 출력 디렉토리 (기본 `./render_output`)
+- `--prefix TEXT` : PNG 파일명 접두사 (기본 `page`)
+
 ## 릴리스 전 실제 HWP 검증
 
-릴리스 직전 **본인의 업무 HWP 파일 3종 (일반 문서 / 장문 / HWPX)** 으로 여섯 스크립트를 순서대로 돌려 출력을 육안 확인한다. 한컴오피스 뷰어로 연 원본과 대조해 섹션/문단/페이지 수치, SVG/PDF 렌더, IR 의 block/table 구조, LangChain Document 매핑, MCP 도구 7 종이 깨지지 않는지 본다.
+릴리스 직전 **본인의 업무 HWP 파일 3종 (일반 문서 / 장문 / HWPX)** 으로 일곱 스크립트를 순서대로 돌려 출력을 육안 확인한다. 한컴오피스 뷰어로 연 원본과 대조해 섹션/문단/페이지 수치, SVG/PDF/PNG 렌더, IR 의 block/table 구조, LangChain Document 매핑, MCP 도구 7 종이 깨지지 않는지 본다.
