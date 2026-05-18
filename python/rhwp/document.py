@@ -32,12 +32,15 @@ Rust ``py.detach`` 가 해제.
 Document 객체에 대해 ``to_ir()`` 재호출은 동일 인스턴스를 반환 (identity 보존).
 """
 
+import os
 from typing import TYPE_CHECKING
 
 from rhwp._rhwp import _Document
 
 if TYPE_CHECKING:
     from rhwp.ir.nodes import HwpDocument, PictureBlock
+
+StrPath = str | os.PathLike[str]
 
 
 class Document:
@@ -56,8 +59,8 @@ class Document:
 
     __slots__ = ("_inner",)
 
-    def __init__(self, path: str) -> None:
-        self._inner: _Document = _Document(path)
+    def __init__(self, path: StrPath) -> None:
+        self._inner: _Document = _Document(str(path))
 
     @classmethod
     def _from_rust(cls, rust_doc: _Document) -> "Document":
@@ -317,11 +320,11 @@ class Document:
         return repr(self._inner)
 
 
-def parse(path: str) -> Document:
+def parse(path: StrPath) -> Document:
     """HWP5 또는 HWPX 파일을 파싱하여 Document 반환.
 
     Args:
-        path: HWP 또는 HWPX 파일 경로.
+        path: HWP 또는 HWPX 파일 경로 (``str`` 또는 ``os.PathLike[str]``).
 
     Returns:
         파싱된 Document.
@@ -336,7 +339,7 @@ def parse(path: str) -> Document:
 
 
 async def arender_png(
-    path: str,
+    path: StrPath,
     page: int,
     *,
     scale: float = 1.0,
@@ -354,7 +357,7 @@ async def arender_png(
     여러 번 호출) 이 더 효율적 — 본 함수는 단발 페이지 렌더링용.
 
     Args:
-        path: HWP 또는 HWPX 파일 경로.
+        path: HWP 또는 HWPX 파일 경로 (``str`` 또는 ``os.PathLike[str]``).
         page: 0-based 페이지 인덱스.
         scale: 페이지 크기 배율 (기본 1.0).
         dpi: 메타데이터 DPI.
@@ -369,12 +372,13 @@ async def arender_png(
     """
     import asyncio
 
-    data = await asyncio.to_thread(_read_bytes, path)
-    doc = Document.from_bytes(data, source_uri=path)
+    path_str = str(path)
+    data = await asyncio.to_thread(_read_bytes, path_str)
+    doc = Document.from_bytes(data, source_uri=path_str)
     return doc.render_png(page, scale=scale, dpi=dpi, max_pixels=max_pixels)
 
 
-async def aparse(path: str) -> Document:
+async def aparse(path: StrPath) -> Document:
     """:func:`parse` 의 async 변형 — 파일 읽기만 async, 파싱은 sync.
 
     ``#[pyclass(unsendable)]`` 제약 상 Document 는 스레드 경계를 넘을 수 없다.
@@ -392,7 +396,7 @@ async def aparse(path: str) -> Document:
     aiofiles 도 동일 한계. 단발 read 이므로 실용 영향 없음.
 
     Args:
-        path: HWP 또는 HWPX 파일 경로.
+        path: HWP 또는 HWPX 파일 경로 (``str`` 또는 ``os.PathLike[str]``).
 
     Returns:
         파싱된 Document. 호출 스레드에 묶인다.
@@ -405,8 +409,9 @@ async def aparse(path: str) -> Document:
     """
     import asyncio
 
-    data = await asyncio.to_thread(_read_bytes, path)
-    return Document.from_bytes(data, source_uri=path)
+    path_str = str(path)
+    data = await asyncio.to_thread(_read_bytes, path_str)
+    return Document.from_bytes(data, source_uri=path_str)
 
 
 def _read_bytes(path: str) -> bytes:
