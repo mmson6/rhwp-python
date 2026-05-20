@@ -15,7 +15,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 - **v0.5.0** — Frozen, MCP server (`rhwp-mcp`) GA (2026-05-06)
 - **v0.5.1** — Frozen, MCP tool 출력 schema 강타입화 GA (2026-05-07)
 - **v0.6.0** — Frozen, 페이지 PNG 렌더링 (VLM 입력) GA (2026-05-10)
-- **v0.7.0+** — 미착수 (주제 미정, demand-driven)
+- **v0.7.0** — 미착수, HWPX writeback baseline (단순 문서 round-trip — 상류 Stage 2.3 GA 기반)
 
 ## 활성 spec 인덱스
 
@@ -38,34 +38,28 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 
 본 섹션은 결정 미정 narrative — `vX.Y.Z` 디렉토리가 아직 없는 minor 들의 의도/스코프. 작업 시점이 가까워지면 `/new-spec <version> <topic>` 으로 정식 spec 으로 promote.
 
-### v0.7.0+ — 미정 (demand-driven)
+### v0.7.0 ~ v1.0.0 — JSON IR → HWP 역생성
 
-v0.5.0 MCP server (Frozen, [v0.5.0/mcp.md](v0.5.0/mcp.md)) + v0.5.1 후속 polish (Frozen, [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md)) + v0.6.0 페이지 PNG 렌더링 (Frozen, [v0.6.0/png-vlm-render.md](v0.6.0/png-vlm-render.md)) 이후 다음 minor 들. 주제 미정 — v0.3.0 LangChain integration + v0.5.0 MCP + v0.6.0 PNG (VLM) 가 RAG / LLM 에이전트 사용처 분모를 이미 커버하는 상황에서 추가 RAG 프레임워크 통합은 **demand-driven 으로 보류** (HWP × 비-LangChain RAG 교집합이 좁을 가능성). 구체화되면 `/new-spec <version> <topic>` 으로 promote.
+선행 조건: v0.6.0 GA 완료 (✓ 2026-05-10). 상류 `edwardkim/rhwp` v0.7.12 시점 HWPX serializer 가 **Stage 2.3 (텍스트·문단·탭·소프트 브레이크 round-trip)** 까지 공개 API 로 GA — `serialize_hwp` / `serialize_hwpx` / `serialize_document` (`external/rhwp/src/serializer/`). 표·이미지·스타일은 Stage 2.5+, 수식 등 고급 요소는 후속 Stage 진행 중 — 본 라인은 상류 Stage 진척과 minor 단위로 lock-step.
 
-> v0.4.0 view 렌더러 (Markdown / HTML) / v0.5.0 MCP server (`rhwp-mcp`) / v0.5.1 MCP 출력 강타입화 / v0.6.0 페이지 PNG (VLM 입력) 모두 GA 완료 — [v0.4.0/view-renderer.md](v0.4.0/view-renderer.md), [v0.5.0/mcp.md](v0.5.0/mcp.md), [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md), [v0.6.0/png-vlm-render.md](v0.6.0/png-vlm-render.md) 가 SSOT.
-
-### v0.8.0 ~ v1.0.0 — JSON IR → HWP 역생성
-
-선행 조건: v0.5.0 MCP server GA + v0.6.0+ minor 들 GA + rhwp Rust 코어의 HWP writer API 안정.
-
-IR 을 축으로 한 양방향 변환 — 사용자가 IR 을 편집해 새 HWP/HWPX 를 생성할 수 있게 함. 본 라인은 rhwp **Rust 코어의 쓰기 API 성숙도** 에 좌우됨. 업스트림 [edwardkim/rhwp](https://github.com/edwardkim/rhwp) 가 HWP writer 를 안정화해야 진행 가능. 시작 전 업스트림 상태 재평가 + 필요 시 writer PR 기여로 진입.
+IR 을 축으로 한 역방향 변환 — parse 결과를 다시 HWP/HWPX 로 저장. v0.7.0 진입 시점에 상류 baseline 이 GA 된 상태이므로 본 minor 는 PyO3 표면 노출 + 보존 회귀 테스트 + 보존 boundary 문서화가 본체. 사용자가 IR 을 편집해 새 HWP/HWPX 를 생성하는 mutable IR 빌더 API 는 v1.0 API 안정 선언 시점에 통합 검토.
 
 범위:
 - IR → **HWPX** 역직렬화 (HWPX 가 XML 기반이라 먼저)
 - IR → **HWP5** 역직렬화 (OLE 컴파운드 파일 — 더 복잡)
 - 왕복 (round-trip) 보장 테스트: parse → IR → write → parse 결과가 의미적으로 동일
-- Python API: `rhwp.write(ir, path)` / `rhwp.Document.from_ir(ir).save(path)`
+- Python API: `Document.to_hwpx_bytes()` / `Document.export_hwpx(path)` (v0.7.0~), `Document.to_hwp_bytes()` / `Document.export_hwp(path)` (v0.9.0~)
 
 릴리스 분할:
 
 | 버전 | 범위 |
 |---|---|
-| v0.8.0 | HWPX writeback baseline (단순 문서 왕복) |
-| v0.9.0 | HWPX writeback 확장 (표·이미지·수식) |
-| v0.10.0 | HWP5 writeback baseline |
+| v0.7.0 | HWPX writeback baseline (단순 문서 왕복) |
+| v0.8.0 | HWPX writeback 확장 (표·이미지·수식) |
+| v0.9.0 | HWP5 writeback baseline |
 | v1.0.0 | HWP5 writeback 확장 + API 안정 선언 |
 
-SemVer 0.x.y 단계에서 minor 는 단조 증가 — v0.9 다음은 v0.10 (v1.0 으로 점프하지 않음). v1.0.0 은 API 안정 선언과 함께 별도 도달.
+SemVer 0.x.y 단계에서 minor 는 단조 증가. v1.0.0 은 API 안정 선언과 함께 별도 도달 — round-trip 무결성 / breaking change 부재 / 외부 검토 기준 충족 시점에 도달.
 
 1.0 안정화 기준:
 - HWPX 왕복 무결성 ≥ 99% (bytewise 는 불가능, 의미적 동등성 기준)
