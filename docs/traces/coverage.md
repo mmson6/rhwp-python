@@ -635,3 +635,10 @@ v0.4.0+ 신규 spec 의 인수조건 ↔ 테스트 매핑. 기존 v0.1.0 ~ v0.3.
 | v0.6.0/png-vlm-render | AC-5 | `tests/test_render_png.py::TestMcpRenderPagePng::test_returns_image_content` |
 | v0.6.0/png-vlm-render | AC-6 | `tests/test_render_png.py::TestArenderPng::test_async_returns_png_without_panic` |
 | v0.6.0/png-vlm-render | AC-7 | `tests/test_render_png.py::TestExportPng::test_writes_files_with_png_magic` |
+| v0.7.0/hwpx-writeback-baseline | AC-1 | `tests/test_hwpx_writeback.py::TestRoundtripPreservation::test_text_paragraph_roundtrip` |
+| v0.7.0/hwpx-writeback-baseline | AC-2 | `tests/test_hwpx_writeback.py::TestContainerShape::test_to_hwpx_bytes_is_valid_container` |
+| v0.7.0/hwpx-writeback-baseline | AC-3 | `tests/test_hwpx_writeback.py::TestContainerShape::test_hwp5_input_converts_to_hwpx_container` |
+| v0.7.0/hwpx-writeback-baseline | AC-4 | `tests/test_hwpx_writeback.py::TestContainerShape::test_table_document_serializes_without_crash` |
+| v0.7.0/hwpx-writeback-baseline | AC-5 | `tests/test_hwpx_writeback.py::TestExportHwpx::test_export_to_missing_parent_raises_oserror` |
+| v0.7.0/hwpx-writeback-baseline | AC-5 | `tests/test_hwpx_writeback.py::TestExportHwpx::test_export_writes_file_and_returns_byte_count` |
+| v0.7.0/hwpx-writeback-baseline | AC-6 | `tests/test_hwpx_writeback.py::TestAdditiveNoSideEffects::test_writeback_does_not_mutate_existing_surfaces` |

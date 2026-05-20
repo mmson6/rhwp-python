@@ -293,6 +293,33 @@ impl PyDocument {
         result.extract::<String>()
     }
 
+    /// 문서를 HWPX (ZIP+XML) bytes 로 직렬화한다 (상류 `serialize_hwpx` 위임).
+    ///
+    /// `Document` IR 은 포맷 독립이라 HWP5 로 parse 한 문서도 HWPX 로 출력된다
+    /// (HWP5 → HWPX 포맷 변환). 출력은 ZIP magic 으로 시작하고 첫 엔트리가
+    /// STORED `mimetype` = `application/hwp+zip`. 직렬화 실패 (참조 무결성
+    /// 위반 등) 는 `ValueError`.
+    fn to_hwpx_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
+        // ^ GIL 보유: serialize_hwpx(self.inner.document()) 가 &self.inner 캡처 —
+        //   DocumentCore 가 RefCell 캐시로 !Sync 라 py.detach 클로저 이동 불가
+        //   (to_ir 와 동일 제약). clone 후 detach 는 측정 후 후속 patch.
+        let bytes = rhwp::serializer::serialize_hwpx(self.inner.document())
+            .map_err(|e| PyValueError::new_err(format!("HWPX serialization failed: {e}")))?;
+        Ok(PyBytes::new(py, &bytes))
+    }
+
+    /// 문서를 HWPX 파일로 저장하고 작성 바이트 수를 반환한다.
+    ///
+    /// 직렬화 실패는 `ValueError`, 파일 쓰기 실패 (부모 디렉토리 부재 등) 는
+    /// `OSError`. GIL 은 `export_svg` 와 동일하게 보유 — serialize 가 `&self.inner`
+    /// 를 캡처하므로 detach 불가.
+    fn export_hwpx(&self, output_path: &str) -> PyResult<usize> {
+        let bytes = rhwp::serializer::serialize_hwpx(self.inner.document())
+            .map_err(|e| PyValueError::new_err(format!("HWPX serialization failed: {e}")))?;
+        std::fs::write(output_path, &bytes).map_err(|e| PyIOError::new_err(e.to_string()))?;
+        Ok(bytes.len())
+    }
+
     fn __repr__(&self) -> String {
         format!(
             "Document(sections={}, paragraphs={}, pages={})",
