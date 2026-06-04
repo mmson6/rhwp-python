@@ -140,8 +140,15 @@ exclude = [
     { path = "**/node_modules/**", format = "sdist" },
     { path = "**/__pycache__/**", format = "sdist" },
     { path = "**/target/**", format = "sdist" },
-    # ^ external/rhwp/samples ≈ 60 MB 테스트 fixture — sdist 에서 제외해 PyPI 100 MB 한도 준수
+    # ^ external/rhwp 의 빌드 불필요 대용량 자산 — sdist 에서 제외해 PyPI 100 MB 한도 준수
     { path = "**/samples/**", format = "sdist" },
+    { path = "**/pdf/**", format = "sdist" },
+    { path = "**/pdf-large/**", format = "sdist" },
+    { path = "**/pdf-2020/**", format = "sdist" },
+    { path = "**/pdf-2010/**", format = "sdist" },
+    { path = "**/mydocs/**", format = "sdist" },
+    { path = "**/web/**", format = "sdist" },
+    { path = "**/rhwp-studio/**", format = "sdist" },
 ]
 
 [tool.pytest.ini_options]
