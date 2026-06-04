@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-06-04
+
+MINOR release. parse 한 `Document` 를 다시 HWPX 로 저장하는 첫 역방향 표면을 추가한다 — v0.2.0 ~ v0.6.0 의 모든 산출물 (IR / SVG / PDF / PNG) 이 read-only 였던 것에 writeback 을 연다. 직렬화는 상류 `serialize_hwpx` 에 위임한다. 추가만 있고 기존 IR / 렌더 / MCP 표면은 모두 보존 (additive only) — IR schema (`"1.1"`) 변경 0.
+
+### Added
+
+- `Document.to_hwpx_bytes() -> bytes` — 문서를 HWPX (ZIP+XML) 바이트로 직렬화. 출력은 ZIP magic `b"PK\x03\x04"` 으로 시작하고 첫 엔트리가 STORED `mimetype` = `application/hwp+zip`. `Document` IR 이 포맷 독립이라 HWP5 로 parse 한 문서도 HWPX 로 출력된다 (HWP5 → HWPX 포맷 변환). 직렬화 실패 (참조 무결성 위반 — BinData 누락 등) 는 `ValueError`.
+- `Document.export_hwpx(path) -> int` — 문서를 HWPX 파일로 저장하고 작성 바이트 수 (> 0) 를 반환. 파일 쓰기 실패 (부모 디렉토리 부재 등) 는 `OSError`. `render_pdf` / `export_pdf` 의 메모리 / 파일 분리 패턴과 대칭.
+- README § "HWPX 저장 (writeback)" 신설 — `to_hwpx_bytes` / `export_hwpx` 사용 예 + HWP5 → HWPX 변환 + 보존 범위 / 에러 계약. PNG 렌더 섹션과 LangChain 통합 섹션 사이 배치.
+
+보존 범위: 텍스트·문단은 round-trip 의미를 보존한다 (parse → 저장 → 재파싱 시 섹션 수 / 문단 수 / 문단 텍스트 동등). 표·그림·수식은 상류 serializer 의 현 보존 범위에 위임 — 의미 보존 미보장 (예외 없는 직렬화만 보장). round-trip 은 의미적 동등성 기준이며 byte 단위 동일은 보장하지 않는다. 표·그림 round-trip 의미 보존은 v0.8.0, HWP5 binary 출력 (`export_hwp`) 은 별도 minor.
+
+### Build
+
+- `external/rhwp` submodule pin `1899ef9b` (v0.7.12) → `ce45231c` (v0.7.12 + 394 commit, 2026-05-27 상류). spec·feat 는 `1899ef9b` 기준 작성됐고 (2026-05-20) GA 직전 재동기화 후 그 위에서 회귀를 재검증했다. **본 binding 관점 회귀 0** — `serialize_hwpx` 시그니처 불변, `maturin develop --release` clean, `pytest -m "not slow"` 599 passed / 2 skipped (IR baseline byte-equal 포함). 흡수한 상류 변경: serializer +2092 (16 commit 거의 전부 HWP5 binary writeback `serialize_hwp` 한컴 호환 — Form 컨트롤 byte-perfect / 각주 contract / 표 셀 배경 / EQEDIT errata), model +1267, rendering +1320 — 모두 직렬화·렌더 내부라 binding 이 소비하는 IR schema (`"1.1"`) / IR·렌더 출력은 불변. 상류 HWPX round-trip IrDiff 는 여전히 Stage 0 (카운트만) 라 본 baseline 의 텍스트·문단 round-trip 보장은 binding 자체 회귀 가드가 책임.
+- `Cargo.toml` 의 `version` `0.6.1` → `0.7.0`. `pyproject.toml` 은 `dynamic = ["version"]` 으로 자동 추종.
+
 ## [0.6.1] — 2026-05-18
 
 PATCH release. v0.6.0 (Frozen, 2026-05-10) 의 GitHub Release / PyPI publish 가 누락된 상태에서 발견된 release 인프라 정합화 + 후속 polish 를 한 묶음 PATCH 로 발행한다. 사용자 영향: PyPI 첫 게시 패키지가 `v0.5.1` 다음 `v0.6.1` 로 점프 — v0.6.0 의 모든 표면 (페이지 PNG 렌더링 + 문서 시스템 개편) 은 변경 없이 그대로 포함하며 `[0.6.0]` 섹션은 historical record 로 보존. 외부 공개 API / IR schema (`"1.1"`) 변경 0.

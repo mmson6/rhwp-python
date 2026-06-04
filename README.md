@@ -124,6 +124,37 @@ print(message.content[0].text)
 `ValueError("raster pixel count out of range: ...")`. 사용자가 명시 override
 가능 — 예: `doc.render_png(0, max_pixels=200_000_000)`.
 
+## HWPX 저장 (writeback)
+
+parse 한 문서를 다시 HWPX 파일로 저장하는 역방향 표면. `Document` IR 이 포맷
+독립이라 HWP5 로 parse 한 문서도 HWPX 로 출력된다 (HWP5 → HWPX 포맷 변환).
+직렬화는 상류 `rhwp` 의 `serialize_hwpx` (PR #170) 에 위임한다.
+
+```python
+import rhwp
+
+doc = rhwp.parse("report.hwp")
+
+# 메모리 bytes — ZIP magic 으로 시작 (첫 엔트리 STORED mimetype = application/hwp+zip)
+data: bytes = doc.to_hwpx_bytes()
+
+# 디스크 저장 — 작성 바이트 수 반환
+written: int = doc.export_hwpx("out.hwpx")
+
+# HWP5 → HWPX 변환도 동일 (입력 포맷 무관)
+rhwp.parse("legacy.hwp").export_hwpx("converted.hwpx")
+```
+
+**보존 범위** — 텍스트·문단은 round-trip 의미를 보존한다 (parse → 저장 →
+재파싱 시 섹션 수 / 문단 수 / 문단 텍스트 동등). 표·그림·수식은 상류 serializer
+의 현 보존 범위에 위임하며 의미 보존을 보장하지 않는다 (예외 없는 직렬화만
+보장). 표·그림의 round-trip 의미 보존은 후속 버전 과제다. round-trip 은 의미적
+동등성 기준이며 byte 단위 동일은 보장하지 않는다 (ZIP 압축 / canonical default
+주입 등).
+
+직렬화 실패 (참조 무결성 위반 — BinData 누락 등) 는 `ValueError`, 파일 쓰기
+실패 (부모 디렉토리 부재 등) 는 `OSError`.
+
 ## LangChain 통합
 
 ```bash

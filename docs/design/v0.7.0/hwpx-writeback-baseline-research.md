@@ -1,8 +1,8 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.7.0 hwpx-writeback-baseline ADR — 직렬화 source(상류 위임) / API 명명 / GIL 전략 / 보존 boundary 4개 결정의 근거"
-target: v0.7.0
-last_updated: 2026-05-20
+ga: v0.7.0
+last_updated: 2026-06-04
 ---
 
 # v0.7.0 hwpx-writeback-baseline — 설계 의사결정 리서치 요약

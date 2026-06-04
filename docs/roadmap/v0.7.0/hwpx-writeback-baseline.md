@@ -1,8 +1,8 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.7.0 — HWPX writeback baseline. parse 결과를 'export_hwpx' / 'to_hwpx_bytes' 로 HWPX 저장 — 상류 'serialize_hwpx' 위임 + 텍스트·문단 round-trip 보장"
-target: v0.7.0
-last_updated: 2026-05-20
+ga: v0.7.0
+last_updated: 2026-06-04
 ---
 
 # v0.7.0 — HWPX writeback baseline
