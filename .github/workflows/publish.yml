@@ -36,10 +36,15 @@ jobs:
 
   build-linux:
     name: Build Linux wheel (${{ matrix.target }})
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false
       matrix:
-        target: [x86_64, aarch64]
+        include:
+          - target: x86_64
+            runner: ubuntu-latest
+          - target: aarch64
+            runner: ubuntu-22.04-arm
     steps:
       - uses: actions/checkout@v6
         with:
