@@ -316,6 +316,40 @@ class Document:
         """
         return self._inner.export_png(output_dir, prefix=prefix)
 
+    # * HWPX writeback
+
+    def to_hwpx_bytes(self) -> bytes:
+        """문서를 HWPX (ZIP+XML) 바이트로 직렬화한다 (상류 serializer 위임).
+
+        ``Document`` IR 은 포맷 독립이므로 HWP5 로 parse 한 문서도 HWPX 로
+        출력된다 (HWP5 → HWPX 포맷 변환). 텍스트·문단은 round-trip 의미를
+        보존하고, 표·그림은 상류 보존 범위에 위임한다 (의미 보존 미보장).
+        출력은 ZIP magic ``b"PK\\x03\\x04"`` 으로 시작하고 첫 엔트리가 STORED
+        방식 ``mimetype`` = ``application/hwp+zip``.
+
+        Returns:
+            HWPX 컨테이너 바이트.
+
+        Raises:
+            ValueError: 직렬화 실패 — 참조 무결성 위반 (BinData 누락 등).
+        """
+        return self._inner.to_hwpx_bytes()
+
+    def export_hwpx(self, output_path: str) -> int:
+        """문서를 HWPX 파일로 저장한다.
+
+        Args:
+            output_path: 출력 파일 경로.
+
+        Returns:
+            저장된 바이트 수 (> 0).
+
+        Raises:
+            OSError: 파일 쓰기 실패 (부모 디렉토리 부재 등).
+            ValueError: 직렬화 실패 — 참조 무결성 위반 (BinData 누락 등).
+        """
+        return self._inner.export_hwpx(output_path)
+
     def __repr__(self) -> str:
         return repr(self._inner)
 
