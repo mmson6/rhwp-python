@@ -35,12 +35,28 @@ Document 객체에 대해 ``to_ir()`` 재호출은 동일 인스턴스를 반환
 import os
 from typing import TYPE_CHECKING
 
+from pydantic import BaseModel, ConfigDict
+
 from rhwp._rhwp import _Document
 
 if TYPE_CHECKING:
     from rhwp.ir.nodes import HwpDocument, PictureBlock
 
 StrPath = str | os.PathLike[str]
+
+
+class RoundtripReport(BaseModel):
+    """:meth:`Document.verify_hwpx_roundtrip` 의 결과 — HWPX 저장 round-trip 충실도.
+
+    ``ok`` 는 ``differences`` 가 빌 때만 ``True`` (불변 ``ok == (not differences)``).
+    ``differences`` 각 항목은 상류 ``diff_documents`` 가 검출한 IR 차이의 사람 가독
+    문자열 (차이 종류 + 위치). 차이가 없으면 빈 리스트.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    ok: bool
+    differences: list[str]
 
 
 class Document:
@@ -349,6 +365,32 @@ class Document:
             ValueError: 직렬화 실패 — 참조 무결성 위반 (BinData 누락 등).
         """
         return self._inner.export_hwpx(output_path)
+
+    def verify_hwpx_roundtrip(self) -> RoundtripReport:
+        """현재 문서를 HWPX 로 저장했을 때 IR 의미가 보존되는지 검증한다.
+
+        문서를 HWPX 로 직렬화 → 재파싱한 뒤, 원본 ``Document`` 와 재파싱 결과를
+        상류 ``diff_documents`` 로 비교한다. 보존되면 ``ok == True`` 이고
+        ``differences == []``.
+
+        보장 범위는 상류 ``diff_documents`` 가 *실제 비교* 하는 필드 집합이다 —
+        표 cell 내용·캡션·page_break, 그림 크기·캡션, 문단 char_shape·lineseg,
+        섹션 PageDef, 리소스·BinData 엔트리 카운트. 수식 script, 표 cell
+        rowspan/colspan, BinData byte, 도형 raw 는 상류가 비교하지 않으므로 보장
+        범위 밖이다 (round-trip 차이 0 이 해당 요소의 보존을 뜻하지는 않는다).
+
+        ``export_hwpx`` 와 달리 파일을 쓰지 않으며 현재 Document 를 변형하지 않는다.
+
+        Returns:
+            ``RoundtripReport`` — ``ok: bool`` + ``differences: list[str]``.
+            불변 ``report.ok == (len(report.differences) == 0)``.
+
+        Raises:
+            ValueError: 직렬화 또는 재파싱 실패 — 참조 무결성 위반 (BinData 누락 등).
+                ``to_hwpx_bytes`` / ``export_hwpx`` 와 동일 에러 계약.
+        """
+        ok, differences = self._inner.verify_hwpx_roundtrip()
+        return RoundtripReport(ok=ok, differences=differences)
 
     def __repr__(self) -> str:
         return repr(self._inner)

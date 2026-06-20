@@ -1,12 +1,14 @@
 """rhwp — HWP/HWPX parser and renderer (Korean word processor format)."""
 
 from rhwp.document import Document as Document
+from rhwp.document import RoundtripReport as RoundtripReport
 from rhwp.document import aparse as aparse
 from rhwp.document import arender_png as arender_png
 from rhwp.document import parse as parse
 
 __all__ = [
     "Document",
+    "RoundtripReport",
     "aparse",
     "arender_png",
     "parse",

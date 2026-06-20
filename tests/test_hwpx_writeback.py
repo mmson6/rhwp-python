@@ -13,10 +13,13 @@ AC-1 의 round-trip fixture 로는 텍스트 문단이 풍부한 ``business_over
 import io
 import zipfile
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
-
 import rhwp
+
+if TYPE_CHECKING:
+    from rhwp.ir.nodes import HwpDocument
 
 ZIP_MAGIC = b"PK\x03\x04"
 HWPX_MIMETYPE = b"application/hwp+zip"
@@ -117,3 +120,119 @@ class TestAdditiveNoSideEffects:
         assert doc.extract_text() == text_before
         assert doc.render_svg(0) == svg_before
         assert (doc.section_count, doc.paragraph_count, doc.page_count) == counts_before
+
+
+# * v0.8.0 — HWPX writeback 확장 (verify_hwpx_roundtrip + 표·그림 round-trip 보존)
+
+
+def _block_kind_counts(ir: "HwpDocument") -> dict[str, int]:
+    """IR 블록을 종류별로 집계 (scope=all, TableCell 재귀)."""
+    counts: dict[str, int] = {}
+    for block in ir.iter_blocks(scope="all", recurse=True):
+        counts[block.kind] = counts.get(block.kind, 0) + 1
+    return counts
+
+
+class TestExpansionTableAndPicture:
+    @pytest.mark.spec("v0.8.0/hwpx-writeback-expansion#AC-1")
+    def test_table_and_picture_roundtrip_equivalent(
+        self, samples_dir: Path, tmp_path: Path
+    ) -> None:
+        # ^ aift.hwpx — 표·그림 풍부한 실문서. export → reparse 후 표·그림 카운트
+        #   보존 + 상류 diff_documents 기준 동등 (verify ok).
+        original = rhwp.parse(str(samples_dir / "hwpx" / "aift.hwpx"))
+        kinds = _block_kind_counts(original.to_ir())
+        assert kinds.get("table", 0) > 0, "fixture must contain tables for AC-1"
+        assert kinds.get("picture", 0) > 0, "fixture must contain pictures for AC-1"
+
+        out = tmp_path / "expansion_roundtrip.hwpx"
+        original.export_hwpx(str(out))
+        reparsed_kinds = _block_kind_counts(rhwp.parse(str(out)).to_ir())
+        assert reparsed_kinds.get("table", 0) == kinds["table"]
+        assert reparsed_kinds.get("picture", 0) == kinds["picture"]
+
+        report = original.verify_hwpx_roundtrip()
+        assert report.ok is True
+        assert report.differences == []
+
+
+class TestVerifyReport:
+    @pytest.mark.spec("v0.8.0/hwpx-writeback-expansion#AC-2")
+    def test_preserved_document_is_ok_with_invariant(self, samples_dir: Path) -> None:
+        doc = rhwp.parse(str(samples_dir / "hwpx" / "aift.hwpx"))
+        report = doc.verify_hwpx_roundtrip()
+        assert isinstance(report, rhwp.RoundtripReport)
+        assert report.ok is True
+        assert report.differences == []
+        # 불변: ok == (differences 가 빔)
+        assert report.ok == (len(report.differences) == 0)
+
+    @pytest.mark.spec("v0.8.0/hwpx-writeback-expansion#AC-3")
+    def test_preserved_document_differences_are_empty_str_list(self, samples_dir: Path) -> None:
+        # positive — 보존 문서의 differences 는 빈 list[str]
+        report = rhwp.parse(str(samples_dir / "hwpx" / "aift.hwpx")).verify_hwpx_roundtrip()
+        assert isinstance(report.differences, list)
+        assert report.differences == []
+
+    @pytest.mark.spec("v0.8.0/hwpx-writeback-expansion#AC-3")
+    def test_lossy_document_reports_human_readable_differences(
+        self, parsed_hwpx: rhwp.Document
+    ) -> None:
+        # ^ table-vpos-01.hwpx 는 도형 shapeComment 가 round-trip 에서 손실되는 자연
+        #   발생 fixture (상류 serializer 미직렬화) — verify 의 손실 검출력 회귀 가드.
+        #   특정 개수·메시지는 박지 않는다 (상류가 손실을 고치면 이 fixture 갱신).
+        report = parsed_hwpx.verify_hwpx_roundtrip()
+        assert report.ok is False
+        assert report.differences, "verify must surface the upstream shapeComment loss"
+        assert all(isinstance(d, str) and d.strip() for d in report.differences)
+        # 불변은 양방향 모두 성립
+        assert report.ok == (len(report.differences) == 0)
+
+
+class TestVerifyNoSideEffects:
+    @pytest.mark.spec("v0.8.0/hwpx-writeback-expansion#AC-4")
+    def test_verify_does_not_mutate_existing_surfaces(self, samples_dir: Path) -> None:
+        # ^ 독립 parse — 공유 session fixture 캐시 간섭 회피 (v0.7.0 AC-6 패턴).
+        doc = rhwp.parse(str(samples_dir / "table-vpos-01.hwpx"))
+
+        ir_before = doc.to_ir_json()
+        paras_before = doc.paragraphs()
+        text_before = doc.extract_text()
+        svg_before = doc.render_svg(0)
+        hwpx_before = doc.to_hwpx_bytes()
+        counts_before = (doc.section_count, doc.paragraph_count, doc.page_count)
+
+        doc.verify_hwpx_roundtrip()
+
+        assert doc.to_ir_json() == ir_before
+        assert doc.paragraphs() == paras_before
+        assert doc.extract_text() == text_before
+        assert doc.render_svg(0) == svg_before
+        assert doc.to_hwpx_bytes() == hwpx_before
+        assert (doc.section_count, doc.paragraph_count, doc.page_count) == counts_before
+
+
+class TestVerifyErrorContract:
+    @pytest.mark.spec("v0.8.0/hwpx-writeback-expansion#AC-5")
+    def test_serializable_document_passes_verify_serialization(
+        self, parsed_hwpx: rhwp.Document
+    ) -> None:
+        # ^ verify 는 to_hwpx_bytes 와 동일 직렬화 경로 (상류 serialize_hwpx) — 직렬화
+        #   가능한 문서는 verify 도 ValueError 없이 통과한다. 직렬화 실패 시 양쪽 모두
+        #   ValueError (동일 에러 계약). 자연 발생 실패 fixture 부재로 negative 비검증.
+        data = parsed_hwpx.to_hwpx_bytes()
+        assert isinstance(data, bytes) and data
+        report = parsed_hwpx.verify_hwpx_roundtrip()
+        assert isinstance(report, rhwp.RoundtripReport)
+
+
+class TestV070GuaranteeIntact:
+    @pytest.mark.spec("v0.8.0/hwpx-writeback-expansion#AC-6")
+    def test_text_paragraph_guarantee_holds_under_verify(self, samples_dir: Path) -> None:
+        # ^ v0.7.0 baseline 의 텍스트·문단 round-trip 보장이 verify 표면에서도 일관
+        #   (회귀 가드). business_overview.hwpx (텍스트 풍부) round-trip 보존.
+        original = rhwp.parse(str(samples_dir / "hwpx" / "business_overview.hwpx"))
+        assert any(p.strip() for p in original.paragraphs())
+        report = original.verify_hwpx_roundtrip()
+        assert report.ok is True
+        assert report.differences == []
