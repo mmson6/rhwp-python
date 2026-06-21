@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.8.0 hwpx-writeback-expansion ADR — 보존 boundary 확대 / verify 표면 노출 / 반환 타입 / 비교 기준 / GIL 5개 결정의 근거"
-target: v0.8.0
+ga: v0.8.0
 last_updated: 2026-06-21
 ---
 

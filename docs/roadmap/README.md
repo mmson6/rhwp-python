@@ -16,7 +16,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 - **v0.5.1** — Frozen, MCP tool 출력 schema 강타입화 GA (2026-05-07)
 - **v0.6.0** — Frozen, 페이지 PNG 렌더링 (VLM 입력) GA (2026-05-10)
 - **v0.7.0** — Frozen, HWPX writeback baseline (parse → HWPX round-trip, 텍스트·문단 보존) GA (2026-06-04)
-- **v0.8.0** — Draft, HWPX writeback 확장 (표·그림·수식 의미 보존) 착수 — 상류 sync (v0.7.16+36, 1,209 commit) 흡수 + round-trip IrDiff Stage 4 선행조건 충족 (2026-06-21~)
+- **v0.8.0** — Frozen, HWPX writeback round-trip 검증 (`verify_hwpx_roundtrip` + 보존 boundary 를 상류 `diff_documents` 검증 필드로 확대) GA (2026-06-21)
 
 ## 활성 spec 인덱스
 
@@ -35,7 +35,7 @@ rhwp-python 의 버전별 로드맵 + **활성 spec 인덱스 SSOT**. 모든 spe
 | v0.5.1 (MCP typed output) | Frozen | [v0.5.1/mcp-typed-output.md](v0.5.1/mcp-typed-output.md) | [design/v0.5.1/mcp-typed-output-research.md](../design/v0.5.1/mcp-typed-output-research.md) |
 | v0.6.0 (png-vlm-render) | Frozen | [v0.6.0/png-vlm-render.md](v0.6.0/png-vlm-render.md) | [design/v0.6.0/png-vlm-render-research.md](../design/v0.6.0/png-vlm-render-research.md) |
 | v0.7.0 (hwpx-writeback-baseline) | Frozen | [v0.7.0/hwpx-writeback-baseline.md](v0.7.0/hwpx-writeback-baseline.md) | [design/v0.7.0/hwpx-writeback-baseline-research.md](../design/v0.7.0/hwpx-writeback-baseline-research.md) |
-| v0.8.0 (hwpx-writeback-expansion) | Draft | [v0.8.0/hwpx-writeback-expansion.md](v0.8.0/hwpx-writeback-expansion.md) | [design/v0.8.0/hwpx-writeback-expansion-research.md](../design/v0.8.0/hwpx-writeback-expansion-research.md) |
+| v0.8.0 (hwpx-writeback-expansion) | Frozen | [v0.8.0/hwpx-writeback-expansion.md](v0.8.0/hwpx-writeback-expansion.md) | [design/v0.8.0/hwpx-writeback-expansion-research.md](../design/v0.8.0/hwpx-writeback-expansion-research.md) |
 
 ## 미착수 작업 계획
 
@@ -90,6 +90,7 @@ SemVer 0.x.y 단계에서 minor 는 단조 증가. v1.0.0 은 API 안정 선언�
 | v0.5.1 | [implementation/v0.5.1/migration.md](../implementation/v0.5.1/migration.md) | — |
 | v0.6.0 | [implementation/v0.6.0/migration.md](../implementation/v0.6.0/migration.md) | — |
 | v0.7.0 | [implementation/v0.7.0/migration.md](../implementation/v0.7.0/migration.md) | — |
+| v0.8.0 | [implementation/v0.8.0/migration.md](../implementation/v0.8.0/migration.md) | — |
 
 ## 원칙
 

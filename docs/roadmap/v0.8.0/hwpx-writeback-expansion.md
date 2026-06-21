@@ -1,7 +1,7 @@
 ---
-status: Draft
+status: Frozen
 description: "v0.8.0 — HWPX writeback round-trip 검증 표면 'verify_hwpx_roundtrip' 추가 + 보존 boundary 를 상류 'diff_documents' 검증 범위로 확대"
-target: v0.8.0
+ga: v0.8.0
 last_updated: 2026-06-21
 ---
 

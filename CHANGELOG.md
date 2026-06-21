@@ -5,9 +5,9 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.0] — 2026-06-21
 
-> 미출시 — 다음 MINOR (v0.8.0 예정) 에 흡수. `Cargo.toml` 의 `version` 은 `0.7.0` 유지.
+MINOR release. parse 한 `Document` 를 HWPX 로 저장했을 때 IR 의미가 보존되는지 검증하는 `Document.verify_hwpx_roundtrip()` 표면을 추가하고, 보존 boundary 를 v0.7.0 의 텍스트·문단에서 상류 `diff_documents` 가 실제 비교하는 필드 집합 (표 cell·캡션·page_break, 그림 크기·캡션, char_shape·lineseg, PageDef, 리소스·BinData count) 으로 확대한다. 직렬화·진단 모두 상류 위임 — 추가만 있고 기존 표면 보존, IR schema (`"1.1"`) 변경 0. 동시에 상류 v0.7.13 ~ v0.7.16 sync 를 흡수한다.
 
 ### Added
 
