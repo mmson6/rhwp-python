@@ -320,6 +320,28 @@ impl PyDocument {
         Ok(bytes.len())
     }
 
+    /// 현재 문서를 HWPX 로 직렬화 → 재파싱한 뒤 상류 `diff_documents` 로 IR 차이를
+    /// 측정한다. 반환은 raw `(ok, differences)` tuple — Python wrapper 가 리포트로 감싼다.
+    ///
+    /// `ok` 는 `differences` 가 비었을 때 `true`. `differences` 각 항목은 상류
+    /// `IrDifference` 의 `Display` 문자열 (차이 종류 + 위치). 직렬화·재파싱 실패는
+    /// `ValueError` — `to_hwpx_bytes` / `export_hwpx` 와 동일 에러 계약.
+    fn verify_hwpx_roundtrip(&self) -> PyResult<(bool, Vec<String>)> {
+        // ^ GIL 보유: diff_documents 의 첫 인자가 self.inner.document() (&self.inner 캡처) —
+        //   DocumentCore 가 RefCell 캐시로 !Sync (to_ir / to_hwpx_bytes 와 동일 제약).
+        let bytes = rhwp::serializer::serialize_hwpx(self.inner.document())
+            .map_err(|e| PyValueError::new_err(format!("HWPX serialization failed: {e}")))?;
+        let reparsed = rhwp::document_core::DocumentCore::from_bytes(&bytes)
+            .map_err(|e| PyValueError::new_err(format!("HWPX roundtrip reparse failed: {e:?}")))?;
+        // ^ roundtrip 항목은 serializer/mod.rs re-export 밖이라 모듈 경로로 접근.
+        let diff = rhwp::serializer::hwpx::roundtrip::diff_documents(
+            self.inner.document(),
+            reparsed.document(),
+        );
+        let differences: Vec<String> = diff.differences.iter().map(|d| d.to_string()).collect();
+        Ok((differences.is_empty(), differences))
+    }
+
     fn __repr__(&self) -> String {
         format!(
             "Document(sections={}, paragraphs={}, pages={})",

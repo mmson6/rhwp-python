@@ -5,7 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.0] — 2026-06-21
+
+MINOR release. parse 한 `Document` 를 HWPX 로 저장했을 때 IR 의미가 보존되는지 검증하는 `Document.verify_hwpx_roundtrip()` 표면을 추가하고, 보존 boundary 를 v0.7.0 의 텍스트·문단에서 상류 `diff_documents` 가 실제 비교하는 필드 집합 (표 cell·캡션·page_break, 그림 크기·캡션, char_shape·lineseg, PageDef, 리소스·BinData count) 으로 확대한다. 직렬화·진단 모두 상류 위임 — 추가만 있고 기존 표면 보존, IR schema (`"1.1"`) 변경 0. 동시에 상류 v0.7.13 ~ v0.7.16 sync 를 흡수한다.
+
+### Added
+
+- `Document.verify_hwpx_roundtrip() -> RoundtripReport` — 현재 문서를 HWPX 로 직렬화 → 재파싱한 뒤 상류 `diff_documents` 로 원본 대비 IR 차이를 측정. 반환 `RoundtripReport` 는 `ok: bool` + `differences: list[str]` 경량 리포트 (불변 `ok == (not differences)`). `differences` 각 항목은 상류 `IrDifference` 의 사람 가독 문자열 (차이 종류 + 위치). 직렬화·재파싱 실패는 `ValueError` — `to_hwpx_bytes` / `export_hwpx` 와 동일 에러 계약. GIL 보유 — `diff_documents` 가 `self.inner.document()` (`&self.inner`) 를 캡처하고 `DocumentCore` 가 `!Sync` (v0.7.0 결정 3 일관).
+- `rhwp.RoundtripReport` — verify 결과 모델 (`frozen=True` / `extra="forbid"`) 을 public 노출. `report.ok` 로 프로그램 분기, `report.differences` 로 사람 가독 진단. 상류 `IrDifference` variant 가 게이트 진행마다 증가하므로 강타입 mirror 대신 forward-compatible 한 문자열 리스트로 출고.
+
+보존 boundary 확대: v0.7.0 의 텍스트·문단 → 상류 `diff_documents` 가 *실제 round-trip 비교* 하는 필드 집합 (표 cell 내용·캡션·page_break, 그림 크기·캡션, 문단 char_shape·lineseg, 섹션 PageDef, 리소스·BinData 엔트리 카운트). 미비교 요소 (수식 script, 표 cell rowspan/colspan, BinData byte, 도형 raw) 는 보장 범위 밖 — 상류 비교 확대에 의존. 직렬화·진단 모두 상류 위임 — 추가만 있고 기존 표면 보존, IR schema (`"1.1"`) 변경 0. 회귀 가드: `tests/test_hwpx_writeback.py` 에 AC-1 ~ AC-6 (7 테스트) 추가 — 표·그림 round-trip 동등 (`aift.hwpx`) + verify positive + 자연 발생 negative 검출 (`table-vpos-01.hwpx` 의 그리기 도형 shapeComment 상류 미직렬화) + 부작용 없음 + v0.7.0 텍스트·문단 보장 유지. spec / ADR: [docs/roadmap/v0.8.0/hwpx-writeback-expansion.md](docs/roadmap/v0.8.0/hwpx-writeback-expansion.md) / [docs/design/v0.8.0/hwpx-writeback-expansion-research.md](docs/design/v0.8.0/hwpx-writeback-expansion-research.md) (둘 다 Draft — GA 전환은 릴리스 시점).
+
+### Build
+
+- `external/rhwp` submodule pin `ce45231c` (v0.7.12 + 394) → `7d9aae7f` (v0.7.16 + 36). 상류 v0.7.13 ~ v0.7.16 GA 흡수 (pin 간 1,209 commit). **본 binding 관점 회귀 0** — 공개 API / IR schema (`"1.1"`) / wheel 의존성 모두 불변. 검증: `maturin develop --release` clean, `pytest -m "not slow"` 599 passed / 2 skipped (v0.7.0 GA 와 동일), IR baseline byte-equal (`tests/test_view_baseline.py` 2/2 — `aift.hwp` + `table-vpos-01.hwpx`), `cargo clippy --all-targets -D warnings` clean. 우리가 소비하는 상류 심볼 (`serialize_hwpx` / `render_page_svg_native` / `build_page_layer_tree` / `renderer::pdf::svgs_to_pdf` / `RasterRenderOptions` / `get_bin_data`) 시그니처 전부 불변.
+  - **HWPX serializer fidelity 대폭 강화** — lossless round-trip 도달 (DocInfo / numbering paraHead / cellzoneList / useKerning / useFontSpace 무손실, 표·그림·묶음 캡션 직렬화, 그림 크기 요소 curSz/imgRect/imgDim, MEMO 필드 parameters, shapeComment, borderFill 등록, 표 pageBreak 보존). 상류 round-trip IrDiff 가 Stage 0 (섹션·문단 카운트만) → Stage 4 (표·그림·수식 의미 동등성) 로 성숙, 143 HWPX 샘플 xfail 0 — **v0.8.0 HWPX writeback 확장의 상류 선행조건 충족**.
+  - native PDF export API (`DocumentCore::render_*_pdf_native`, 상류 #1359) — 기존 `renderer::pdf::svgs_to_pdf` 경로와 additive 공존, 본 binding 의 PDF 표면 영향 0.
+  - Text IR v2 폰트 증명 게이트 / 그림 effects·shadow round-trip / 차트 샘플 코퍼스 27종 / 미주 높이 모델 정규화.
+- **상류 #823 (macOS headless Skia font lookup hang) 해결** (v0.7.13). v0.6.1 Build 섹션이 미해결로 기록했던 PNG 표면 known limitation 종결 — headless macOS 에서 `render_png` 가 hang 없이 동작. 이에 맞춰 `ci.yml` 의 macOS smoke 잡 (`test-other-os` 매트릭스) 을 복원 — `4083a27` 의 비활성화를 되돌리고 `macos-latest` 를 추가 (`docs/upstream/issue-macos-png-coretext-hang.md` RESOLVED 전환).
 
 ## [0.7.0] — 2026-06-04
 
