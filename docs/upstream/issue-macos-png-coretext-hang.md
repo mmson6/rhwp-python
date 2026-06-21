@@ -1,8 +1,10 @@
 ---
-status: Active
+status: Frozen
 description: "업스트림 제안 — headless macOS (CI 등) 에서 PNG 렌더가 미설치 폰트 fallback 시 CoreText downloadable lookup IPC 로 hang. 시스템 폰트 사전 필터링 patch 로 실측 0.43초 정상화 검증. 상류 등록 [#823](https://github.com/edwardkim/rhwp/issues/823)."
-last_updated: 2026-05-11
+last_updated: 2026-06-21
 ---
+
+> **RESOLVED 2026-06-04** — 상류 [#823](https://github.com/edwardkim/rhwp/issues/823) 이 v0.7.13 에서 해결 (closed). headless macOS 에서 `render_png` 가 hang 없이 동작한다. 본 binding 은 v0.8.0 상류 sync (pin `7d9aae7f`, v0.7.16+36) 로 fix 를 흡수하고 `ci.yml` 의 macOS smoke 잡을 복원했다.
 
 > 외부 binding (`rhwp-python`) 구현 중 업스트림에서 수정이 필요해 보이는 부분을 발견하여, Claude 로 조사 및 다차례 사실 검증을 거친 결과입니다.
 
