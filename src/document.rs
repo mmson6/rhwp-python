@@ -173,6 +173,7 @@ impl PyDocument {
     /// `scale` / `dpi` / `max_pixels` 는 RasterRenderOptions 의 동일 필드로 wire-through.
     /// 미지정 시 상류 default (`scale=1.0` / `dpi=None` / `max_pixels=67_108_864` ≈ 8192×8192).
     /// 픽셀 한도 위반 시 상류 메시지 그대로 ValueError (예: "raster pixel count out of range: ...").
+    #[cfg(feature = "native-skia")]
     #[pyo3(signature = (page, *, scale=None, dpi=None, max_pixels=None))]
     fn render_png<'py>(
         &self,
@@ -186,6 +187,7 @@ impl PyDocument {
         Ok(PyBytes::new(py, &bytes))
     }
 
+    #[cfg(feature = "native-skia")]
     fn render_all_png<'py>(&self, py: Python<'py>) -> PyResult<Vec<Bound<'py, PyBytes>>> {
         let page_count = self.inner.page_count();
         let mut out = Vec::with_capacity(page_count as usize);
@@ -196,6 +198,7 @@ impl PyDocument {
         Ok(out)
     }
 
+    #[cfg(feature = "native-skia")]
     #[pyo3(signature = (output_dir, *, prefix=None))]
     fn export_png(
         &self,
@@ -365,6 +368,7 @@ impl PyDocument {
             .collect()
     }
 
+    #[cfg(feature = "native-skia")]
     fn render_png_internal(
         &self,
         py: Python<'_>,
