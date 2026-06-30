@@ -32,6 +32,7 @@ class RawCharRun(TypedDict):
     italic: bool
     underline: bool
     strikethrough: bool
+    color_rgb: int  # 0x00RRGGBB (normalised from COLORREF 0x00BBGGRR); 0 = black
 
 
 class RawCell(TypedDict):

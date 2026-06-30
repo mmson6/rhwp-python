@@ -30,6 +30,8 @@ pub(crate) struct RawCharRun {
     pub italic: bool,
     pub underline: bool,
     pub strikethrough: bool,
+    /// Text colour as 0x00RRGGBB (normalised from HWP COLORREF 0x00BBGGRR). 0 = black.
+    pub color_rgb: u32,
 }
 
 #[derive(IntoPyObject)]
@@ -402,6 +404,12 @@ fn build_char_runs(para: &Paragraph, doc_info: &DocInfo) -> Vec<RawCharRun> {
 
         let shape_id = shape_ref.char_shape_id;
         let shape = doc_info.char_shapes.get(shape_id as usize);
+        // COLORREF is 0x00BBGGRR; normalise to 0x00RRGGBB before crossing the PyO3 boundary.
+        let colorref = shape.map(|s| s.text_color).unwrap_or(0);
+        let r = colorref & 0xFF;
+        let g = (colorref >> 8) & 0xFF;
+        let b = (colorref >> 16) & 0xFF;
+        let color_rgb = (r << 16) | (g << 8) | b;
         runs.push(RawCharRun {
             start_cp,
             end_cp,
@@ -412,6 +420,7 @@ fn build_char_runs(para: &Paragraph, doc_info: &DocInfo) -> Vec<RawCharRun> {
                 .map(|s| s.underline_type != UnderlineType::None)
                 .unwrap_or(false),
             strikethrough: shape.map(|s| s.strikethrough).unwrap_or(false),
+            color_rgb,
         });
     }
 

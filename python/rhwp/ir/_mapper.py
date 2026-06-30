@@ -231,6 +231,7 @@ def _build_inline_runs(text: str, char_runs: list[RawCharRun]) -> list[InlineRun
         slice_text = text[run["start_cp"] : run["end_cp"]]
         if not slice_text:
             continue
+        raw_color = run.get("color_rgb", 0) or 0
         runs.append(
             InlineRun(
                 text=slice_text,
@@ -239,6 +240,7 @@ def _build_inline_runs(text: str, char_runs: list[RawCharRun]) -> list[InlineRun
                 underline=run["underline"],
                 strikethrough=run["strikethrough"],
                 raw_style_id=run["char_shape_id"],
+                color_rgb=raw_color if raw_color != 0 else None,
             )
         )
 

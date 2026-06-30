@@ -45,7 +45,7 @@ extension-module = ["pyo3/extension-module"]
 pyo3 = { version = "0.28", features = ["abi3-py310"] }
 # ^ native-skia: 상류 SkiaLayerRenderer (PR #599 PNG 게이트웨이) 활성화.
 #   skia-safe binary-cache 가 빌드 시점 약 30 MB pre-built binary 다운로드.
-rhwp = { path = "external/rhwp", features = ["native-skia"] }
+rhwp = { path = "external/rhwp" }
 
 [profile.release]
 lto = "fat"

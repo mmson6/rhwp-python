@@ -133,6 +133,13 @@ class InlineRun(BaseModel):
             "정상 HWP 는 모든 런이 char_shape 에 대응되어 항상 값이 채워진다."
         ),
     )
+    color_rgb: int | None = Field(
+        default=None,
+        description=(
+            "Text colour as 0x00RRGGBB (COLORREF byte-order normalised by Rust patch). "
+            "None means black or no explicit colour. Only populated by patched wheel."
+        ),
+    )
 
 
 class DocumentSource(BaseModel):
